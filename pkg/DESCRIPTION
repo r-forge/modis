@@ -1,4 +1,4 @@
-Package: getMODIS
+Package: MODIS
 Version: 0.2-15
 Date: 2011-08-10
 Title: Utility package for creating or updating a local user-defined subsets of the global MODIS grid data online archive. Pre-processing functionalities for MODIS grid data using MODIS Reporjection Tool (MRT)  
