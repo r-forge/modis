@@ -124,9 +124,9 @@ files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collect
 if (sum(file.exists(files))==length(files)){
 
 if (!exists("SDSstring")) {
-	stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[1],"')' to see which SDS are available, and generate the SDSstring",sep=""))
+	stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[1],"',MRTpath=",MRTpath,")' to see which SDS are available, and generate the SDSstring",sep=""))
 } else {
-	SDSstring <- getSDS(HdfName=files[1],SDSstring=SDSstring)
+	SDSstring <- getSDS(HdfName=files[1],SDSstring=SDSstring,MRTpath=MRTpath)
 } 
 
 if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstring$SDSnames,sep="\n ")}
