@@ -59,7 +59,7 @@ for (i in 1:length(product$PF2)){
 				avDates <- as.Date(ftpdirs[,ind],format="%Y.%m.%d")
 		
 				if (!missing(startdate)){
-					begin <- as.Date(startdate,format="%Y.%m.%d")
+					begin <- transDATE(begin=startdate)$begin
 						if (is.na(begin)) {stop("\n'startdate=",startdate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (begin < min(avDates,na.rm=TRUE)) {
 					getIT <- TRUE
@@ -71,7 +71,7 @@ for (i in 1:length(product$PF2)){
 				}
 	
 				if (!missing(enddate) & !getIT) {
-					end <- as.Date(enddate,format="%Y.%m.%d") 
+					end <- transDATE(end=enddate)$end 
 						if (is.na(end)) {stop("\n'enddate=",enddate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (end > max(avDates,na.rm=TRUE)) {
 					getIT <- TRUE

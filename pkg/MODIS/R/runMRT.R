@@ -106,10 +106,11 @@ avDates <- ftpdirs[,colnames(ftpdirs)==paste(product$productName[i],".",collecti
 avDates <- avDates[!is.na(avDates)]
 avDates <- as.Date(avDates,format="%Y.%m.%d")
 
-begin <- as.Date(startdate,format="%Y.%m.%d")
-		if (is.na(begin)) {stop("\n'startdate=",startdate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
-end <- as.Date(enddate,format="%Y.%m.%d") 
-		if (is.na(end)) {stop("\n'enddate=",enddate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
+#### convert dates 
+tLimits <- transDATE(begin=startdate,end=enddate)
+begin   <-tLimits$begin
+end     <-tLimits$end
+####
 
 	us  <- avDates >= begin & avDates <= end
 	if (sum(us,na.rm=TRUE)>0){

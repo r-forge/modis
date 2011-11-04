@@ -82,8 +82,8 @@ invisible(unlist(dates))
 
 } else { # if HdfName isn't provided:
 
-if (missing(startdate)) {stop("Please provide a 'startdate' (format: 'YYYY.MM.DD')")} 
-if (missing(enddate))   {stop("Please provide a 'endate' (format: 'YYYY.MM.DD')")} 
+if (missing(startdate)) {cat("No startdate set, getting data from the beginning\n")} 
+if (missing(enddate))   {cat("No enddate set, getting up to the most actual data\n")} 
 if (missing(extent) & (missing(tileH) | missing(tileV))){stop("Please provide eighter a 'tileH(s)' plus tileV(s) or an extent")} 
 if (missing(product))   {stop("Please provide the MODIS-'product'")}
 #######
@@ -100,13 +100,12 @@ if (missing(collection)) {
 	collection <- sprintf("%03d",as.numeric(collection))
 	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 	}
-
-#### convert dates 
-begin   <- as.Date(startdate,format="%Y.%m.%d")
-if (is.na(begin)) {stop("\n'startdate=",startdate,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
-end     <- as.Date(enddate,format="%Y.%m.%d") 
-if (is.na(end)) {stop("\n'enddate=",enddate,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
-####
+#########
+# tranform dates
+tLimits <- transDATE(startdate=startdate,enddate=enddate)
+begin<-tLimits$begin
+end<-tLimits$end
+#########
 # tileID
 if (substr(product$PD,3,nchar(product$PD))=="CMG") {
 	tileID="GLOBAL"
@@ -128,7 +127,6 @@ l=0
 for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	productName <- product$productName[z]
-	
 
 	ftp <- paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
 	#ftp <- paste("ftp://e4ftl01u.ecs.nasa.gov/", product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
