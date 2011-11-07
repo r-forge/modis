@@ -2,7 +2,7 @@
 # Date : July 2011
 # Licence GPL v3
 
-getXML <- function(LocalArcPath,HdfName,checkSize=TRUE,wait=1,quiet=FALSE){
+getXML <- function(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE){
 
 fsep <- .Platform$file.sep
 
@@ -71,7 +71,7 @@ islocal <- rep(NA,length(avFiles))
 	if (
 		!file.exists(paste(avFiles[u],".xml",sep=""))
 		| 
-		if (.Platform$OS.type == "unix" & file.exists(paste(avFiles[u],".xml",sep=""))) {
+		if (.Platform$OS.type == "unix" & file.exists(paste(avFiles[u],".xml",sep=""))) { # limited size control for xml files
 		as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000
 		} else if (.Platform$OS.type == "windows" & file.exists(paste(avFiles[u],".xml",sep=""))) {
 		as.numeric(shell(paste("for %I in (",avFiles[u],") do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...
@@ -97,12 +97,11 @@ islocal <- rep(NA,length(avFiles))
 
 	require(RCurl) # is it good here?
 
-
 	islocal[u] <- download.file(
 #		paste("ftp://e4ftl01u.ecs.nasa.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		destfile=paste(avFiles[u],".xml",sep=""),
-		mode='wb', method='wget', quiet=quiet, cacheOK=FALSE)
+		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
 
 		if (wait!=0){
 		require(audio)
@@ -112,7 +111,7 @@ islocal <- rep(NA,length(avFiles))
 	islocal[u] <- 0
 	}
 
-# checksum
+# XML based checksum for HDF files
 if (checkSize) {
 	xml <- paste(avFiles[u],".xml",sep="")
 	require(XML)
@@ -132,7 +131,26 @@ if (checkSize) {
 		if(!quiet){
 			cat("\nMETA check for file:",avFiles[u],"\nFileSize:",FileSize,"but expected:",MetaSize,"\n")
 		}
-	getHDF(HdfName=avFiles[u])
+	fname <- strsplit(avFiles[u],"/")[[1]] # separate filename from path
+	fname <- fname[length(fname)]
+	secName  <- strsplit(fname,"\\.")[[1]] # decompose filename
+	product <-  getPRODUCT(product=secName[1])	
+
+	fdate <- substr(secName[2],2,8)
+	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
+
+	collection <- if (product$raster_type=="Tile") {
+				secName[4]
+			} else if (product$raster_type=="CMG") {
+				secName[3]	
+			} else {
+			stop(product$raster_type," not supported yet!")			
+			}
+
+	download.file(
+		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,sep=""),
+		destfile=paste(avFiles[u],sep=""),
+		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
 	} else {
 		if(!quiet){
 			cat("\nSize check for: ",avFiles[u], "done!\n")

@@ -78,7 +78,7 @@ if (!missing(HdfName)){
 
 dates[[i]] <- paste(LocalArcPath,fsep,arcPath,HdfName[i],sep="")
 	}
-invisible(unlist(dates))
+return(invisible(unlist(dates)))
 
 } else { # if HdfName isn't provided:
 
@@ -102,9 +102,9 @@ if (missing(collection)) {
 	}
 #########
 # tranform dates
-tLimits <- transDATE(startdate=startdate,enddate=enddate)
-begin<-tLimits$begin
-end<-tLimits$end
+tLimits <- transDATE(begin=startdate,end=enddate)
+begin   <- tLimits$begin
+end     <- tLimits$end
 #########
 # tileID
 if (substr(product$PD,3,nchar(product$PD))=="CMG") {
@@ -238,13 +238,9 @@ output[[l]] <- paste(arcPath,grep(dates[[z]][i,-1],pattern=".hdf$",value=TRUE),s
 	cat(paste("No files on ftp in date range for: ",product$PF2[z],product$PD,".",collection,"\n\n",sep=""))
 #		}
 	}
-} # if no files are avalable for product in date AND end platform z
+} # if no files are avalaible for product in date AND end platform z
+return(invisible(paste(unlist(output),sep="")))
 } # end if not HdfName
-if (length(dim(dates))==2) {
-			invisible(paste(unlist(output),sep=""))
-		} else {
-			invisible(paste(unlist(output),sep=""))
-		}
 } ## END: FTP vs ARC check and download 
 
 

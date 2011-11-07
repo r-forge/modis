@@ -2,14 +2,14 @@
 # Date : August 2011
 # Licence GPL v3
 
+runMRT <- 
+function(LocalArcPath, ParaSource, job, product, startdate,enddate, tileH, tileV, extent, SDSstring,MRTpath = "check", quiet = FALSE, dlmethod = "auto"){
 
-runMRT <- function(LocalArcPath,ParaSource, MRTpath = "check",quiet=FALSE) {
-
-if (missing(ParaSource)) {
-	ParaEx <- file.path(find.package('getMODIS'),'external','ParaExample.R')
-	stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'",sep=""))
+if (missing(ParaSource)&&c(missing(job)||missing(product)||missing(startdate)||missing(enddate)||missing(extent)||missing(SDSstring))) {
+	ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
+	stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
 	} else {
-	source(ParaSource)
+	if (!missing(ParaSource)) {source(ParaSource)}
 	}
 
 fsep <- .Platform$file.sep
@@ -29,7 +29,7 @@ dir.create(LocalArcPath,showWarnings=FALSE)
 try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
 if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
 #################
-
+# must paras
 if (!exists("extent"))  {stop("Provide a valid 'extent'.")}
 if (!exists("job"))     {stop("Provide a valid 'job'-name")}
 if (!exists("startdate")) {stop("Provide a 'startdate'")}
@@ -85,14 +85,14 @@ if (MRTpath=="check") {
 if (!file.exists(MRTpath)) {stop("'MRTpath' is wrong. Provide a good path, leave empty or run 'getPATH()'")}
 
 product <- getPRODUCT(product=product)
-extent <- getTILE(extent=extent)
+extent  <- getTILE(extent=extent)
 
 # check collection
-if (!exists("collection")) {
-	collection <- getCOLLECTION(product=product)
-	} else {
+if (exists("collection")) {
 	collection <- sprintf("%03d",as.numeric(collection))
-	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist, run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+	} else {
+	collection <- getCOLLECTION(product=product)
 	}
 
 # after getSTRUC is called, getHDF can easily be called on single files...

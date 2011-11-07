@@ -22,7 +22,7 @@ This function will become internal. It will be used if no collection is spezifie
 }
 
 \value{
-An invisible list with usable for other functions.
+An invisible list with usable information for other functions.
 }
 
 \author{
