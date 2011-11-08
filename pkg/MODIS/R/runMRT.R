@@ -2,14 +2,13 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMRT <- 
-function(LocalArcPath, ParaSource, job, product, startdate,enddate, tileH, tileV, extent, SDSstring,MRTpath = "check", quiet = FALSE, dlmethod = "auto"){
+runMRT <- function(LocalArcPath,ParaSource,job,product,startdate,enddate,tileH,tileV,extent,SDSstring,MRTpath="check",quiet=FALSE,dlmethod="auto"){
 
-if (missing(ParaSource)&&c(missing(job)||missing(product)||missing(startdate)||missing(enddate)||missing(extent)||missing(SDSstring))) {
-	ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-	stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
-	} else {
-	if (!missing(ParaSource)) {source(ParaSource)}
+if (!missing(ParaSource)) {
+		source(ParaSource)
+	} else if (missing(job)||missing(product)||missing(startdate)||missing(enddate)||missing(extent)||missing(SDSstring)) {
+		ParaEx <- file.path(find.package('getMODIS'),'external','ParaExample.R')
+		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
 	}
 
 fsep <- .Platform$file.sep
