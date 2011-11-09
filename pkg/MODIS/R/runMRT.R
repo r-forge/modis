@@ -2,11 +2,11 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMRT <- function(LocalArcPath,ParaSource,job,product,startdate,enddate,tileH,tileV,extent,SDSstring,MRTpath="check",quiet=FALSE,dlmethod="auto"){
-
+runMRT <- function(LocalArcPath,ParaSource,...,anonym=TRUE,MRTpath="check",quiet=FALSE,dlmethod="auto"){
+# job,product,startdate,enddate,tileH,tileV,extent,SDSstring
 if (!missing(ParaSource)) {
 		source(ParaSource)
-	} else if (missing(job)||missing(product)||missing(startdate)||missing(enddate)||missing(extent)||missing(SDSstring)) {
+	} else  if (!exists("job")||!exists("product")||!exists("startdate")||!exists("enddate")||!exists("extent")||!exists("SDSstring")) {
 		ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
 	}
@@ -75,8 +75,17 @@ if (!exists("outProj")) {
 	outProj <- "GEOGRAPHIC"
 	} else {
 	cat("Output projection:", outProj,"\n")
+		if (outProj=="UTM"){
+			if (!exists("ZONE")) {
+			cat("No UTM zone spezified used MRT autodetection.\n")			
+			} else {
+			cat("Using UTM zone:", ZONE,"\n")
+			}
+		}
 	}
-
+if (!exists("DATUM")) {
+DATUM <- "WGS84"
+}
 ######
 if (MRTpath=="check") {
 	MRTpath <- getPATH(quiet=TRUE)
@@ -152,8 +161,11 @@ wait(1) # without wait the skript can break here. "wait" is a try but it seams t
 
 basenam <- strsplit(files[1],fsep)[[1]]
 basenam <- basenam[length(basenam)]
+if (anonym) {
+basenam <- paste(paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse="."),sep=".")
+}else{
 basenam <- paste(paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse="."),job,sep=".")
-
+}
 # TODO: output pixelsize, OUTPUT_PROJECTION_PARAMETERS...
 paraname <- paste(outDir,"MRTgResample.prm",sep="")
 filename = file(paraname, open="wt")
@@ -166,8 +178,11 @@ write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$exte
 write(paste('OUTPUT_FILENAME = ',outDir,fsep,basenam,'.tif',sep=''),filename) 
 write(paste('RESAMPLING_TYPE = ',resample,sep=''),filename)
 write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
+if (outProj=="UTM" && exists("ZONE")) {
+write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
+}
 write('OUTPUT_PROJECTION_PARAMETERS = ( 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 )',filename)
-write('DATUM = WGS84',filename)
+write(paste('DATUM =', DATUM,sep=''),filename)
 close(filename)
 
 if (.Platform$OS=="unix") {

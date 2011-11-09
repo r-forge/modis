@@ -7,9 +7,11 @@ extent    <-  list(lat_min=46.12,lat_max=49.3,lon_min=9.2,lon_max=17.47) # see: 
 
 ####### consult MRT manual for details
 # pixelsize <- xxx # empty for no change
-resample  <- "NN" # "NN", "CC" or "BI" (if missin "NN" is used)
+resample  <- "NN" # "NN", "CC" or "BI" (if missing "NN" is used)
 outProj   <- "GEOGRAPHIC" # See: MRT doc for available (if missing "GEOGRAPHIC" is used)
-#UTM_zone <- 33 # only needed for: outProj <- "UTM" 
+# ZONE <- 33 # optional and only for: outProj <- "UTM" 
+# DATUM <- "WGS84" # at the moment default is WGS84
+
 # ProjParam <- TODO
 
 # extract SDS
