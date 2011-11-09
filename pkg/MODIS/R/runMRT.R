@@ -7,7 +7,7 @@ runMRT <- function(LocalArcPath,ParaSource,job,product,startdate,enddate,tileH,t
 if (!missing(ParaSource)) {
 		source(ParaSource)
 	} else if (missing(job)||missing(product)||missing(startdate)||missing(enddate)||missing(extent)||missing(SDSstring)) {
-		ParaEx <- file.path(find.package('getMODIS'),'external','ParaExample.R')
+		ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
 	}
 
