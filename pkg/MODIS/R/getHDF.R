@@ -227,8 +227,8 @@ if (log) {
 	}
 	
 if(checkSize){
-	xml <-  getXML(HdfName = list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=quiet)
-	} # list() should not be needed but but but...
+	xml <-  getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=quiet,dlmethod=dlmethod)
+	} # as.list() should not be needed but but but...
 
 l=l+1
 output[[l]] <- paste(arcPath,grep(dates[[z]][i,-1],pattern=".hdf$",value=TRUE),sep="")

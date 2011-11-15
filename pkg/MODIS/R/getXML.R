@@ -50,14 +50,14 @@ doit <- sapply(avFiles,function(x) {
 	PF <- substr(secName[1],1,3)
 	Tpat <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
 
-	if (sum((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (PF %in% c("MOD","MYD")) + (length(secName)==6)) == 4){
+	if (sum((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (PF %in% c("MOD","MYD","MCD")) + (length(secName)==6)) == 4){
 		res <- TRUE
 	} else {
 		res <- FALSE}
 
 	return(res)}
 	)
-		
+doit <- unlist(doit) # ??
 avFiles <- avFiles[doit]
 
 if(length(avFiles)==0) {

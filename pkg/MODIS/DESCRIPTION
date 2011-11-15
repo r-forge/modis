@@ -1,6 +1,6 @@
 Package: MODIS
-Version: 0.2-21
-Date: 11-November-2011
+Version: 0.2-22
+Date: 15-November-2011
 Title: Utility package for creating or updating a local user-defined subsets of the global MODIS grid data online archive. Pre-processing functionalities for MODIS grid data using MODIS Reporjection Tool (MRT)  
 Depends: R (>= 2.10), RCurl
 Suggests: raster, audio, XML, mapdata
