@@ -83,9 +83,19 @@ if (!exists("outProj")) {
 			}
 		}
 	}
-if (!exists("DATUM")) {
-DATUM <- "WGS84"
+
+if (!exists("Datum")) {
+	cat("No Datum spezified, using WGS84!\n")
+Datum <- "WGS84"
 }
+
+if (!exists("ProjPara")) {
+	cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
+ProjPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+	} else {
+	cat("Output projection parameters specified!\nUsing:",ProjPara,"\n")
+	}
+
 ######
 if (MRTpath=="check") {
 	MRTpath <- getPATH(quiet=TRUE)
@@ -169,7 +179,7 @@ basenam <- paste(paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse="."),job,
 # TODO: output pixelsize, OUTPUT_PROJECTION_PARAMETERS...
 paraname <- paste(outDir,"MRTgResample.prm",sep="")
 filename = file(paraname, open="wt")
-write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=""), filename)
+write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=''), filename)
 write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
 if (extent$extent[1]!=""){
 write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
@@ -181,8 +191,8 @@ write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
 if (outProj=="UTM" && exists("ZONE")) {
 write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
 }
-write('OUTPUT_PROJECTION_PARAMETERS = ( 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 )',filename)
-write(paste('DATUM =', DATUM,sep=''),filename)
+write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',ProjPara,' )',sep=''),filename)
+write(paste('DATUM =', Datum,sep=''),filename)
 close(filename)
 
 if (.Platform$OS=="unix") {
