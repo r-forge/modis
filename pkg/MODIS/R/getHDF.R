@@ -3,7 +3,7 @@
 # Licence GPL v3
   
 
-getHDF <- function(LocalArcPath,HdfName,product,startdate,enddate,tileH,tileV,extent,collection,dlmethod="auto",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
+getHDF <- function(LocalArcPath,HdfName,product,startdate,enddate,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="low",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
 
 if (wait > 0){require(audio)} # waiting seams to decrease the chance of ftp rejection!
 
@@ -25,6 +25,13 @@ try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
 if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
 
 auxPATH <- file.path(LocalArcPath,".auxiliaries",fsep=fsep)
+
+if (is.numeric(stubbornness)) {
+	torheit <- subbornness	
+	} else {
+	torheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
+	}
+
 #################
 
 # TODO HdfName as regex
@@ -62,12 +69,13 @@ if (!missing(HdfName)){
 		  require(RCurl)
 		  ftpPath <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
 #			ftpPath <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
-
-		download.file(
+	for (g in 1:torheit){
+		if (g==1){qi <- quiet} else { qi <- TRUE}
+		try(download.file(
 			ftpPath,
 			destfile=paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""),
-			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
-			
+			mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE))
+			}
 			if (wait>0) {
 				wait(as.numeric(wait))
 				}
@@ -94,7 +102,7 @@ product <- getPRODUCT(product=product)
 if (missing(collection)) {
 	collection <- getCOLLECTION(product=product)
 		if (!quiet){
-	cat("No Collection spezified used the newest for",product$productName,":", collection,"\n")
+	cat("No Collection spezified used the newest for ",product$productName,":", collection,"\n",sep="")
 		}
 	} else {
 	collection <- sprintf("%03d",as.numeric(collection))
@@ -207,7 +215,12 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 				HDF <- HDF[which.max(unlist(select))]		
 				}
 			dates[[z]][i,j+1] <- HDF
-			hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""), destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
+				
+				for (g in 1:torheit){
+						if (g==1){qi <- quiet} else { qi <- TRUE}
+					try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""), destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE))
+				}
+				
 			mtr[j] <- hdf
 				if (wait > 0){wait(as.numeric(wait))}
 			} else { 
@@ -221,18 +234,23 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 	} # on ftp is possible to find empty folders!
 }
 
-if (log) {
-	dir.create(paste(LocalArcPath,fsep,"LOGS",fsep,sep=""),showWarnings=FALSE)	
-	write.csv(dates[[z]],file=paste(LocalArcPath,fsep,"LOGS",fsep,product$PF2[z],product$PD,"_",collection,"_CHECK.csv",sep=""))
+	if (log) {
+		dir.create(paste(LocalArcPath,fsep,"LOGS",fsep,sep=""),showWarnings=FALSE)	
+		write.csv(dates[[z]],file=paste(LocalArcPath,fsep,"LOGS",fsep,product$PF2[z],product$PD,"_",collection,"_CHECK.csv",sep=""))
 	}
 	
-if(checkSize){
-	xml <-  getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=quiet,dlmethod=dlmethod)
+	if(checkSize){
+
+		for (g in 1:torheit){
+			if (g==1){qi <- quiet} else { qi <- TRUE}
+		try(xml <-  getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=quiet,dlmethod=dlmethod))
+		}
 	} # as.list() should not be needed but but but...
 
 l=l+1
 output[[l]] <- paste(arcPath,grep(dates[[z]][i,-1],pattern=".hdf$",value=TRUE),sep="")
 } # end dates i 
+
 }else{
 #		if (!quiet){
 	cat(paste("No files on ftp in date range for: ",product$PF2[z],product$PD,".",collection,"\n\n",sep=""))

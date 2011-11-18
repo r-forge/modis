@@ -3,7 +3,7 @@
 \docType{methods}
 
 \alias{getHDF}
-\alias{getHDF, LocalArcPath, HdfName, product, startdate, enddate, tileH, tileV, extent, collection, dlmethod, quiet, wait, checkSize, log}
+\alias{getHDF, LocalArcPath, HdfName, product, startdate, enddate, tileH, tileV, extent, collection, dlmethod, stubbornness, quiet, wait, checkSize, log}
 
 \title{Create or update a local, user-defined subset of the global online
   MODIS grid data pool.}
@@ -17,7 +17,7 @@
   update of local MODIS data archive.
 }
 
-\usage{getHDF(LocalArcPath, HdfName, product, startdate, enddate, tileH, tileV, extent, collection, dlmethod="auto", quiet=FALSE, wait=1, checkSize=FALSE, log=TRUE)}
+\usage{getHDF(LocalArcPath, HdfName, product, startdate, enddate, tileH, tileV, extent, collection, dlmethod="auto",stubbornness="low", quiet=FALSE, wait=1, checkSize=FALSE, log=TRUE)}
 
 \arguments{
 
@@ -41,6 +41,8 @@
 
   \item{dlmethod}{Default \code{auto}. Argument passed to \code{?download.file}}
 
+  \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the value increases the runtime but increases also the chance of getting your job terminated. For large jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
+  
   \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded with their MODIS-HDF file and a "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. (!keep FALSE for now!)}
     
   \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. Requires the 'audio' package. (Hopefully a temporary solution!)}
