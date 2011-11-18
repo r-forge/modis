@@ -166,8 +166,7 @@ if (.Platform$OS=="unix") {
 	}
 unlink(paraname)
 
-require(audio)
-wait(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
+Sys.sleep(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
 
 basenam <- strsplit(files[1],fsep)[[1]]
 basenam <- basenam[length(basenam)]

@@ -97,8 +97,7 @@ for (i in 1:length(product$PF2)){
 		FtpDayDirs  <- getURL(ftp)
 	
 			if (wait > 0 && i != length(product$PF2)) {
-					require(audio)
-					wait(wait)
+					Sys.sleep(wait)
 					}
 	
 		FtpDayDirs  <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....

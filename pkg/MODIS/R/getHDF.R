@@ -5,8 +5,6 @@
 
 getHDF <- function(LocalArcPath,HdfName,product,startdate,enddate,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="low",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
 
-if (wait > 0){require(audio)} # waiting seams to decrease the chance of ftp rejection!
-
 fsep <- .Platform$file.sep
 
 if (missing(LocalArcPath)) {
@@ -27,9 +25,9 @@ if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")}
 auxPATH <- file.path(LocalArcPath,".auxiliaries",fsep=fsep)
 
 if (is.numeric(stubbornness)) {
-	torheit <- subbornness	
+	sturheit <- subbornness	
 	} else {
-	torheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
+	sturheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
 	}
 
 #################
@@ -65,24 +63,43 @@ if (!missing(HdfName)){
 	arcPath <- paste(product$productName,".",collection,fsep,fdate,fsep,sep="")
 	dir.create(paste(LocalArcPath,fsep,arcPath,sep=""),recursive=TRUE,showWarnings=FALSE) # this always generates the same structure as the original ftp (this makes sense if the local LocalArcPath becomes big!)
 	
-		if (!file.exists(paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""))) {
+	if (!file.exists(paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""))) {
 		  require(RCurl)
 		  ftpPath <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
 #			ftpPath <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
-	for (g in 1:torheit){
-		if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(download.file(
-			ftpPath,
-			destfile=paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""),
-			mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE))
-			}
-			if (wait>0) {
-				wait(as.numeric(wait))
-				}
+		
+		g=1
+		hdf=1
+		while(g <= sturheit) {
+
+			if (g==1){qi <- quiet} else { qi <- TRUE}
+
+			try(hdf <- download.file(
+				ftpPath,
+				destfile=paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""),
+				mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE)
+			)
+		if(hdf==0) {break}	
+		g=g+1		
 		}
-		if(checkSize){
-			getXML(HdfName = HdfName[i],checkSize=TRUE)
-			}
+
+		if (wait>0) {
+			Sys.sleep(as.numeric(wait))
+		}
+	}
+		
+	if(checkSize){
+		g=1
+		xml=1
+		while(g <= sturheit | xml != 0) {
+		
+			if (g==1){qi <- quiet} else { qi <- TRUE}
+	
+			try(xml <- getXML(HdfName = HdfName[i],checkSize=TRUE,wait=wait,quiet=qi,dlmethod=dlmethod))
+		if(xml==0) {break}
+		g=g+1
+		}
+	}
 
 dates[[i]] <- paste(LocalArcPath,fsep,arcPath,HdfName[i],sep="")
 	}
@@ -141,8 +158,6 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	ftpdirs <- getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=startdate,enddate=enddate,wait=0)
 		
-#		if (wait > 0){wait(as.numeric(wait))}
-		
 	ftpdirs <- ftpdirs[,which(colnames(ftpdirs)==paste(product$productName[z],".",collection,sep=""))] 
 	ftpdirs <- ftpdirs[!is.na(ftpdirs)]
 	
@@ -193,7 +208,7 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 
 	ftpfiles <- getURL(paste(ftp,dates[[z]][i,1],"/",sep=""))
 	ftpfiles <- strsplit(ftpfiles, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
-		if (wait > 0){wait(as.numeric(wait))}
+		if (wait > 0){Sys.sleep(as.numeric(wait))}
 
 	if (ftpfiles[1] != "total 0") {
     
@@ -216,13 +231,20 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 				}
 			dates[[z]][i,j+1] <- HDF
 				
-				for (g in 1:torheit){
-						if (g==1){qi <- quiet} else { qi <- TRUE}
-					try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""), destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE))
-				}
+
+			g=1
+			hdf=1
+			while(g <= sturheit) {
+			
+				if (g==1){qi <- quiet} else { qi <- TRUE}
+			
+				try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""), destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE),silent=TRUE)
+			if(hdf==0) {break}
+			g=g+1
+			}
 				
 			mtr[j] <- hdf
-				if (wait > 0){wait(as.numeric(wait))}
+				if (wait > 0){Sys.sleep(as.numeric(wait))}
 			} else { 
 				dates[[z]][i,j+1] <- "No tile for location" 
 			}
@@ -240,10 +262,13 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 	}
 	
 	if(checkSize){
-
-		for (g in 1:torheit){
+		g=1
+		xml=1
+		while(g <= sturheit) {
 			if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(xml <-  getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=quiet,dlmethod=dlmethod))
+			try(xml <- getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=qi,dlmethod=dlmethod),silent=TRUE)
+		if(xml==0) {break}
+		g=g+1
 		}
 	} # as.list() should not be needed but but but...
 

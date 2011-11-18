@@ -23,7 +23,7 @@ This function retrieves and updates the folder structure on the MODIS data pool 
 
   \item{enddate}{Character. Subset end date of MODIS time series (format: "YYYY.MM.DD").}
 
-  \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. Requires the 'audio' package. (Hopefully a temporary solution!)}
+  \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
 }
 

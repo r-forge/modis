@@ -45,7 +45,7 @@
   
   \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded with their MODIS-HDF file and a "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. (!keep FALSE for now!)}
     
-  \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. Requires the 'audio' package. (Hopefully a temporary solution!)}
+  \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
   \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}, if \code{TRUE} the \code{getHDF} becomes really boring.}
   

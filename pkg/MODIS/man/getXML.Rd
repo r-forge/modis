@@ -34,7 +34,7 @@ getXML(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE)
 
 \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every
   internal \code{download.file()} or \code{getURL()} call. It reduces
-  the chance of FTP connection error that often occurs. Requires the 'audio' package. Recommended values 1 to 3
+  the chance of FTP connection error that often occurs. Recommended values 1 to 3
   seconds (more files, higer value). (Hopefully \code{wait} is a
   temporary solution!)}
   

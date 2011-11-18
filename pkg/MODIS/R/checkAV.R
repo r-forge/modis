@@ -74,8 +74,6 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	ftpdirs <- getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=begin,enddate=end,wait=0)
 		
-#		if (wait > 0){wait(as.numeric(wait))}
-		
 	ftpdirs <- ftpdirs[,which(colnames(ftpdirs)==paste(product$productName[z],".",collection,sep=""))] 
 	ftpdirs <- ftpdirs[!is.na(ftpdirs)]
 	

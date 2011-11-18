@@ -104,8 +104,7 @@ islocal <- rep(NA,length(avFiles))
 		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
 
 		if (wait!=0){
-		require(audio)
-		wait(as.numeric(wait))
+		Sys.sleep(as.numeric(wait))
 		}
 	} else {
 	islocal[u] <- 0

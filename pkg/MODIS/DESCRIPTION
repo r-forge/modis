@@ -3,7 +3,7 @@ Version: 0.2-23
 Date: 18-November-2011
 Title: Utility package for creating or updating a local user-defined subsets of the global MODIS grid data online archive. Pre-processing functionalities for MODIS grid data using MODIS Reporjection Tool (MRT)  
 Depends: R (>= 2.10), RCurl
-Suggests: raster, audio, XML, mapdata
+Suggests: raster, XML, mapdata
 Author: Matteo Mattiuzzi with contibutions from Anja Klisch. Institute of Surveying, Remote Sensing and Land Information (IVFL), BOKU Vienna
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at>
 Description: Functions for selective download from the global MODIS-ftp data pool ('ftp://e4ftl01u.ecs.nasa.gov/'). Simple parameters are defining: MODIS-PRODUCT, COLLECTION, AREA and PERIOD. The functions (1) create a local archive if it is not existing, (2) check if requested files are already stored in the local archive, (3) download missing file(s) including metafile(s). Pre-processing capabilities of MRT (https://lpdaac.usgs.gov/tools/modis_reprojection_tool).
