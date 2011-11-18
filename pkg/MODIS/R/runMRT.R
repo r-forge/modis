@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMRT <- function(LocalArcPath,ParaSource,...,anonym=TRUE,MRTpath="check",quiet=FALSE,dlmethod="auto"){
+runMRT <- function(LocalArcPath,ParaSource,...,anonym=TRUE,MRTpath="check",quiet=FALSE,dlmethod="auto",stubbornness="low"){
 # job,product,startdate,enddate,tileH,tileV,extent,SDSstring
 if (!missing(ParaSource)) {
 		source(ParaSource)
@@ -138,7 +138,7 @@ avDates <- avDates[us]
 ######################### along start-end-date
 for (l in 1:length(avDates)){ 
 
-files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collection=collection,startdate=avDates[l],enddate=avDates[l],extent=extent,log=FALSE)
+files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collection=collection,startdate=avDates[l],enddate=avDates[l],extent=extent,stubbornness=stubbornness,log=FALSE)
 
 if (sum(file.exists(files))==length(files)){
 
