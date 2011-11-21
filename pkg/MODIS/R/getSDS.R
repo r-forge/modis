@@ -45,7 +45,7 @@ SDSstring <- gsub(pattern=" ",replacement="",x=SDSstring) # collapse the spaces
 		}
 				
 	msk <- rep(FALSE,length(sds))
-	for (o in 1:nchar(SDSstring)){
+	for (o in 1:length(sds)){
 	msk[o] <- substr(SDSstring,o,o)==1
 	}
 return(list(SDSnames = sds[msk],SDSstring = paste(as.numeric(msk),collapse=" ")))

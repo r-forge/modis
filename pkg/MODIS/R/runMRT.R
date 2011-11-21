@@ -147,10 +147,10 @@ if (sum(file.exists(files))==length(files)){
 if (!exists("SDSstring")) {
 	stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[1],"',MRTpath=",MRTpath,")' to see which SDS are available, and generate the SDSstring",sep=""))
 } else {
-	SDSstring <- getSDS(HdfName=files[1],SDSstring=SDSstring,MRTpath=MRTpath)
+	SDSstringIntern <- getSDS(HdfName=files[1],SDSstring=SDSstring,MRTpath=MRTpath)
 } 
 
-if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstring$SDSnames,sep="\n ")}
+if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
 
 
 TmpMosNam <- paste("TmpMosaic",round(runif(1,1,10000)),".hdf",sep="") # to make sure access priority
@@ -162,9 +162,9 @@ close(filename)
 
 # run mosaic
 if (.Platform$OS=="unix") {
-		system(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s '",SDSstring$SDSstring,"'" ,sep=""))
+		system(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
 	} else {
-	  shell(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s \"",SDSstring$SDSstring,"\"" ,sep=""))
+		shell(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
 	}
 unlink(paraname)
 
