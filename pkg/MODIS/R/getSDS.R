@@ -37,14 +37,14 @@ if (!missing(SDSstring)){
 	if (inherits(SDSstring,"list")) {
 		SDSstring <- paste(SDSstring$SDSstring,collapse="")
 		}
-#SDSstring <- paste(SDSstring,collapse="")# collapse the spaces 
+
 SDSstring <- gsub(pattern=" ",replacement="",x=SDSstring) # collapse the spaces
 
 	if (nchar(SDSstring)!= length(sds)) {
-		stop("The file has ",length(sds)," layers (SDS), your SDSstring has length ",nchar(SDSstring),"!")
+		warning("The file has ",length(sds)," layers (SDS), your SDSstring has length ",nchar(SDSstring),"!\nThe string is auto-completed!")
 		}
 				
-	msk <- rep(FALSE,nchar(SDSstring))
+	msk <- rep(FALSE,length(sds))
 	for (o in 1:nchar(SDSstring)){
 	msk[o] <- substr(SDSstring,o,o)==1
 	}
