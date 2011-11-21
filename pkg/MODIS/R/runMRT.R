@@ -6,10 +6,12 @@ runMRT <- function(LocalArcPath,ParaSource,...,anonym=TRUE,MRTpath="check",quiet
 # job,product,startdate,enddate,tileH,tileV,extent,SDSstring
 if (!missing(ParaSource)) {
 		source(ParaSource)
-	} else  if (!exists("job")||!exists("product")||!exists("startdate")||!exists("enddate")||!exists("extent")||!exists("SDSstring")) {
+	} 
+	
+if (!exists("job")||!exists("product")||!exists("startdate")||!exists("enddate")||!exists("extent")||!exists("SDSstring")) {
 		ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
-	}
+}
 
 fsep <- .Platform$file.sep
 

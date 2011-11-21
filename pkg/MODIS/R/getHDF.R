@@ -69,7 +69,6 @@ if (!missing(HdfName)){
 #			ftpPath <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
 		
 		g=1
-		hdf=1
 		while(g <= sturheit) {
 
 			if (g==1){qi <- quiet} else { qi <- TRUE}
@@ -90,13 +89,12 @@ if (!missing(HdfName)){
 		
 	if(checkSize){
 		g=1
-		xml=1
-		while(g <= sturheit | xml != 0) {
+		while(g <= sturheit) {
 		
 			if (g==1){qi <- quiet} else { qi <- TRUE}
 	
 			try(xml <- getXML(HdfName = HdfName[i],checkSize=TRUE,wait=wait,quiet=qi,dlmethod=dlmethod))
-		if(xml==0) {break}
+		if(sum(xml)==0) {break}
 		g=g+1
 		}
 	}
@@ -233,7 +231,6 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 				
 
 			g=1
-			hdf=1
 			while(g <= sturheit) {
 			
 				if (g==1){qi <- quiet} else { qi <- TRUE}
@@ -263,11 +260,10 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 	
 	if(checkSize){
 		g=1
-		xml=1
 		while(g <= sturheit) {
 			if (g==1){qi <- quiet} else { qi <- TRUE}
 			try(xml <- getXML(HdfName = as.list(paste(arcPath,dates[[z]][i,-1],sep="")),wait=wait,quiet=qi,dlmethod=dlmethod),silent=TRUE)
-		if(xml==0) {break}
+		if(sum(xml)==0) {break}
 		g=g+1
 		}
 	} # as.list() should not be needed but but but...
