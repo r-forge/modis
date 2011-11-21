@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMRT <- function(LocalArcPath,ParaSource,...,anonym=TRUE,MRTpath="check",quiet=FALSE,dlmethod="auto",stubbornness="low"){
+runMRT <- function(LocalArcPath, ParaSource,..., mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low"){
 # job,product,startdate,enddate,tileH,tileV,extent,SDSstring
 if (!missing(ParaSource)) {
 		source(ParaSource)
@@ -142,56 +142,87 @@ for (l in 1:length(avDates)){
 
 files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collection=collection,startdate=avDates[l],enddate=avDates[l],extent=extent,stubbornness=stubbornness,log=FALSE)
 
-if (sum(file.exists(files))==length(files)){
+if (length(files)!=0){
 
-if (!exists("SDSstring")) {
-	stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[1],"',MRTpath=",MRTpath,")' to see which SDS are available, and generate the SDSstring",sep=""))
-} else {
-	SDSstringIntern <- getSDS(HdfName=files[1],SDSstring=SDSstring,MRTpath=MRTpath)
-} 
-
-if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
-
-
-TmpMosNam <- paste("TmpMosaic",round(runif(1,1,10000)),".hdf",sep="") # to make sure access priority
-### in subset
-paraname <- file.path(outDir,"MRTgMosaic.prm",fsep=fsep) # create mosaic prm file ((removed prmDir put wrkdr))
-filename = file(paraname, open="wt")
-write(paste(files,sep='',collapse=' '), filename)
-close(filename)
-
-# run mosaic
-if (.Platform$OS=="unix") {
-		system(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
-	} else {
-		shell(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
+	if (mosaic) {
+	
+		if (sum(file.exists(files)) < length(extent$tile)){ # if not all files available switch "off" mosaicing and process single files
+			mosaic <- FALSE
+		}
+	
 	}
-unlink(paraname)
+	
+	if (mosaic) {
+		v <- 1
+	} else {
+		v <- 1:length(files)
+	}
+	
+	for (q in v) {
+	
+		if (!exists("SDSstring")) {
+			stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[v],"',MRTpath=",MRTpath,")' to see which SDS are available, and generate the SDSstring",sep=""))
+		} else {
+			SDSstringIntern <- getSDS(HdfName=files[q],SDSstring=SDSstring,MRTpath=MRTpath)
+		} 
 
-Sys.sleep(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
+	if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
 
-basenam <- strsplit(files[1],fsep)[[1]]
-basenam <- basenam[length(basenam)]
-if (anonym) {
-basenam <- paste(paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse="."),sep=".")
-}else{
-basenam <- paste(paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse="."),job,sep=".")
-}
-# TODO: output pixelsize, OUTPUT_PROJECTION_PARAMETERS...
-paraname <- paste(outDir,"MRTgResample.prm",sep="")
-filename = file(paraname, open="wt")
-write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=''), filename)
+	if (mosaic) {
+		TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
+		### in subset
+		paraname <- file.path(outDir,"MRTgMosaic.prm",fsep=fsep) # create mosaic prm file
+		filename = file(paraname, open="wt")
+		write(paste(files,sep='',collapse=' '), filename)
+		close(filename)
+
+	# run mosaic
+		if (.Platform$OS=="unix") {
+				system(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
+			} else {
+				shell(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
+			}
+		unlink(paraname)
+
+		Sys.sleep(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
+	}
+		
+	basenam <- strsplit(files[q],fsep)[[1]]
+	basenam <- basenam[length(basenam)]
+	
+	if (mosaic){
+		basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse=".")
+	} else {
+		basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,3,4)],collapse=".")	
+	}
+	
+	if (!anonym) {
+		basenam <- paste(basenam,job,sep=".")
+	}
+
+	paraname <- paste(outDir,"MRTgResample.prm",sep="")
+	filename = file(paraname, open="wt")
+	if (mosaic){
+		write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=''), filename)
+	} else {
+		write(paste('SPECTRAL_SUBSET = ( ',SDSstringIntern$SDSstring,' )',sep=''), filename)
+		write(paste('INPUT_FILENAME = ',files[q],sep=''), filename)
+	}
+
 write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
+
 if (extent$extent[1]!=""){
-write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
-write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$extent$lon_max,')',sep=''),filename)
+	write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
+	write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$extent$lon_max,')',sep=''),filename)
 }
 write(paste('OUTPUT_FILENAME = ',outDir,fsep,basenam,'.tif',sep=''),filename) 
 write(paste('RESAMPLING_TYPE = ',resample,sep=''),filename)
 write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
+
 if (outProj=="UTM" && exists("ZONE")) {
-write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
+	write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
 }
+
 write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',ProjPara,' )',sep=''),filename)
 write(paste('DATUM =', Datum,sep=''),filename)
 close(filename)
@@ -202,9 +233,15 @@ if (.Platform$OS=="unix") {
 	  shell(paste(MRTpath,fsep,"resample -p ",paraname,sep=""))
 	}
 unlink(paraname)
-unlink(paste(outDir,fsep,TmpMosNam,sep=""))
 
-} else {cat("missing files?",files,"jumping to the next date",sep="\n")}
+if (mosaic) {
+	unlink(TmpMosNam)
+}
+}
+
+} else {
+	cat("Missing files?",files,"jumping to the next date",sep="\n")
+}
 
 } # l, avDates
 } else {cat("No files found for that product within the date range\n")}
