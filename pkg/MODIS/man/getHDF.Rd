@@ -41,7 +41,7 @@
 
   \item{dlmethod}{Default \code{auto}. Argument passed to \code{?download.file}}
 
-  \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the value increases the runtime but increases also the chance of getting your job terminated. For large jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
+  \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
   
   \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded with their MODIS-HDF file and a "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. (!keep FALSE for now!)}
     

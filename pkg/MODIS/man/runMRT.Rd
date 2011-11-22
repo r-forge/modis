@@ -9,7 +9,7 @@
 \description{
   Spezifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
 
-\usage{runMRT(LocalArcPath,ParaSource,...,mosaic=TRUE, anonym=TRUE,MRTpath="check", quiet=FALSE, dlmethod="auto")}
+\usage{runMRT(LocalArcPath,ParaSource,...,mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low")}
 
 \arguments{
   \item{LocalArcPath}{Character. Local path to look for and to download MODIS files.  If missing the default archive '~/MODIS_ARC/' (LINUX), 'C:/Documents and Settings/username/My Documents/MODIS_ARC/' (Windows XP) and 'C:/Users/username/Documents/MODIS_ARC' (Vista/Windows 7) is used.}
@@ -27,6 +27,9 @@
   \item{quiet}{Logical. Default \code{FALSE}, its up to you to switsch to 'boring' alias \code{FASLE}. Not fully implemented!}
 
   \item{dlmethod}{Default \code{auto}. Argument passed to \code{?download.file}}
+
+  \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
+
 } 
 
 \author{
