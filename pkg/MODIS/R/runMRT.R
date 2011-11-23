@@ -3,11 +3,11 @@
 # Licence GPL v3
 
 runMRT <- function(LocalArcPath, ParaSource,..., mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low"){
-# job,product,startdate,enddate,tileH,tileV,extent,SDSstring
+
 if (!missing(ParaSource)) {
 		source(ParaSource)
 	} 
-	
+		
 if (!exists("job")||!exists("product")||!exists("startdate")||!exists("enddate")||!exists("extent")||!exists("SDSstring")) {
 		ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
@@ -144,7 +144,9 @@ files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collect
 
 if (length(files)!=0){
 
-	if (mosaic) {
+	mos <- mosaic
+
+	if (mos) {
 	
 		if (sum(file.exists(files)) < length(extent$tile)){ # if not all files available switch "off" mosaicing and process single files
 			mos <- FALSE
