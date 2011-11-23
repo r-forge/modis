@@ -147,12 +147,16 @@ if (length(files)!=0){
 	if (mosaic) {
 	
 		if (sum(file.exists(files)) < length(extent$tile)){ # if not all files available switch "off" mosaicing and process single files
-			mosaic <- FALSE
+			mos <- FALSE
+		} else {
+			mos <- TRUE
 		}
 	
+	} else { 
+			mos <-  TRUE
 	}
 	
-	if (mosaic) {
+	if (mos) {
 		v <- 1
 	} else {
 		v <- 1:length(files)
@@ -168,7 +172,7 @@ if (length(files)!=0){
 
 	if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
 
-	if (mosaic) {
+	if (mos) {
 		TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
 		### in subset
 		paraname <- file.path(outDir,"MRTgMosaic.prm",fsep=fsep) # create mosaic prm file
@@ -190,7 +194,7 @@ if (length(files)!=0){
 	basenam <- strsplit(files[q],fsep)[[1]]
 	basenam <- basenam[length(basenam)]
 	
-	if (mosaic){
+	if (mos){
 		basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,4)],collapse=".")
 	} else {
 		basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,3,4)],collapse=".")	
@@ -200,32 +204,34 @@ if (length(files)!=0){
 		basenam <- paste(basenam,job,sep=".")
 	}
 
+#### Write prm File
 	paraname <- paste(outDir,"MRTgResample.prm",sep="")
 	filename = file(paraname, open="wt")
-	if (mosaic){
+
+	if (mos){
 		write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=''), filename)
 	} else {
 		write(paste('SPECTRAL_SUBSET = ( ',SDSstringIntern$SDSstring,' )',sep=''), filename)
 		write(paste('INPUT_FILENAME = ',files[q],sep=''), filename)
 	}
 
-write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
+	write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
 
-if (extent$extent[1]!=""){
-	write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
-	write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$extent$lon_max,')',sep=''),filename)
-}
-write(paste('OUTPUT_FILENAME = ',outDir,fsep,basenam,'.tif',sep=''),filename) 
-write(paste('RESAMPLING_TYPE = ',resample,sep=''),filename)
-write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
+	if (extent$extent[1]!=""){
+		write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
+		write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$extent$lon_max,')',sep=''),filename)
+	}
+	write(paste('OUTPUT_FILENAME = ',outDir,fsep,basenam,'.tif',sep=''),filename) 
+	write(paste('RESAMPLING_TYPE = ',resample,sep=''),filename)
+	write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
 
-if (outProj=="UTM" && exists("ZONE")) {
-	write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
-}
+	if (outProj=="UTM" && exists("ZONE")) {
+		write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
+	}
 
-write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',ProjPara,' )',sep=''),filename)
-write(paste('DATUM =', Datum,sep=''),filename)
-close(filename)
+	write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',ProjPara,' )',sep=''),filename)
+	write(paste('DATUM =', Datum,sep=''),filename)
+	close(filename)
 
 if (.Platform$OS=="unix") {
 		system(paste(MRTpath,fsep,"resample -p ",paraname,sep=""))
@@ -234,7 +240,7 @@ if (.Platform$OS=="unix") {
 	}
 unlink(paraname)
 
-if (mosaic) {
+if (mos) {
 	unlink(TmpMosNam)
 }
 }
