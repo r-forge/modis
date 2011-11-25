@@ -80,8 +80,22 @@ res <- as.character(ftpdirs[!is.na(ftpdirs[,ind]),ind])
 if (!missing(collection)) {
 	res <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) # if collection is providen...return TRUE or FALSE
 } else if(newest) {
-	res <- max(res)
-	res <- sprintf("%03d",as.numeric(res))
+	res <- as.numeric(res)
+	zeros <- sapply(nchar(res),function(x) {
+			x<- x-1
+			if (x==0) {
+				as.numeric(1)
+				} else {
+				as.numeric(paste(1,rep(0,x),sep=""))	
+				}
+			})
+	res <- res / zeros
+	or  <- order(res)
+	res <- res[which(or==max(or))]
+	zeros <- zeros[which(or==max(or))]
+	res <- res * zeros
+	res <- sprintf("%03d",res)
+
 } else {
 	res <- sprintf("%03d",as.numeric(res))
 }
