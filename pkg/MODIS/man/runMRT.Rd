@@ -9,14 +9,14 @@
 \description{
   Spezifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
 
-\usage{runMRT(LocalArcPath,ParaSource,...,mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low")}
+\usage{runMRT(ParaSource=NULL,...)}
 
 \arguments{
-  \item{LocalArcPath}{Character. Local path to look for and to download MODIS files.  If missing the default archive '~/MODIS_ARC/' (LINUX), 'C:/Documents and Settings/username/My Documents/MODIS_ARC/' (Windows XP) and 'C:/Users/username/Documents/MODIS_ARC' (Vista/Windows 7) is used.}
-
   \item{ParaSource}{Text file. Run: \code{runMRT()} or the MRT grid Manual for more information.}
+  
+  \item{...}{See: parameters in: \code{runMRT()}.}
 
-  \item{...}{See: parameters in: \code{runMRT()}. Not all are working for now!}
+  \item{LocalArcPath}{Character. Local path to look for and to download MODIS files.  If missing the default archive '~/MODIS_ARC/' (LINUX), 'C:/Documents and Settings/username/My Documents/MODIS_ARC/' (Windows XP) and 'C:/Users/username/Documents/MODIS_ARC' (Vista/Windows 7) is used.}
   
   \item{mosaic}{Logical, default \code{TRUE}. Mosaic files of not? One case for setting \code{mosaic=FALSE} is a to big \code{extent}. HDF4 file supports max 2GB filesize using \code{mosaic=FALSE} this can exied in the mosaicing process.}
     
@@ -28,7 +28,7 @@
 
   \item{dlmethod}{Default \code{auto}. Argument passed to \code{?download.file}}
 
-  \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
+  \item{stubbornness}{Default \code{high}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
 
 } 
 

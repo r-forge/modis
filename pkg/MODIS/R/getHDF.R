@@ -55,7 +55,7 @@ if (!missing(HdfName)){
 	product <- getPRODUCT(product=secName[1])
   
 	collection <- sprintf("%03d",as.numeric(secName[4]))
-		if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+		if (getCOLLECTION(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 
 	fdate <- substr(secName[2],2,8)
 	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d") # doy to date
@@ -121,7 +121,7 @@ if (missing(collection)) {
 		}
 	} else {
 	collection <- sprintf("%03d",as.numeric(collection))
-	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+	if (getCOLLECTION(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 	}
 #########
 # tranform dates

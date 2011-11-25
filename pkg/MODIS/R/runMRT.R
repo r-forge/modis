@@ -2,137 +2,174 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMRT <- function(LocalArcPath, ParaSource,..., mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low"){
+runMRT <- function(ParaSource=NULL,...){ #, mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low"
 
-if (!missing(ParaSource)) {
-		source(ParaSource)
+if (!is.null(ParaSource)) {
+		fe  <- new.env()
+		eval(parse(ParaSource),env=fe)
+    sp <- as.list(fe)
+    dp <- list(...)
+ 		pm <- c(sp, dp[(!names(dp) %in% names(sp))])
+	} else {
+	  pm <- list(...)
 	} 
-		
-if (!exists("job")||!exists("product")||!exists("startdate")||!exists("enddate")||!exists("extent")||!exists("SDSstring")) {
+	
+	if(length(pm)==0) {
 		ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 		stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
-}
+	}
+	
+	pm$product <- getPRODUCT(pm$product)
+	
+	if (substr(pm$product$PD,3,nchar(pm$product$PD))=="CMG") {
+		tileID="GLOBAL"
+		ntiles=1 
+	} else {
+		if(!is.null(pm$extent)) {
+			extentCall <- pm$extent
+			pm$extent <- getTILE(extent=pm$extent)
+ 		 } else {
+			pm$extent <- getTILE(tileH=pm$tileH,tileV=pm$tileV)
+ 		 }
+		ntiles <- length(pm$extent$tile)
+	}
+	
+	
+	if (is.null(pm$collection)){
+		pm$collection <- getCOLLECTION(product=pm$product)	
+		
+	} else if (getCOLLECTION(product=pm$product, collection=pm$collection)==FALSE) {
+	
+		cat(paste("The collection you have spezified doesn't exist for the given product.\nTry: 'getCOLLECTION(product='",pm$product$productName,"',newest=FALSE,forceCheck=TRUE)'\n",sep=""))
+	} else {
+	
+		pm$collection <- getCOLLECTION(product=pm$product, collection=pm$collection)
+	
+	}
+
+
+	if (is.null(pm$job)) {
+		r <- paste(sample(c(0:9, letters, LETTERS),6, replace=TRUE),collapse="")
+		pm$job <- paste(pm$product$request,"_",pm$collection,"_",r,sep="")	
+		cat("No 'job' name spezified, generated:",pm$job,"\n")
+	}
+
+	
+	if (all(is.null(pm$startdate), is.null(pm$enddate))) {
+		period <- transDATE()
+		cat("No dates spezified, getting all available data for: ", pm$product$productName, ", collection: ",pm$collection,"\n",sep="")
+	} else if (is.null(pm$startdate)) {
+		period <- transDATE(end=pm$enddate)
+		cat("No 'startdate' dates spezified, getting data for: ", pm$product$productName, ", collection: ",pm$collection," form the beginning\n",sep="")
+	} else if (is.null(pm$enddate)) {
+		period <- transDATE(begin=pm$startdate)
+		cat("No 'endddate' spezified, getting data for: ", pm$product$productName, ", collection: ",pm$collection," to the most actual\n",sep="")
+	} else {
+		period <- transDATE(begin=pm$startdate,end=pm$enddate)
+	}	
+	pm$startdate <- period$begin
+	pm$enddate   <- period$end
+		
+		
+################################
+# Some defaults:
+if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
+if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
+if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
+if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
+if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
+if (is.null(pm$MRTpath))  {pm$MRTpath <- "check"} 
 
 fsep <- .Platform$file.sep
 
-if (missing(LocalArcPath)) {
-	LocalArcPath <- normalizePath("~", winslash = fsep)
-	LocalArcPath <- file.path(LocalArcPath,"MODIS_ARC",fsep=fsep)
-		if(!quiet){
-		cat(paste("No archive path set, using/creating standard archive in: ",LocalArcPath,"\n",sep=""))
+if (is.null(pm$LocalArcPath)) {
+	pm$LocalArcPath <- normalizePath("~", winslash = fsep)
+	pm$LocalArcPath <- file.path(pm$LocalArcPath,"MODIS_ARC",fsep=fsep)
+		if(!pm$quiet){
+		cat(paste("No archive path set, using/creating standard archive in: ",pm$LocalArcPath,"\n",sep=""))
 		flush.console()
 		}
 }
 
-LocalArcPath <- paste(strsplit(LocalArcPath,fsep)[[1]],collapse=fsep) # removes "/" or "\" on last position (if present)
-dir.create(LocalArcPath,showWarnings=FALSE)
+pm$LocalArcPath <- paste(strsplit(pm$LocalArcPath,fsep)[[1]],collapse=fsep) # removes "/" or "\" on last position (if present)
+dir.create(pm$LocalArcPath,showWarnings=FALSE)
 # test local LocalArcPath
-try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
+try(testDir <- list.dirs(pm$LocalArcPath),silent=TRUE)
 if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
 #################
-# must paras
-if (!exists("extent"))  {stop("Provide a valid 'extent'.")}
-if (!exists("job"))     {stop("Provide a valid 'job'-name")}
-if (!exists("startdate")) {stop("Provide a 'startdate'")}
-if (!exists("enddate")) {stop("Provide a 'enddate'")}
-if (!exists("product")) {stop("Provide a MODIS product to be processed")}
 
-if (!exists("outDir"))  {
-	outDir <- "~/"
-	outDir <- normalizePath(path.expand(outDir), winslash = fsep)
-	outDir <- paste(strsplit(outDir,fsep)[[1]],collapse=fsep) # removes "/" or "\" on last position (if present)
-	outDir <- file.path(outDir,"MRTresults",job,fsep=fsep)
+if (is.null(pm$outDir)) {
+	pm$outDir <- "~/"
+	pm$outDir <- normalizePath(path.expand(pm$outDir), winslash = fsep)
+	pm$outDir <- paste(strsplit(pm$outDir,fsep)[[1]],collapse=fsep) # removes "/" or "\" on last position (if present)
+	pm$outDir <- file.path(pm$outDir,"MRTresults",pm$job,fsep=fsep)
 	}
-dir.create(outDir,recursive=TRUE,showWarnings=FALSE)
+	
+dir.create(pm$outDir,recursive=TRUE,showWarnings=FALSE)
 # test local LocalArcPath
-try(testDir <- list.dirs(outDir),silent=TRUE)
+try(testDir <- list.dirs(pm$outDir),silent=TRUE)
 if(!exists("testDir")) {stop("'outDir' not set properly!")} 
 ##############
 
-if (!exists("pixelsize")) {
+if (is.null(pm$pixelsize)) {
 	cat("No output 'pixelsize' specified, input size used!\n")
-	pixelsize <- "asIn"
-	} else if (pixelsize==""){
-	cat("No output 'pixelsize' specified, input size used!\n")
-	pixelsize <- "asIn"
+	pm$pixelsize <- "asIn"
 	} else {
-	cat("Resampling to pixelsize:", pixelsize,"\n")
+	cat("Resampling to pixelsize:", pm$pixelsize,"\n")
 	}
 
-if (!exists("resample")) {
+if (is.null(pm$resample)) {
 	cat("No resampling method specified, using nearest neighbor!\n")
-	resample <- "NN"
-	} else if (resample=="") {
-	cat("No resampling method specified, using nearest neighbor!\n")
-	resample <- "NN"
+	pm$resample <- "NN"
 	} else {
-	cat("Resampling method:", resample,"\n")
+	cat("Resampling method:", pm$resample,"\n")
 	}
 
-if (!exists("outProj")) {
+if (is.null(pm$outProj)) {
 	cat("No output projection specified, using WGS84!\n")
-	outProj <- "GEOGRAPHIC"
-	} else if ( outProj=="" ){
-	cat("No output projection specified, using WGS84!\n")
-	outProj <- "GEOGRAPHIC"
+	pm$outProj <- "GEOGRAPHIC"
 	} else {
-	cat("Output projection:", outProj,"\n")
-		if (outProj=="UTM"){
+	cat("Output projection:", pm$outProj,"\n")
+		if (pm$outProj=="UTM"){
 			if (!exists("ZONE")) {
 			cat("No UTM zone spezified used MRT autodetection.\n")			
 			} else {
-			cat("Using UTM zone:", ZONE,"\n")
+			cat("Using UTM zone:", pm$zone,"\n")
 			}
 		}
 	}
 
-if (!exists("Datum")) {
+if (is.null(pm$datum)) {
 	cat("No Datum spezified, using WGS84!\n")
-Datum <- "WGS84"
+	pm$datum <- "WGS84"
 }
 
-if (!exists("ProjPara")) {
+if (is.null(pm$projPara)) {
 	cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
-ProjPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+pm$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
 	} else {
-	cat("Output projection parameters specified!\nUsing:",ProjPara,"\n")
+	cat("Output projection parameters specified!\nUsing:",pm$projPara,"\n")
 	}
 
 ######
-if (MRTpath=="check") {
-	MRTpath <- getPATH(quiet=TRUE)
+if (pm$MRTpath=="check") {
+	pm$MRTpath <- getPATH(quiet=TRUE)
 	}
-if (!file.exists(MRTpath)) {stop("'MRTpath' is wrong. Provide a good path, leave empty or run 'getPATH()'")}
+if (!file.exists(pm$MRTpath)) {stop("'MRTpath' is wrong. Provide a good path, leave empty or run 'getPATH()'")}
 
-product <- getPRODUCT(product=product)
-extent  <- getTILE(extent=extent)
-
-# check collection
-if (exists("collection")) {
-	collection <- sprintf("%03d",as.numeric(collection))
-	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist, run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
-	} else {
-	collection <- getCOLLECTION(product=product)
-	}
 
 # after getSTRUC is called, getHDF can easily be called on single files...
 # getSTRUC garants that all needed dir structure information is made avalable offline
-ftpdirs <- getSTRUC(product=product$request,collection=collection,startdate=startdate,enddate=enddate)
+ftpdirs <- getSTRUC(product=pm$product$request,collection=pm$collection,startdate=pm$startdate,enddate=pm$enddate)
 
 ######################## along platform (TerraAqua)
-for(i in 1:length(product$PF1)) { 
+for(i in 1:length(pm$product$PF1)) { 
 
-avDates <- ftpdirs[,colnames(ftpdirs)==paste(product$productName[i],".",collection,sep="")]
+avDates <- ftpdirs[,colnames(ftpdirs)==paste(pm$product$productName[i],".",pm$collection,sep="")]
 avDates <- avDates[!is.na(avDates)]
 avDates <- as.Date(avDates,format="%Y.%m.%d")
 
-#### convert dates 
-tLimits <- transDATE(begin=startdate,end=enddate)
-begin   <-tLimits$begin
-end     <-tLimits$end
-####
-
-	us  <- avDates >= begin & avDates <= end
+	us  <- avDates >= pm$startdate & avDates <= pm$enddate
 	if (sum(us,na.rm=TRUE)>0){
 
 avDates <- avDates[us]
@@ -140,22 +177,22 @@ avDates <- avDates[us]
 ######################### along start-end-date
 for (l in 1:length(avDates)){ 
 
-files <- getHDF(LocalArcPath=LocalArcPath,product=product$productName[i],collection=collection,startdate=avDates[l],enddate=avDates[l],extent=extent,stubbornness=stubbornness,log=FALSE)
+files <- getHDF(LocalArcPath=pm$LocalArcPath,product=pm$product$productName[i],collection=pm$collection,startdate=avDates[l],enddate=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE)
 
 if (length(files)!=0){
 
-	mos <- mosaic
+	mos <- pm$mosaic
 
 	if (mos) {
 	
-		if (sum(file.exists(files)) < length(extent$tile)){ # if not all files available switch "off" mosaicing and process single files
+		if (sum(file.exists(files)) < length(pm$extent$tile)){ # if not all files available switch "off" mosaicing and process single files
 			mos <- FALSE
 		} else {
 			mos <- TRUE
 		}
 	
 	} else { 
-			mos <-  TRUE
+			mos <-  FALSE
 	}
 	
 	if (mos) {
@@ -166,27 +203,27 @@ if (length(files)!=0){
 	
 	for (q in v) {
 	
-		if (!exists("SDSstring")) {
-			stop(paste("No 'SDSstring' is specified, run: 'getSDS(HdfName='",files[v],"',MRTpath=",MRTpath,")' to see which SDS are available, and generate the SDSstring",sep=""))
-		} else {
-			SDSstringIntern <- getSDS(HdfName=files[q],SDSstring=SDSstring,MRTpath=MRTpath)
-		} 
+		if (is.null(pm$SDSstring)) {
+			pm$SDSstring <- rep(1,length(getSDS(HdfName=files[q],MRTpath=pm$MRTpath)))
+		}
+		
+	SDSstringIntern <- getSDS(HdfName=files[q],SDSstring=pm$SDSstring,MRTpath=pm$MRTpath)
 
-	if (!quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
+	if (!pm$quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
 
 	if (mos) {
 		TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
 		### in subset
-		paraname <- file.path(outDir,"MRTgMosaic.prm",fsep=fsep) # create mosaic prm file
+		paraname <- file.path(pm$outDir,"MRTgMosaic.prm",fsep=fsep) # create mosaic prm file
 		filename = file(paraname, open="wt")
 		write(paste(files,sep='',collapse=' '), filename)
 		close(filename)
 
 	# run mosaic
 		if (.Platform$OS=="unix") {
-				system(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
+				system(paste(pm$MRTpath,"/mrtmosaic -i ",paraname," -o ",pm$outDir,"/",TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
 			} else {
-				shell(paste(MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",outDir,fsep,TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
+				shell(paste(pm$MRTpath,fsep,"mrtmosaic -i ",paraname," -o ",pm$outDir,fsep,TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
 			}
 		unlink(paraname)
 
@@ -202,16 +239,16 @@ if (length(files)!=0){
 		basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,3,4)],collapse=".")	
 	}
 	
-	if (!anonym) {
-		basenam <- paste(basenam,job,sep=".")
+	if (!pm$anonym) {
+		basenam <- paste(basenam,pm$job,sep=".")
 	}
 
 #### Write prm File
-	paraname <- paste(outDir,"MRTgResample.prm",sep="")
+	paraname <- paste(pm$outDir,"MRTgResample.prm",sep="")
 	filename = file(paraname, open="wt")
 
 	if (mos){
-		write(paste('INPUT_FILENAME = ',outDir,fsep,TmpMosNam,sep=''), filename)
+		write(paste('INPUT_FILENAME = ',pm$outDir,fsep,TmpMosNam,sep=''), filename)
 	} else {
 		write(paste('SPECTRAL_SUBSET = ( ',SDSstringIntern$SDSstring,' )',sep=''), filename)
 		write(paste('INPUT_FILENAME = ',files[q],sep=''), filename)
@@ -219,32 +256,33 @@ if (length(files)!=0){
 
 	write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
 
-	if (extent$extent[1]!=""){
-		write(paste('SPATIAL_SUBSET_UL_CORNER = (',extent$extent$lat_max,' ',extent$extent$lon_min,')',sep=''),filename)
-		write(paste('SPATIAL_SUBSET_LR_CORNER = (',extent$extent$lat_min,' ',extent$extent$lon_max,')',sep=''),filename)
+	if (pm$extent$extent[1]!=""){
+		write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent$lat_max,' ',pm$extent$extent$lon_min,')',sep=''),filename)
+		write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent$lat_min,' ',pm$extent$extent$lon_max,')',sep=''),filename)
 	}
-	write(paste('OUTPUT_FILENAME = ',outDir,fsep,basenam,'.tif',sep=''),filename) 
-	write(paste('RESAMPLING_TYPE = ',resample,sep=''),filename)
-	write(paste('OUTPUT_PROJECTION_TYPE = ',outProj,sep=''),filename)
+	write(paste('OUTPUT_FILENAME = ',pm$outDir,fsep,basenam,'.tif',sep=''),filename) 
+	write(paste('RESAMPLING_TYPE = ',pm$resample,sep=''),filename)
+	write(paste('OUTPUT_PROJECTION_TYPE = ',pm$outProj,sep=''),filename)
 
-	if (outProj=="UTM" && exists("ZONE")) {
-		write(paste('UTM_ZONE = ',ZONE,sep=''),filename)
+	if (pm$outProj=="UTM" && !is.null(pm$zone)) {
+		write(paste('UTM_ZONE = ',pm$zone,sep=''),filename)
 	}
 
-	write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',ProjPara,' )',sep=''),filename)
-	write(paste('DATUM =', Datum,sep=''),filename)
+	write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',pm$projPara,' )',sep=''),filename)
+	write(paste('DATUM =', pm$datum,sep=''),filename)
 	close(filename)
 
 if (.Platform$OS=="unix") {
-		system(paste(MRTpath,fsep,"resample -p ",paraname,sep=""))
+		system(paste(pm$MRTpath,"/resample -p ",paraname,sep=""))
 	} else {
-	  shell(paste(MRTpath,fsep,"resample -p ",paraname,sep=""))
+	  shell(paste(pm$MRTpath,fsep,"resample -p ",paraname,sep=""))
 	}
 unlink(paraname)
 
 if (mos) {
-	unlink(TmpMosNam)
+	unlink(paste(pm$outDir,TmpMosNam,sep="/"))
 }
+
 }
 
 } else {

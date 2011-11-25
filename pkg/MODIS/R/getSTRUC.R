@@ -28,7 +28,7 @@ if (missing(collection)) {
 	collection <- getCOLLECTION(product=product)
 	} else {
 	collection <- sprintf("%03d",as.numeric(collection))
-	if (!getCOLLECTION(product=product,collection=collection)) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+	if (getCOLLECTION(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 	}
 
 

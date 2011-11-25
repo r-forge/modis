@@ -78,7 +78,15 @@ ind <- which(colnames(ftpdirs)==product$productName[i])
 res <- as.character(ftpdirs[!is.na(ftpdirs[,ind]),ind])
 
 if (!missing(collection)) {
-	res <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) # if collection is providen...return TRUE or FALSE
+	
+	isOk <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) # if collection is providen...return TRUE or FALSE
+
+	if (isOk) {
+		res <- sprintf("%03d",as.numeric(collection))
+	} else {
+		res <- FALSE
+	}
+	
 } else if(newest) {
 	res <- as.numeric(res)
 	zeros <- sapply(nchar(res),function(x) {
