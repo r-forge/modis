@@ -11,7 +11,7 @@ extent <- ""
 # from mapdata/maps 
 
 if (inherits(extent,"map")){
-extent <- list(lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]),lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]))
+extent <- list(lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]),lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]))
 }
 
 if (inherits(extent,"character")){
@@ -22,7 +22,7 @@ try(test <- map("worldHires",extent,plot=FALSE),silent=TRUE) # for error handlin
 	} else {
 		stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires',',",extent,"')",sep=""))
 	}
-extent <- list(lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]),lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]))
+extent <- list(lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]),lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]))
 }
 ############################################
 # extent class "raster* object (extent)"
@@ -32,7 +32,7 @@ if (class(extent) %in% c("Extent","RasterLayer","RasterStack","RasterBrick") ){
 		extent <- extent(extent)# checking if lat/lon !!??
 	} 
 
-extent <- list(lat_min=extent@ymin,lat_max=extent@ymax,lon_min=extent@xmin,lon_max=extent@xmax)
+extent <- list(lon_min=extent@xmin,lon_max=extent@xmax,lat_min=extent@ymin,lat_max=extent@ymax)
 }
 ####################################
 # extent class "list"
