@@ -14,7 +14,7 @@
 \arguments{
   \item{ParaSource}{Text file. Run: \code{runMRT()} or the MRT grid Manual for more information.}
   
-  \item{...}{See: parameters in: \code{runMRT()}.}
+  \item{...}{See: parameters in file: \code{runMRT()}.}
 
   \item{LocalArcPath}{Character. Local path to look for and to download MODIS files.  If missing the default archive '~/MODIS_ARC/' (LINUX), 'C:/Documents and Settings/username/My Documents/MODIS_ARC/' (Windows XP) and 'C:/Users/username/Documents/MODIS_ARC' (Vista/Windows 7) is used.}
   

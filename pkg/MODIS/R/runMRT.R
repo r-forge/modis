@@ -27,7 +27,7 @@ if (!is.null(ParaSource)) {
 	} else {
 		if(!is.null(pm$extent)) {
 			extentCall <- pm$extent
-			pm$extent <- getTILE(extent=pm$extent)
+			pm$extent <- getTILE(extent=pm$extent,buffer=pm$buffer)
  		 } else {
 			pm$extent <- getTILE(tileH=pm$tileH,tileV=pm$tileV)
  		 }

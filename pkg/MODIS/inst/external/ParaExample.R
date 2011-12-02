@@ -7,7 +7,8 @@ product    <- "MOD11A1"       # see: ?getPRODUCT absolute needed Parameter! type
 startdate  <- "2010.01.01"    # see: ?transDATE. if not set the function will process MODIS from the beginning.
 enddate    <- "2010-01-05"    # if not set the function will process MODIS to the last available date.
 collection <-  5              # see: ?getCOLLECTION. if not set the newest collection for the given product is used.
-extent     <- "austria"       # see: ?getTILE for possibilities. 'extent' or 'tileH/V' are absolutly needed for "TILE" product, but ignored for "CMG" products. If both are provided,'extent' is priorised to tileH/V.  
+extent     <- "austria"       # see: ?getTILE for possibilities. 'extent' or 'tileH/V' are absolutly needed for "TILE" product, but ignored for "CMG" products. If both are provided,'extent' is priorised to tileH/V. 
+buffer		 <- 0.1             # See: ?getTILE 
 tileH      <- 5:8
 tileV      <- 10:15
 

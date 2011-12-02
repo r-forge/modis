@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getTILE <- function(tileH,tileV,extent) {
+getTILE <- function(tileH,tileV,extent,buffer=NULL) {
 
 if(missing(extent)) {
 extent <- ""
@@ -36,10 +36,19 @@ extent <- list(lon_min=extent@xmin,lon_max=extent@xmax,lat_min=extent@ymin,lat_m
 }
 ####################################
 # extent class "list"
-if (inherits(extent,"list")){ # if it did exist it should have been changed to a list!
+if (inherits(extent,"list")){ # all possible extent classes should have been converted to a list
 
 if(length(extent$extent)==4) {extent<-extent$extent}
 
+if (length(extent)==2) {  } # if extent it is a point!
+
+if (!is.null(buffer)) {
+	if (length(buffer)==1) {buffer <- c(buffer,buffer)}
+extent[1] <- as.numeric(extent[1]) - buffer[1]
+extent[2] <- as.numeric(extent[2]) + buffer[1]
+extent[3] <- as.numeric(extent[3]) - buffer[2]
+extent[4] <- as.numeric(extent[4]) + buffer[2]
+}
 
 data("tiletable")
 

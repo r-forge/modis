@@ -3,7 +3,7 @@
 \docType{methods}
 
 \alias{getTILE}
-\alias{getTILE,tileH,tileV,extent}
+\alias{getTILE,tileH,tileV,extent,buffer}
 
 \title{Get MODIS tile id(s)}
 
@@ -11,7 +11,7 @@
 Get MODIS tile id(s) for a geographic area.
 }
 
-\usage{getTILE(tileH, tileV, extent)}
+\usage{getTILE(tileH, tileV, extent,buffer=NULL)}
 
 \arguments{
 
@@ -20,6 +20,8 @@ Get MODIS tile id(s) for a geographic area.
   \item{tileV}{Integer. Vertical tile number(s) (between 0 and 17). I.e.: \code{tileV = 9:12}.}
 
   \item{extent}{Extent Informations see details.}
+  
+  \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(Lat,Lon)}. }
 }
 
 \details{
@@ -46,6 +48,8 @@ getTILE(tileH=18:19,tileV=4)
 # with Extent of class 'list'
 Austria <- list(lat_min=46.12,lat_max=49.3,lon_min=9.2,lon_max=17.47)
 getTILE(extent=Austria)
+getTILE(extent=Austria,buffer=10)
+getTILE(extent=Austria,buffer=c(0.5,10)) 
 
 # with Extent or raster* object from raster package
 require(raster)
