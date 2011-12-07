@@ -76,7 +76,7 @@ if (!is.null(ParaSource)) {
 if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
 if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
 if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
-if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
+if (is.null(pm$stubbornness)) {pm$stubbornness <- "extreme"} 
 if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
 if (is.null(pm$MRTpath))  {pm$MRTpath <- "check"} 
 
@@ -146,7 +146,7 @@ if (is.null(pm$datum)) {
 
 if (is.null(pm$projPara)) {
 	cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
-pm$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+# pm$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
 	} else {
 	cat("Output projection parameters specified!\nUsing:",pm$projPara,"\n")
 	}
@@ -257,9 +257,12 @@ if (length(files)!=0){
 	write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
 
 	if (pm$extent$extent[1]!=""){
-		write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent$lat_max,' ',pm$extent$extent$lon_min,')',sep=''),filename)
-		write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent$lat_min,' ',pm$extent$extent$lon_max,')',sep=''),filename)
+		write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent$ymax,' ',pm$extent$extent$xmin,')',sep=''),filename)
+		write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent$ymin,' ',pm$extent$extent$xmax,')',sep=''),filename)
 	}
+	if (!is.null(pm$pixelsize)) {
+		write(paste('OUTPUT_PIXLESIZE = ',pm$pixelsize,sep=''),filename) 
+	}	
 	write(paste('OUTPUT_FILENAME = ',pm$outDir,fsep,basenam,'.tif',sep=''),filename) 
 	write(paste('RESAMPLING_TYPE = ',pm$resample,sep=''),filename)
 	write(paste('OUTPUT_PROJECTION_TYPE = ',pm$outProj,sep=''),filename)
@@ -267,15 +270,18 @@ if (length(files)!=0){
 	if (pm$outProj=="UTM" && !is.null(pm$zone)) {
 		write(paste('UTM_ZONE = ',pm$zone,sep=''),filename)
 	}
-
-	write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',pm$projPara,' )',sep=''),filename)
+	
+	if (!is.null(pm$projPara)) {
+		write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',pm$projPara,' )',sep=''),filename)
+	}
+	
 	write(paste('DATUM =', pm$datum,sep=''),filename)
 	close(filename)
 
 if (.Platform$OS=="unix") {
 		system(paste(pm$MRTpath,"/resample -p ",paraname,sep=""))
 	} else {
-	  shell(paste(pm$MRTpath,fsep,"resample -p ",paraname,sep=""))
+		shell(paste(pm$MRTpath,fsep,"resample -p ",paraname,sep=""))
 	}
 unlink(paraname)
 

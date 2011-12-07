@@ -26,7 +26,7 @@ Get MODIS tile id(s) for a geographic area.
 
 \details{
 \code{extent}: \cr
-If 'list': \code{myExtent <- list(lat_min=mumeric, lat_max=mumeric, lon_max=mumeric, lon_min=mumeric)}.\cr
+If 'list': \code{myExtent <- list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
 If 'character', the country name from \code{mapdata}. \cr
 Or one of the following objects \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'} from \code{package(raster)}.
 }
@@ -46,7 +46,7 @@ Or one of the following objects \code{'extent','rasterLayer','rasterStack'} or \
 getTILE(tileH=18:19,tileV=4)
 
 # with Extent of class 'list'
-Austria <- list(lat_min=46.12,lat_max=49.3,lon_min=9.2,lon_max=17.47)
+Austria <- list(ymin=46.12,ymax=49.3,xmin=9.2,xmax=17.47)
 getTILE(extent=Austria)
 getTILE(extent=Austria,buffer=10)
 getTILE(extent=Austria,buffer=c(0.5,10)) 
@@ -64,7 +64,7 @@ getTILE(extent=ext)
 
 # require(mapdata)
 # if you pass a character name to the extent option a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
-# Use with caution! The following example includes much more areas than the main USA. Look at "map('worldHires','usa')" result.  
+# Use with caution! The following example includes much more areas than the main USA. Look at \code{map('worldHires','usa')} result.  
 getTILE(extent="usa")
 # so you better always check befor applying an extent of the class 'character' that defines a 'map' object
 # if you want subsets or more detailed maps use ?map arguments 

@@ -1,12 +1,12 @@
 Package: MODIS
-Version: 0.2-27
-Date: 1-December-2011
-Title: Utility package for creating or updating a local user-defined subsets of the global MODIS grid data online archive. Pre-processing functionalities for MODIS grid data using MODIS Reporjection Tool (MRT)  
+Version: 0.2-28
+Date: 7-December-2011
+Title: MODIS retrieving and processing Package. Pre-processing functionalities for MODIS grid data.  
 Depends: R (>= 2.10), RCurl
 Suggests: raster, XML, mapdata
-Author: Matteo Mattiuzzi with contibutions from Anja Klisch. Institute of Surveying, Remote Sensing and Land Information (IVFL), BOKU Vienna
+Author: Matteo Mattiuzzi, Jan Verbesselt, Tomislav Hengl, with contibutions from Anja Klisch.
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at>
-Description: Functions for selective download from the global MODIS-ftp data pool ('ftp://e4ftl01u.ecs.nasa.gov/'). Simple parameters are defining: MODIS-PRODUCT, COLLECTION, AREA and PERIOD. The functions (1) create a local archive if it is not existing, (2) check if requested files are already stored in the local archive, (3) download missing file(s) including metafile(s). Pre-processing capabilities of MRT (https://lpdaac.usgs.gov/tools/modis_reprojection_tool).
+Description: MODIS retrieving and processing Package. Downloading, reprojecting, resampling, mosaicing, converting, SDS-extraction, bit-extraction and filtering/smoothing capabilities. Download data from FTP (local processing) or using SSOAP (online processing). Process data with MRT,GDAL,FWT,SSOAP.
 URL: http://getmodis.r-forge.r-project.org/
 License: GPL (>=3)
 LazyLoad: yes

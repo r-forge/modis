@@ -11,7 +11,7 @@ extent <- ""
 # from mapdata/maps 
 
 if (inherits(extent,"map")){
-extent <- list(lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]),lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]))
+extent <- list(xmin=min(extent$range[1:2]),xmax=max(extent$range[1:2]),ymin=min(extent$range[3:4]),ymax=max(extent$range[3:4]))
 }
 
 if (inherits(extent,"character")){
@@ -22,7 +22,7 @@ try(test <- map("worldHires",extent,plot=FALSE),silent=TRUE) # for error handlin
 	} else {
 		stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires',',",extent,"')",sep=""))
 	}
-extent <- list(lon_min=min(extent$range[1:2]),lon_max=max(extent$range[1:2]),lat_min=min(extent$range[3:4]),lat_max=max(extent$range[3:4]))
+extent <- list(xmin=min(extent$range[1:2]),xmax=max(extent$range[1:2]),ymin=min(extent$range[3:4]),ymax=max(extent$range[3:4]))
 }
 ############################################
 # extent class "raster* object (extent)"
@@ -32,7 +32,7 @@ if (class(extent) %in% c("Extent","RasterLayer","RasterStack","RasterBrick") ){
 		extent <- extent(extent)# checking if lat/lon !!??
 	} 
 
-extent <- list(lon_min=extent@xmin,lon_max=extent@xmax,lat_min=extent@ymin,lat_max=extent@ymax)
+extent <- list(xmin=extent@xmin,xmax=extent@xmax,ymin=extent@ymin,ymax=extent@ymax)
 }
 ####################################
 # extent class "list"
@@ -40,7 +40,7 @@ if (inherits(extent,"list")){ # all possible extent classes should have been con
 
 if(length(extent$extent)==4) {extent<-extent$extent}
 
-if (length(extent)==2) {  } # if extent it is a point!
+#if (length(extent)==2) {  } # if extent it is a point!
 
 if (!is.null(buffer)) {
 	if (length(buffer)==1) {buffer <- c(buffer,buffer)}
@@ -53,21 +53,20 @@ extent[4] <- as.numeric(extent[4]) + buffer[2]
 data("tiletable")
 
   minTile <- subset(tiletable,
-                  (tiletable$lon_min <= extent$lon_min & tiletable$lon_max >= extent$lon_min) &
-                  (tiletable$lat_min <= extent$lat_min & tiletable$lat_max >= extent$lat_min)
+                  (tiletable$lon_min <= extent$xmin & tiletable$lon_max >= extent$xmin) &
+                  (tiletable$lat_min <= extent$ymin & tiletable$lat_max >= extent$ymin)
          ,select=c(iv,ih))
   minTile <- c(min(minTile$iv),min(minTile$ih))
     
   maxTile <-  subset(tiletable,
-                  (tiletable$lon_min <= extent$lon_max & tiletable$lon_max >= extent$lon_max) &
-                  (tiletable$lat_min <= extent$lat_max & tiletable$lat_max >= extent$lat_max)
+                  (tiletable$lon_min <= extent$xmax & tiletable$lon_max >= extent$xmax) &
+                  (tiletable$lat_min <= extent$ymax & tiletable$lat_max >= extent$ymax)
          ,select=c(iv,ih))
   maxTile <- c(max(maxTile$iv),max(maxTile$ih))
 
   tileV <- minTile[1]:maxTile[1]
   tileH <- minTile[2]:maxTile[2]
-}
-#
+}#
 } 
 ###################################
 # get the results

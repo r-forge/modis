@@ -16,7 +16,9 @@ Installing MODIS ReprojectionTool MRT software it is possible to further process
 }
 
 \author{
-Matteo Mattiuzzi; Institute of Surveying, Remote Sensing and Land Information (IVFL), BOKU Vienna\cr 
+Matteo Mattiuzzi; Institute of Surveying, Remote Sensing and Land Information (IVFL), BOKU Vienna\cr
+Jan Verbesselt; WUR NL\cr
+Tomislav Hengl, WUR NL\cr
 Anja Klisch; Institute of Surveying, Remote Sensing and Land Information (IVFL), BOKU Vienna 
 
 Maintainer: Matteo Mattiuzzi \email{matteo.mattiuzzi@boku.ac.at}
@@ -26,8 +28,6 @@ Maintainer: Matteo Mattiuzzi \email{matteo.mattiuzzi@boku.ac.at}
 MODIS data pool home page with list of data access possibilities: \url{https://lpdaac.usgs.gov/lpdaac/get_data/data_pool}\cr
 MODIS data pool server: \url{ftp://e4ftl01.cr.usgs.gov/}\cr
 MODIS home page: \url{http://modis.gsfc.nasa.gov/}\cr
-
-A great thanks to Tomislav Hengl. 'getMODIS' has its origin in his code see: \url{http://spatial-analyst.net/wiki/index.php?title=Download_and_resampling_of_MODIS_images}.
 
 }
 
