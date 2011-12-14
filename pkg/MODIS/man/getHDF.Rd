@@ -43,7 +43,7 @@
 
   \item{stubbornness}{Default \code{low}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is wellcome!} 
   
-  \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded with their MODIS-HDF file and a "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. (!keep FALSE for now!)}
+  \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded and the "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. This takes more time than using \code{FALSE} but gives more security of data integrity. You can also run \code{getXML()} in a separate run, this function checks the MODIS archive for data integrity.}
     
   \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
@@ -70,16 +70,16 @@
 getHDF(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
 
 # DO NOT RUN THE NEXT EXAMPLE (unless you need this data)!!!
-# Get all MODIS TERRA 13Q1 beginning from 01. January 2009 up to today.
-# If run in a scheduled batch job it will update the data until end of 2015.
-getHDF(product="MOD13Q1",startdate="2009.01.01",enddate="2015.12.31",tileH=19,tileV=4:5) 
+# Get all MODIS TERRA and AQUA 11A1 beginning from 18. October 2011 up to today.
+# If run in a scheduled batch job it will update the data until the very last available
+getHDF(product="MXD11A1",startdate="2011.10.18",tileH=18:19,tileV=4) 
 
 # or the same with an (list) Extent
-Austria <- list(lat_min=46.12,lat_max=49.3,lon_max=17.47,lon_min=9.2)
-getHDF(product="MYD13Q1",startdate="2009.01.01",enddate="2015.12.31",extent=Austria)
+Austria <- list(xmax=17.47,xmin=9.2,ymin=46.12,ymax=49.3)
+getHDF(product="MxD11A1",startdate="2009.01.01",enddate="2009.01.02",extent=Austria)
 
-# require(mapdata)
-getHDF(product="MYD13Q1",startdate="2009.01.01",enddate="2015.12.31",extent="austria")
+require(mapdata)
+getHDF(product="MxD11A1",startdate="2009.01.01",enddate="2009.01.02",extent="austria")
 }
 }
 
