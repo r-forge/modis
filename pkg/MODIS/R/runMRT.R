@@ -260,8 +260,8 @@ if (length(files)!=0){
 		write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent$ymax,' ',pm$extent$extent$xmin,')',sep=''),filename)
 		write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent$ymin,' ',pm$extent$extent$xmax,')',sep=''),filename)
 	}
-	if (!is.null(pm$pixelsize)) {
-		write(paste('OUTPUT_PIXLESIZE = ',pm$pixelsize,sep=''),filename) 
+	if (!is.null(pm$pixelSize)) {
+		write(paste('OUTPUT_PIXELSIZE = ',pm$pixelSize,sep=''),filename) 
 	}	
 	write(paste('OUTPUT_FILENAME = ',pm$outDir,fsep,basenam,'.tif',sep=''),filename) 
 	write(paste('RESAMPLING_TYPE = ',pm$resample,sep=''),filename)
