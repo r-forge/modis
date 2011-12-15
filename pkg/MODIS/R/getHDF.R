@@ -5,6 +5,13 @@
 
 getHDF <- function(LocalArcPath,HdfName,product,startdate,enddate,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="low",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
 
+serverList <- list() # Temporary! Thing to implement are alternative servers if datapool is down!
+serverList[[1]] <- "ftp://e4ftl01.cr.usgs.gov/" # xml in? YES
+serverList[[2]] <- "ftp://ladsweb.nascom.nasa.gov/allData/" # xml in? NO
+# serverList[[3]] <- Rapid response
+# add more
+#
+
 fsep <- .Platform$file.sep
 
 if (missing(LocalArcPath)) {
@@ -30,6 +37,10 @@ if (is.numeric(stubbornness)) {
 	sturheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
 	}
 
+#################
+# check FTP availability
+a <- try(getURL("ftp://e4ftl01.cr.usgs.gov"),silent=TRUE)
+if (class(a)=="try-error") {stop("FTP-server not available. Try again little later.")}
 #################
 
 # TODO HdfName as regex
@@ -64,27 +75,32 @@ if (!missing(HdfName)){
 	dir.create(paste(LocalArcPath,fsep,arcPath,sep=""),recursive=TRUE,showWarnings=FALSE) # this always generates the same structure as the original ftp (this makes sense if the local LocalArcPath becomes big!)
 	
 	if (!file.exists(paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""))) {
-		  require(RCurl)
-		  ftpPath <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
-#			ftpPath <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
-		
+		require(RCurl)
+		ftpPath <- list()
+		ftpPath[[1]] <- paste(serverList[[1]],product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
+		ftpPath[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",substr(secName[2],2,5),"/",substr(secName[2],6,8),HdfName[i],sep="")
+
+			
 		g=1
 		while(g <= sturheit) {
 
-			if (g==1){qi <- quiet} else { qi <- TRUE}
-
+		if (g==1){qi <- quiet} else { qi <- TRUE}
+	
+		for (x in 1:length(serverList)){
 			try(hdf <- download.file(
-				ftpPath,
+				ftpPath[[x]],
 				destfile=paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""),
 				mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE)
 			)
 		if(hdf==0) {break}	
-		g=g+1		
+		}
+		if(hdf==0) {break}
+		g=g+1	
+		Sys.sleep(0.3) # not proven that it works here! 
 		}
 
-		if (wait>0) {
-			Sys.sleep(as.numeric(wait))
-		}
+		Sys.sleep(as.numeric(wait))
+
 	}
 		
 	if(checkSize){
@@ -151,8 +167,9 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	productName <- product$productName[z]
 
-	ftp <- paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
-	#ftp <- paste("ftp://e4ftl01u.ecs.nasa.gov/", product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
+		#ftp <- list()
+		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
+		#ftp[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",sep="")
 
 	ftpdirs <- getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=startdate,enddate=enddate,wait=0)
 		
