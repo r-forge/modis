@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getSDS <- function(HdfName,SDSstring,method="gdal",...) {
+getSDS <- function(HdfName,SDSstring=NULL,method="gdal",...) {
 ######
 
 method <- tolower(method) 
@@ -62,7 +62,7 @@ if (method=="gdal"){
 	sds <- unlist(lapply(sds,function(x){strsplit(x,", ")[[1]][2]}))
 }
 
-if (!missing(SDSstring)){
+if (!is.null(SDSstring)){
 	if (inherits(SDSstring,"list")) {
 		SDSstring <- paste(SDSstring$SDSstring,collapse="")
 		} else if (inherits(SDSstring,"numeric")) {
