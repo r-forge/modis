@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-getSTRUC <- function(LocalArcPath,product,collection,startdate,enddate,wait=1) {
+getSTRUC <- function(LocalArcPath,product,collection,startdate=NULL,enddate=NULL,wait=1) {
 
 fsep <- .Platform$file.sep
 
@@ -40,7 +40,8 @@ if (file.exists(file.path(auxPATH,"ftpdir.txt",fsep=fsep))) {
 	}
 	
 data("MODIS_Products")
-
+result <- list()
+resnames<-list()
 for (i in 1:length(product$PF2)){
 	
 	productName <- product$productName[i]
@@ -58,7 +59,7 @@ for (i in 1:length(product$PF2)){
 
 				avDates <- as.Date(ftpdirs[,ind],format="%Y.%m.%d")
 		
-				if (!missing(startdate)){
+				if (!is.null(startdate)){
 					begin <- transDATE(begin=startdate)$begin
 						if (is.na(begin)) {stop("\n'startdate=",startdate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (begin < min(avDates,na.rm=TRUE)) {
@@ -70,7 +71,7 @@ for (i in 1:length(product$PF2)){
 					getIT <- TRUE
 				}
 	
-				if (!missing(enddate) & !getIT) {
+				if (!is.null(enddate) & !getIT) {
 					end <- transDATE(end=enddate)$end 
 						if (is.na(end)) {stop("\n'enddate=",enddate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (end > max(avDates,na.rm=TRUE)) {
@@ -104,20 +105,20 @@ for (i in 1:length(product$PF2)){
 		FtpDayDirs  <- FtpDayDirs[substr(FtpDayDirs, 1, 1)=='d'] 
 		FtpDayDirs  <- unlist(lapply(strsplit(FtpDayDirs, " "), function(x){x[length(x)]}))
 		
-			if (!createNew) {	
-				FtpDayDirs <- matrix(FtpDayDirs)
-				mtr <- matrix(NA,ncol=ncol(ftpdirs),nrow=max(length(FtpDayDirs),dim(ftpdirs)[1]))
-				colnames(mtr) <- colnames(ftpdirs)	
-			
-				if (ncol(ftpdirs)!=0){
-					for(j in 1:ncol(ftpdirs)){
-						mtr[,j] <- replace(mtr[,j], 1:nrow(ftpdirs),ftpdirs[,j])
-					}
+		if (!createNew) {	
+			FtpDayDirs <- matrix(FtpDayDirs)
+			mtr <- matrix(NA,ncol=ncol(ftpdirs),nrow=max(length(FtpDayDirs),dim(ftpdirs)[1]))
+			colnames(mtr) <- colnames(ftpdirs)	
+		
+			if (ncol(ftpdirs)!=0){
+				for(j in 1:ncol(ftpdirs)){
+					mtr[,j] <- replace(mtr[,j], 1:nrow(ftpdirs),ftpdirs[,j])
 				}
-			
-				mtr[,productNameFull] <- replace(mtr[,productNameFull], 1:length(FtpDayDirs),FtpDayDirs) 
-				ftpdirs <- mtr
 			}
+		
+			mtr[,productNameFull] <- replace(mtr[,productNameFull], 1:length(FtpDayDirs),FtpDayDirs) 
+			ftpdirs <- mtr
+		}
 		
 	}
 
@@ -135,12 +136,20 @@ for (i in 1:length(product$PF2)){
 			
 		mtr[,ncol(mtr)] <- replace(mtr[,ncol(mtr)], 1:length(FtpDayDirs),FtpDayDirs) 
 		ftpdirs <- mtr
-	} 
+	}
 
+res   <- ftpdirs[,which(colnames(ftpdirs)==productNameFull)]
+begin <- gsub("-","\\.",begin)
+end   <- gsub("-","\\.",end)
+
+result[[i]] <- res[res >= begin & res <= end]
+
+resnames[[i]] <- productNameFull
 }
-
 write.table(ftpdirs,file.path(auxPATH,"ftpdir.txt",fsep=fsep))
-invisible(ftpdirs) 
+
+names(result) <- resnames
+invisible(result) 
 }
 
 
