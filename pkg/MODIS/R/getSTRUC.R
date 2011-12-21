@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-getSTRUC <- function(LocalArcPath,product,collection,startdate=NULL,enddate=NULL,wait=1) {
+getSTRUC <- function(LocalArcPath,product,collection=NULL,startdate=NULL,enddate=NULL,wait=1) {
 
 fsep <- .Platform$file.sep
 
@@ -24,7 +24,7 @@ dir.create(auxPATH,showWarnings=FALSE)
 product <- getPRODUCT(product=product)
 #####
 # Check collection
-if (missing(collection)) {
+if (is.null(collection)) {
 	collection <- getCOLLECTION(product=product)
 	} else {
 	collection <- sprintf("%03d",as.numeric(collection))
@@ -40,8 +40,8 @@ if (file.exists(file.path(auxPATH,"ftpdir.txt",fsep=fsep))) {
 	}
 	
 data("MODIS_Products")
-result <- list()
-resnames<-list()
+result   <- list()
+resnames <-list()
 for (i in 1:length(product$PF2)){
 	
 	productName <- product$productName[i]
@@ -138,9 +138,11 @@ for (i in 1:length(product$PF2)){
 		ftpdirs <- mtr
 	}
 
-res   <- ftpdirs[,which(colnames(ftpdirs)==productNameFull)]
-begin <- gsub("-","\\.",begin)
-end   <- gsub("-","\\.",end)
+res <- ftpdirs[,which(colnames(ftpdirs)==productNameFull)]
+
+dates <- transDATE(begin=startdate,end=enddate)
+begin <- gsub("-","\\.",dates$begin)
+end   <- gsub("-","\\.",dates$end)
 
 result[[i]] <- res[res >= begin & res <= end]
 

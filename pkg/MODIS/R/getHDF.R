@@ -3,7 +3,7 @@
 # Licence GPL v3
   
 
-getHDF <- function(LocalArcPath,HdfName,product,startdate,enddate,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="low",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
+getHDF <- function(LocalArcPath,HdfName,product,startdate=NULL,enddate=NULL,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="low",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE) {
 
 serverList <- list() # Temporary! Thing to implement are alternative servers if datapool is down!
 serverList[[1]] <- "ftp://e4ftl01.cr.usgs.gov/" # xml in? YES
@@ -121,8 +121,8 @@ return(invisible(unlist(dates)))
 
 } else { # if HdfName isn't provided:
 
-if (missing(startdate)) {cat("No startdate set, getting data from the beginning\n")} 
-if (missing(enddate))   {cat("No enddate set, getting up to the most actual data\n")} 
+if (is.null(startdate)) {cat("No startdate set, getting data from the beginning\n")} 
+if (is.null(enddate))   {cat("No enddate set, getting up to the most actual data\n")} 
 if (missing(extent) & (missing(tileH) | missing(tileV))){stop("Please provide eighter a 'tileH(s)' plus tileV(s) or an extent")} 
 if (missing(product))   {stop("Please provide the MODIS-'product'")}
 #######
@@ -171,10 +171,7 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
 		#ftp[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",sep="")
 
-	ftpdirs <- getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=startdate,enddate=enddate,wait=0)
-		
-	ftpdirs <- ftpdirs[,which(colnames(ftpdirs)==paste(product$productName[z],".",collection,sep=""))] 
-	ftpdirs <- ftpdirs[!is.na(ftpdirs)]
+	ftpdirs <- unlist(getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=begin,enddate=end,wait=0))
 	
 	sel <- as.Date(ftpdirs,format="%Y.%m.%d") # convert to date
 	us  <- sel >= begin & sel <= end

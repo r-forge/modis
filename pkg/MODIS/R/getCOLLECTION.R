@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-getCOLLECTION <- function(LocalArcPath,product,collection,newest=TRUE,forceCheck=FALSE){
+getCOLLECTION <- function(LocalArcPath,product,collection=NULL,newest=TRUE,forceCheck=FALSE){
 
 fsep <- .Platform$file.sep
 
@@ -77,7 +77,7 @@ ind <- which(colnames(ftpdirs)==product$productName[i])
 
 res <- as.character(ftpdirs[!is.na(ftpdirs[,ind]),ind])
 
-if (!missing(collection)) {
+if (!is.null(collection)) {
 	
 	isOk <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) # if collection is providen...return TRUE or FALSE
 
@@ -87,7 +87,7 @@ if (!missing(collection)) {
 		res <- FALSE
 	}
 	
-} else if(newest) {
+} else if (newest) {
 	res <- as.numeric(res)
 	zeros <- sapply(nchar(res),function(x) {
 			x<- x-1

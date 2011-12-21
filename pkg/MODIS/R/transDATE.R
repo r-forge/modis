@@ -2,13 +2,13 @@
 # Date : November 2011
 # Licence GPL v3
   
-transDATE <- function(begin,end){
+transDATE <- function(begin=NULL,end=NULL){
 #########
-if(missing(begin)) {
+if(is.null(begin)) {
 	begin="1975.01.01" # maybe once MODIS package retrieves other data too!
 	}
 
-if (missing(end)) {
+if (is.null(end)) {
 	end="2025.12.31" # we have to remember or change it when the time has come ;)
 } 
 
