@@ -165,7 +165,7 @@ ftpdirs <- getSTRUC(product=pm$product$request,collection=pm$collection,startdat
 ######################## along platform (TerraAqua)
 for(i in 1:length(pm$product$PF1)) { 
 
-avDates <- ftpdirs[,colnames(ftpdirs)==paste(pm$product$productName[i],".",pm$collection,sep="")]
+avDates <- ftpdirs[[i]]
 avDates <- avDates[!is.na(avDates)]
 avDates <- as.Date(avDates,format="%Y.%m.%d")
 

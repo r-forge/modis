@@ -41,7 +41,7 @@ if (file.exists(file.path(auxPATH,"ftpdir.txt",fsep=fsep))) {
 	
 data("MODIS_Products")
 result   <- list()
-resnames <-list()
+resnames <- list()
 for (i in 1:length(product$PF2)){
 	
 	productName <- product$productName[i]
@@ -92,7 +92,6 @@ for (i in 1:length(product$PF2)){
 	if (getIT) { # the return is 'FtpDayDirs' of the requested product
 
 		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1[i],"/", productNameFull,"/",sep="")
-#		ftp <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1[i],"/", productNameFull,"/",sep="") # old ftp
 		cat("Getting structure for:", ftp,"\n")	
 		require(RCurl)
 		FtpDayDirs  <- getURL(ftp)
@@ -139,7 +138,7 @@ for (i in 1:length(product$PF2)){
 	}
 
 res <- ftpdirs[,which(colnames(ftpdirs)==productNameFull)]
-
+res <- res[!is.na(res)]
 dates <- transDATE(begin=startdate,end=enddate)
 begin <- gsub("-","\\.",dates$begin)
 end   <- gsub("-","\\.",dates$end)

@@ -142,8 +142,6 @@ if (missing(collection)) {
 #########
 # tranform dates
 tLimits <- transDATE(begin=startdate,end=enddate)
-begin   <- tLimits$begin
-end     <- tLimits$end
 #########
 # tileID
 if (substr(product$PD,3,nchar(product$PD))=="CMG") {
@@ -171,10 +169,10 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
 		#ftp[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",sep="")
 
-	ftpdirs <- unlist(getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=begin,enddate=end,wait=0))
+	ftpdirs <- unlist(getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=tLimits$begin,enddate=tLimits$end,wait=0))
 	
 	sel <- as.Date(ftpdirs,format="%Y.%m.%d") # convert to date
-	us  <- sel >= begin & sel <= end
+	us  <- sel >= tLimits$begin & sel <= tLimits$end
 
 	if (sum(us,na.rm=TRUE)>0){ 
 
