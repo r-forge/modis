@@ -2,7 +2,7 @@
 # Date : December 2011
 # Licence GPL v3
 
-getProducts.WS <- function() {
+getProductsWS <- function() {
 	## get the SOAP service
 	ornlMODIS = processWSDL("http://daac.ornl.gov/cgi-bin/MODIS/GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl")
 	## define the function set
@@ -11,7 +11,7 @@ getProducts.WS <- function() {
 	return(ornlMODISFuncs@functions$getproducts())
 }
 
-# getProducts.WS()
+# getProductsWS()
 
 
 
