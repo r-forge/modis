@@ -41,10 +41,11 @@
 }
 
 \examples{
-# runMRT()
+\dontrun{
+runMRT()
 # You can open the file specified by 'runMRT()' and modify it or test it!
-# runMRT(ParaSource="OutputOf'runMRT()'")
-
+runMRT(ParaSource="OutputOf'runMRT()'")
+}
 }
 
 

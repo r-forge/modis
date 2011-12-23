@@ -30,10 +30,11 @@
 }
 
 \examples{
+\dontrun{
 	#	Please install the required packages
 	# install.packages("SSOAP", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
 	# install.packages("XML", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
 	# install.packages("XMLSchema", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
 	getProductsWS()
-
+}
 }
