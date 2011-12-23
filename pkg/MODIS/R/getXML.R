@@ -2,7 +2,7 @@
 # Date : July 2011
 # Licence GPL v3
 
-getXML <- function(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE){
+getXML <- function(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="extreme"){
 
 fsep <- .Platform$file.sep
 
@@ -21,6 +21,11 @@ dir.create(LocalArcPath,showWarnings=FALSE)
 try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
 if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
 #################
+if (is.numeric(stubbornness)) {
+	sturheit <- stubbornness	
+	} else {
+	sturheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
+	}
 
 
 if(!missing(HdfName)) {
@@ -53,7 +58,8 @@ doit <- sapply(avFiles,function(x) {
 	if (sum((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (PF %in% c("MOD","MYD","MCD")) + (length(secName)==6)) == 4){
 		res <- TRUE
 	} else {
-		res <- FALSE}
+		res <- FALSE
+	}
 
 	return(res)}
 	)
@@ -97,15 +103,17 @@ islocal <- rep(NA,length(avFiles))
 
 	require(RCurl) # is it good here?
 
-	islocal[u] <- download.file(
-#		paste("ftp://e4ftl01u.ecs.nasa.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
+	g=1
+	while(g <= sturheit) {
+		if (g==1){qi <- quiet} else { qi <- TRUE}
+		try(xml <- download.file(
 		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		destfile=paste(avFiles[u],".xml",sep=""),
-		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
-
-		if (wait!=0){
-		Sys.sleep(as.numeric(wait))
-		}
+		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+	if(sum(xml)==0) {break}
+	g=g+1
+	}
+	islocal[u] <- xml
 	} else {
 	islocal[u] <- 0
 	}
@@ -145,14 +153,20 @@ if (checkSize) {
 			} else {
 			stop(product$raster_type," not supported yet!")			
 			}
+	g=1
+	while(g <= sturheit) {
+		if (g==1){qi <- quiet} else { qi <- TRUE}
+		try(hdf <- 	download.file(
+			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,sep=""),
+			destfile=paste(avFiles[u],sep=""),
+			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+	if(hdf==0) {break}
+	g=g+1
+	}
 
-	download.file(
-		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,sep=""),
-		destfile=paste(avFiles[u],sep=""),
-		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
 	} else {
 		if(!quiet){
-			cat("\nSize check for: ",avFiles[u], "done!\n")
+			cat("\nSize check for: ",avFiles[u], "done!\n\n")
 		}
 	}
 }
