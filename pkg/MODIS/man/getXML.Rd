@@ -15,7 +15,7 @@
 }
 
 \usage{
-getXML(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE)
+getXML(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness)
 }
 
 \arguments{
@@ -41,6 +41,7 @@ getXML(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE)
 \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}}
 
 \item{dlmethod}{Default \code{"auto"}. Argument is passed to \code{?download.file} if it is called!}
+\item{stubbornness}{See: code{?getHDF}}
 }
 
 \value{
