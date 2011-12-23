@@ -1,9 +1,9 @@
 Package: MODIS
-Version: 0.2-33
-Date: 22-December-2011
+Version: 0.2-34
+Date: 23-December-2011
 Title: MODIS retrieving and processing Package. Pre-processing functionalities for MODIS grid data.  
 Depends: R (>= 2.10), RCurl
-Suggests: raster, XML, mapdata, XMLSchema, SSOAP
+Suggests: XML, XMLSchema, SSOAP,raster, mapdata
 Author: Matteo Mattiuzzi, Jan Verbesselt, Tomislav Hengl, with contibutions from Anja Klisch.
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at>
 Description: MODIS retrieving and processing Package. Downloading, reprojecting, resampling, mosaicing, converting, SDS-extraction, bit-extraction and filtering/smoothing capabilities. Download data from FTP (local processing) or using SSOAP (online processing) via the MODIS webservice. Process data with MRT,GDAL,FWT,SSOAP.
