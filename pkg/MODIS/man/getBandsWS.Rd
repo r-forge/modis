@@ -10,10 +10,10 @@
 Get the bands of a specific MODIS product available via the MODIS webservice tool
 }
 
-\usage{getBandsWS(product = "MOD13Q1")}
+\usage{getBandsWS(product)}
 
 \arguments{
-  \item{product}{ A MODIS product available via the MODIS webservice}
+  \item{product}{ A MODIS product available via the MODIS webservice }
 }
 
 \value{
@@ -32,6 +32,6 @@ Please see \url{http://daac.ornl.gov/MODIS/MODIS-menu/modis_webservice.html} for
 	#	Please install the required packages
 	# install.packages("SSOAP", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
 	getProductsWS() ## first check products
-	getBandsWS(product = "MOD13Q1") ## check bands of a product
+	getBandsWS("MOD13Q1") ## check bands of a product
 
 }
