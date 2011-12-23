@@ -1,6 +1,5 @@
 # Author: Jan Verbesselt, Jan.Verbesselt@wur.nl
 # Date : December 2011
-# Licence GPL v3
 
 getDatesWS <- function(lat,long,product) {
 	## get the SOAP service
