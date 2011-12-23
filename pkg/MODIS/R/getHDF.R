@@ -31,11 +31,7 @@ if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")}
 
 auxPATH <- file.path(LocalArcPath,".auxiliaries",fsep=fsep)
 
-if (is.numeric(stubbornness)) {
-	sturheit <- stubbornness	
-	} else {
-	sturheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
-	}
+sturheit <- .stubborn(level=stubbornness)
 
 #################
 # check FTP availability
