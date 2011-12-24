@@ -39,6 +39,7 @@ Please see \url{http://daac.ornl.gov/MODIS/MODIS-menu/modis_webservice.html} for
 #	Please install the required packages
 # install.packages("SSOAP", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
 ## get the data
-b <- getModisWS(40,-110, "MOD13Q1", "250m_16_days_NDVI", "A2000049", "A2000097", 1, 1) # 1 km i.e. 9 by 9 pixel block
+## the maximum nr of dates is 10!
+#b <- getModisWS(40,-110, "MOD13Q1", "250m_16_days_NDVI", "A2000049", "A2000097", 1, 1) # 1 km i.e. 9 by 9 pixel block
 #plot(b)
 }
