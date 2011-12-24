@@ -6,6 +6,9 @@
 ## not sure what the best way is here
 ## to deal with helper functions
 
+## if extent is 1x1km!!!
+## needs to be changed
+
 createbrickWS <- function(result) {	
 	## set raster
 	modisprj <-c("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
