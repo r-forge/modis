@@ -16,8 +16,8 @@ createbrickWS <- function(result) {
 	nrows <- result@nrows	
 	ncols <- result@ncols
 	rwebs <- raster(nrows=nrows, ncols=ncols, 
-									xmn=result@xllcorner, xmx=result@xllcorner+(9*res), 
-                  ymn=result@yllcorner, ymx=result@yllcorner+(9*res), crs=modisprj)
+									xmn=result@xllcorner, xmx=result@xllcorner+(nrows*res), 
+                  ymn=result@yllcorner, ymx=result@yllcorner+(ncols*res), crs=modisprj)
 	## add values
 	## extract the data and process
 	dd <- strsplit(result@subset,"\n")
