@@ -13,7 +13,9 @@ createbrickWS <- function(result) {
 	## set raster
 	modisprj <-c("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
 	res <- result@cellsize
-	rwebs <- raster(nrows=9, ncols=9, 
+	nrows <- result@nrows	
+	ncols <- result@ncols
+	rwebs <- raster(nrows=nrows, ncols=ncols, 
 									xmn=result@xllcorner, xmx=result@xllcorner+(9*res), 
                   ymn=result@yllcorner, ymx=result@yllcorner+(9*res), crs=modisprj)
 	## add values
