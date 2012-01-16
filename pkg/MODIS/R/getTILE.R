@@ -2,9 +2,10 @@
 # Date : August 2011
 # Licence GPL v3
 
-getTILE <- function(tileH,tileV,extent,buffer=NULL) {
+getTILE <- function(tileH=NULL,tileV=NULL,extent=NULL,buffer=NULL,system="MODIS") {
 
-if(missing(extent)) {
+if(is.null(extent)) {
+	if (is.null(tileV)||is.null(tileH)) stop("Provide or an 'extent' or 'tileV+tileH' information!")
 extent <- ""
 } else {
 ###########################################
@@ -50,17 +51,21 @@ extent[3] <- as.numeric(extent[3]) - buffer[2]
 extent[4] <- as.numeric(extent[4]) + buffer[2]
 }
 
-data("tiletable")
+if(system=="MODIS") {
+	data("tiletable")
+	} else if (system=="MERIS") {
+	tiletable <- genTILE(tileSize=5)
+	}
 
   minTile <- subset(tiletable,
-                  (tiletable$lon_min <= extent$xmin & tiletable$lon_max >= extent$xmin) &
-                  (tiletable$lat_min <= extent$ymin & tiletable$lat_max >= extent$ymin)
+                  (tiletable$xmin <= extent$xmin & tiletable$xmax >= extent$xmin) &
+                  (tiletable$ymin <= extent$ymin & tiletable$ymax >= extent$ymin)
          ,select=c(iv,ih))
   minTile <- c(min(minTile$iv),min(minTile$ih))
     
   maxTile <-  subset(tiletable,
-                  (tiletable$lon_min <= extent$xmax & tiletable$lon_max >= extent$xmax) &
-                  (tiletable$lat_min <= extent$ymax & tiletable$lat_max >= extent$ymax)
+                  (tiletable$xmin <= extent$xmax & tiletable$xmax >= extent$xmax) &
+                  (tiletable$ymin <= extent$ymax & tiletable$ymax >= extent$ymax)
          ,select=c(iv,ih))
   maxTile <- c(max(maxTile$iv),max(maxTile$ih))
 
@@ -70,17 +75,24 @@ data("tiletable")
 } 
 ###################################
 # get the results
-tiles <- list()
 
 tileH <- as.vector(tileH)
-	if (tileH < 0 || tileH > 35) {stop("'tileH' number(s) must be between 0 and 35")}
 tileV <- as.vector(tileV)
-	if (tileV < 0 || tileV > 16) {stop("'tileV' number(s) must be between 0 and 17")}
-	
+
+vmax <- max(tiletable$iv)
+hmax <- max(tiletable$ih)
+
+if (min(tileH) < 0 || max(tileH) > hmax) {stop(paste("'tileH' number(s) must be between 0 and",hmax,sep=""))}
+if (min(tileV) < 0 || max(tileV) > vmax) {stop(paste("'tileV' number(s) must be between 0 and",vmax,sep=""))}
+
+vsize <- nchar(vmax)
+hsize <- nchar(hmax)
+
+tiles <- list()	
 for (i in seq(along=tileH)){
-	tiles[[i]] <- paste("h",sprintf("%02d",tileH[i]),"v",sprintf("%02d",tileV),sep="")	
+	tiles[[i]] <- paste("h",sprintf(paste("%0",hsize,"d",sep=""),tileH[i]),"v",sprintf(paste("%0",hsize,"d",sep=""),tileV),sep="")	
 }
-result <- list(tile=unlist(tiles),tileH=tileH,tileV=tileV,extent=extent)
+result <- list(tile=unlist(tiles),tileH=tileH,tileV=tileV,extent=extent,system=system)
 
 return(result)
 }
