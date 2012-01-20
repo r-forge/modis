@@ -161,10 +161,8 @@ for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	productName <- product$productName[z]
 
-		#ftp <- list()
 		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$productName[z],".",collection,"/",sep="")
-		#ftp[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",sep="")
-
+		
 	ftpdirs <- unlist(getSTRUC(LocalArcPath=LocalArcPath,product=product$productName[z],collection=collection,startdate=tLimits$begin,enddate=tLimits$end,wait=0))
 	
 	sel <- as.Date(ftpdirs,format="%Y.%m.%d") # convert to date

@@ -3,7 +3,7 @@
 \docType{methods}
 
 \alias{getTILE}
-\alias{getTILE,tileH,tileV,extent,buffer}
+\alias{getTILE,tileH,tileV,extent,buffer,system}
 
 \title{Get MODIS tile id(s)}
 
@@ -11,7 +11,7 @@
 Get MODIS tile id(s) for a geographic area.
 }
 
-\usage{getTILE(tileH, tileV, extent,buffer=NULL)}
+\usage{getTILE(tileH, tileV, extent,buffer=NULL,system="MODIS")}
 
 \arguments{
 
@@ -22,6 +22,8 @@ Get MODIS tile id(s) for a geographic area.
   \item{extent}{Extent Informations see details.}
   
   \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(Lat,Lon)}. }
+
+  \item{system}{Character. Default is \code{MODIS}. Working alternative is the \code{MERIS}  tiling system from culture-MERIS dataset. Other tiling systems mot yet implemented!}
 }
 
 \details{
@@ -42,6 +44,7 @@ Or one of the following objects \code{'extent','rasterLayer','rasterStack'} or \
 }
 
 \examples{
+\dontrun{
 # with tileH and tileV
 getTILE(tileH=18:19,tileV=4)
 
@@ -53,11 +56,9 @@ getTILE(extent=Austria,buffer=c(0.5,10))
 
 # with Extent or raster* object from raster package
 require(raster)
-
 # rasterObject
 rasterObject <- raster(xmn=9.2,xmx=17.47,ymn=46.12,ymx=49.3)
 getTILE(extent=rasterObject)
-
 # raster extent
 ext <- extent(rasterObject)
 getTILE(extent=ext)
@@ -68,8 +69,9 @@ getTILE(extent=ext)
 getTILE(extent="usa")
 # so you better always check befor applying an extent of the class 'character' that defines a 'map' object
 # if you want subsets or more detailed maps use ?map arguments 
-ext <-  map('state', region = c('new york', 'new jersey', 'penn'))
+ext <-  map('state', region = c('new york', 'new jersey', 'penn'),plot=FALSE)
 getTILE(extent=ext)
+}
 }
 
 

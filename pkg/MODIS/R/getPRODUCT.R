@@ -2,8 +2,9 @@
 # Date : August 2011
 # Licence GPL v3
 
-getPRODUCT <- function(product,quiet=TRUE){
+getPRODUCT <- function(product,sensor="MODIS",quiet=TRUE){
 
+if (sensor=="MODIS"){
 # if product is already a result of getPRODUCT turn it back to the original request.
 if (is.list(product) && names(product) %in% c("request","PF1","PF2","PD","raster_type","productName")) { # matching with class should be done here!
 	product <- product$request
@@ -45,8 +46,13 @@ if(as.character(MODIS_Products[ind,4])=="Swath"){stop(paste("You are looking for
 	cat(paste("No product found with the name ",PF2[i],PD,"\n",sep=""))}
 }
 if (!quiet){cat("\n")}
+invisible(list(request=product,PF1 = PF1, PF2 = PF2,PD = PD,raster_type = "Tile",productName =  as.character(unlist(productName)),sensor=sensor))
 
-invisible(list(request=product,PF1 = PF1, PF2 = PF2,PD = PD,raster_type = as.character(MODIS_Products[ind,4]),productName =  as.character(unlist(productName))))
+} else if (sensor=="MERIS") {
+
+invisible(list(sensor=sensor))
+
+}
 }
 
 

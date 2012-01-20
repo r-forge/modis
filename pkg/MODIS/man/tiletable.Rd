@@ -11,10 +11,10 @@ Function \code{?getTILE} uses this information to get the tile id for any locati
   \describe{
     \item{\code{iv}}{a numeric vector of vertical tile number}
     \item{\code{ih}}{a numeric vector of horizontal tile number}
-    \item{\code{lon_min}}{a numeric vector of western geographic coordinate}
-    \item{\code{lon_max}}{a numeric vector of eastern geographic coordinate}
-    \item{\code{lat_min}}{a numeric vector of southern geographic coordinate}
-    \item{\code{lat_max}}{a numeric vector of northern geographic coordinate}
+    \item{\code{xmin}}{a numeric vector of western geographic coordinate}
+    \item{\code{xmax}}{a numeric vector of eastern geographic coordinate}
+    \item{\code{ymin}}{a numeric vector of southern geographic coordinate}
+    \item{\code{ymax}}{a numeric vector of northern geographic coordinate}
   }
 }
 \source{
