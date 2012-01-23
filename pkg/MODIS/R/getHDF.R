@@ -147,7 +147,7 @@ if (substr(product$PD,3,nchar(product$PD))=="CMG") {
 	if(!missing(extent)) {
   	tileID <- getTILE(extent=extent)$tile
  	 } else {
- 	 tileID <- getTILE(tileH=tileH,tileV=tileV)$tile
+    tileID <- getTILE(tileH=tileH,tileV=tileV)$tile
  	 }
 	ntiles <- length(tileID)
 }
@@ -239,9 +239,10 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 			g=1
 			while(g <= sturheit) {
 			
-				if (g==1){qi <- quiet} else { qi <- TRUE}
+				if (g==1){qi <- quiet} else {qi <- TRUE}
 			
-				try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""), destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE),silent=TRUE)
+				try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""),
+					destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE),silent=TRUE)
 			if(hdf==0) {break}
 			g=g+1
 			}
