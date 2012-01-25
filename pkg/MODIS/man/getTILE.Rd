@@ -21,9 +21,9 @@ Get MODIS tile id(s) for a geographic area.
 
   \item{extent}{Extent Informations see details.}
   
-  \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(Lat,Lon)}. }
+  \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(x,y)}. }
 
-  \item{system}{Character. Default is \code{MODIS}. Working alternative is the \code{MERIS}  tiling system from culture-MERIS dataset. Other tiling systems mot yet implemented!}
+  \item{system}{Character. Default is \code{MODIS}. Working alternative is the \code{MERIS}  tiling system from culture-MERIS dataset. Other tiling systems not yet implemented!}
 }
 
 \details{
