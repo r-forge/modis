@@ -31,9 +31,11 @@ Please see \url{http://daac.ornl.gov/MODIS/MODIS-menu/modis_webservice.html} for
 }
 
 \examples{
+\dontrun{
 	#	Please install the required packages
 	# install.packages("SSOAP", repos = "http://www.omegahat.org/R", dependencies=TRUE, type="source")
-#	getProductsWS() ## first check products
-#	getBandsWS("MOD13Q1") ## check bands of a product
-#	getDatesWS(40,-110, "MOD13Q1")
+	getProductsWS() ## first check products
+	getBandsWS("MOD13Q1") ## check bands of a product
+	getDatesWS(40,-110, "MOD13Q1")
+}
 }
