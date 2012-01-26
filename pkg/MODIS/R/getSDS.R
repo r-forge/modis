@@ -45,7 +45,7 @@ if (method=="gdal"){
 	if (!file.exists(MRTpath)) {stop("'MRTpath' is wrong or MRT not installed? Provide a good path, leave empty or run 'getPATH()' first!")}
 	
 	if (.Platform$OS=="unix"){
-	sdsRaw <- system(paste(file.path(MRTpath,"sdslist",fsep=fsep),HdfName,sep=" "),intern=TRUE)
+		sdsRaw <- system(paste(file.path(MRTpath,"sdslist",fsep=fsep),HdfName,sep=" "),intern=TRUE)
 	
 	}else if (.Platform$OS=="windows"){
 		sdsRaw <- shell(gsub(fsep,"\\\\",paste(file.path(MRTpath,"sdslist",fsep=fsep),HdfName,sep=" ")),intern=TRUE)
