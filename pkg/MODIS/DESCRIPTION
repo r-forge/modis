@@ -1,6 +1,6 @@
 Package: MODIS
-Version: 0.2-38
-Date: 20-January-2012
+Version: 0.2-39
+Date: 28-January-2012
 Title: MODIS retrieving and processing Package. Pre-processing functionalities for MODIS grid data.  
 Depends: R (>= 2.10), RCurl, XMLSchema, SSOAP, XML, raster
 Suggests: mapdata
