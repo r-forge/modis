@@ -10,7 +10,7 @@ getModisWS <- function(lat, long, product, bandname, startdate, enddate, KmAbove
 	result = ornlMODISFuncs@functions$getsubset(lat, long, product, 
 																							bandname, startdate, enddate, 
 																							KmAboveBelow, KmLeftRight)
-	return(createbrickWSX(result))
+	return(createbrickWS(result))
 }
 
 

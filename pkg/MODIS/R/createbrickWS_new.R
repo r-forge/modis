@@ -21,7 +21,7 @@ createbrickWSX <- function(result) {
 	if (nl==1) {		
 	res <- raster(nrows=nrows, ncols=ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
 	} else {
-	res <- brick(nrows=nrows, ncols=result@ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
+	res <- brick(nrows=nrows, ncols=ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
 	}
 
 res <- setValues(res,dd)
