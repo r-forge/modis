@@ -16,7 +16,7 @@ createbrickWS <- function(result) {
 	
 	dd <- strsplit(result@subset,"\n")# is the form of result@subset the only option to get the values?
 	dd <- sapply(dd,function(x){as.numeric(strsplit(x,",")[[1]][-1:-5])})
-	dd <- dd * result@scale
+	#dd <- dd * result@scale
 	
 	if (nl==1) {		
 		res <- raster(nrows=nrows, ncols=ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
