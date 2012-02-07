@@ -35,7 +35,8 @@ sturheit <- .stubborn(level=stubbornness)
 
 #################
 # check FTP availability
-a <- try(getURL("ftp://e4ftl01.cr.usgs.gov"),silent=TRUE)
+require(RCurl)
+a <- try(getURL(serverList[[1]]),silent=TRUE)
 if (class(a)=="try-error") {stop("FTP-server not available. Try again little later.")}
 #################
 
@@ -71,7 +72,6 @@ if (!missing(HdfName)){
 	dir.create(paste(LocalArcPath,fsep,arcPath,sep=""),recursive=TRUE,showWarnings=FALSE) # this always generates the same structure as the original ftp (this makes sense if the local LocalArcPath becomes big!)
 	
 	if (!file.exists(paste(LocalArcPath,fsep,arcPath,HdfName[i],sep=""))) {
-		require(RCurl)
 		ftpPath <- list()
 		ftpPath[[1]] <- paste(serverList[[1]],product$PF1,"/", product$productName,".",collection,"/",fdate,"/",HdfName[i],sep="")
 		ftpPath[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$productName,"/",substr(secName[2],2,5),"/",substr(secName[2],6,8),HdfName[i],sep="")
@@ -140,7 +140,7 @@ if (missing(collection)) {
 tLimits <- transDATE(begin=startdate,end=enddate)
 #########
 # tileID
-if (substr(product$PD,3,nchar(product$PD))=="CMG") {
+if (product$raster_type=="CMG") {
 	tileID="GLOBAL"
 	ntiles=1 
 	} else {
