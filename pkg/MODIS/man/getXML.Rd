@@ -8,8 +8,8 @@
 \title{Function that checks the integrity of MODIS-grid-hdf files in the query.}
 
 \description{
-  Each MODIS HDF file has a xml-metafile. This data contains usefull
-  information about each MODIS-hdf file. Within that package, the
+  Each MODIS-HDF file has a xml-metafile. This data contains useful
+  meta-information about the MODIS-hdf file. Within that package, the
   xml-files are used to check the size of the downloaded hdf files, and
   correcting the so often broken downloads. 'getXML' checks locally for the presence of spezified xml files and if not available it retrieves them from the MODIS ftp server.
 }
@@ -25,12 +25,12 @@ getXML(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,st
   are checked for the XML file presence. If not available locally the
   MODIS-XML file is downloaded.}
 
-\item{HdfName}{Character. Is a filename or a pattern (regular expression) to check
+\item{HdfName}{Character. MODIS-hdf filename or a pattern (regular expression) to check
   for XML file presence. If \code{HdfName} is not set all found
   MODIS-XML files are gathered regarding the \code{LocalArcPath}
   setting.}
   
-\item{checkSize}{Logical. Defoult \code{TRUE}, The main purpose of \code{getXML()} is to control if MODIS HDF files have been downloaded properly. If \code{FALSE} the function only downloads missing XML files without "checksum" the HDF files.}
+\item{checkSize}{Logical. Default \code{TRUE}, The main purpose of \code{getXML()} is to control if MODIS HDF files have been downloaded properly. If \code{FALSE} the function only downloads missing XML files without "checksum" the HDF files.}
 
 \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every
   internal \code{download.file()} or \code{getURL()} call. It reduces
