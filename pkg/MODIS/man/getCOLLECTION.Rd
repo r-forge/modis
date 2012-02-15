@@ -3,7 +3,7 @@
 \docType{methods}
 
 \alias{getCOLLECTION}
-\alias{LocalArcPath,product,collection,newest,forceCheck}
+\alias{LocalArcPath,product,collection,newest,forceCheck,as}
 
 \title{Retrieve available version of MODIS product collections}
 
@@ -11,7 +11,7 @@
 This function will become internal. It will be used if no collection is spezified in the different functions i.e.: \code{getHDF}
 }
 
-\usage{getCOLLECTION(LocalArcPath,product,collection,newest=TRUE,forceCheck=FALSE)}
+\usage{getCOLLECTION(LocalArcPath,product,collection,newest=TRUE,forceCheck=FALSE,as="character")}
 
 \arguments{
   \item{LocalArcPath}{Character. Is needed because this funtion creates a hidden folder to store ftp directory inforamtion. If left empty standard path is used see \code{?getHDF}}
@@ -24,12 +24,14 @@ This function will become internal. It will be used if no collection is spezifie
  
   \item{forceCheck}{Logical. Default \code{FALSE}, if \code{TRUE} the function connects to the FTP and gets the available collection. Since the collections doesn't change very frequently this check is rarely needed.}
 
+  \item{as}{character. Default \code{character}, and returns the typical 3 digits long collection number ie: \code{"005"}. Other possibility is to set it to \code{numeric} what would give as a result the numeric \code{5}}
+
 }
 
 
 \value{
   A three digits integer converted to character, indicating the collection version(s). And a file in an hidden folder \code{/MODIS_ARC/.auxiliaries/collections.txt} as database for further calls.
-  if \code{collection} is provided only a \code{TRUE} or \code{FALSE} is retuned!
+  if \code{collection} is provided only the (formatted) collection is returned if available or a \code{FALSE} if not!
 }
 
 \author{
@@ -47,4 +49,6 @@ getCOLLECTION(product="MxD11C3",newest=FALSE)
 
 getCOLLECTION(product="MxD11C3",collection=3)
 getCOLLECTION(product="MxD11C3",collection=41)
+getCOLLECTION(product="MxD11C3",collection="041")
+
 }
