@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-getCOLLECTION <- function(LocalArcPath,product,collection=NULL,newest=TRUE,forceCheck=FALSE){
+getCOLLECTION <- function(LocalArcPath,product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character"){
 
 fsep <- .Platform$file.sep
 
@@ -107,7 +107,7 @@ if (!is.null(collection)) {
 } else {
 	res <- sprintf("%03d",as.numeric(res))
 }
-
+if (as=="numeric") {res=as.numeric(res);if (res==0) {res <- FALSE}}
 return(res)
 }
 
