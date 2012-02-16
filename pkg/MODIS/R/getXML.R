@@ -18,14 +18,11 @@ if (missing(LocalArcPath)) {
 LocalArcPath <- paste(strsplit(LocalArcPath,fsep)[[1]],collapse=fsep)# removes "/" or "\" on last position (if present)
 dir.create(LocalArcPath,showWarnings=FALSE)
 # test local LocalArcPath
-try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
+try(testDir <- list.dirs(LocalArcPath,recursive=FALSE), silent=TRUE)
 if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
 #################
-if (is.numeric(stubbornness)) {
-	sturheit <- stubbornness	
-	} else {
-	sturheit <- c(1,3,8,50,500)[which(stubbornness==c("low","medium","high","veryhigh","extreme"))]
-	}
+
+sturheit <- MODIS:::.stubborn(level=stubbornness)
 
 
 if(!missing(HdfName)) {
@@ -47,21 +44,26 @@ avFiles <- unlist(avFiles)
 avFiles <- list.files(LocalArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under the 'LocalArcPath'
 }
 
-# tests if it is a MODIS-grid file(s) (TODO function that checks that)
+data(MODIS_Products)
+# tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
 doit <- sapply(avFiles,function(x) {
-	fname <- strsplit(x,"/")[[1]] # separate name from path
-	fname <- fname[length(fname)] # select filename
-	secName  <- strsplit(fname,"\\.")[[1]] # decompose filename
-	PF <- substr(secName[1],1,3)
-	Tpat <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
+	fname   <- basename(x)
+	secName <- strsplit(fname,"\\.")[[1]]
+	product <- getPRODUCT(secName[1])
 
-	if (sum((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (PF %in% c("MOD","MYD","MCD")) + (length(secName)==6)) == 4){
-		res <- TRUE
+	if (product$sensor == "MODIS") {
+		if (product$raster_type == "Tile") {
+			Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
+		res <- all((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (product$PF2 %in% c("MOD","MYD","MCD")) + (length(secName)==6))
+		} else if (product$raster_type == "CMG") {
+		res <- all((substr(secName[2],1,1) == "A") + (product$PF2 %in% c("MOD","MYD","MCD")) + (length(secName)==5))
+		} else {
+		res <- FALSE
+		}
 	} else {
 		res <- FALSE
 	}
-
-	return(res)}
+return(res)}
 	)
 doit <- unlist(doit) # ??
 avFiles <- avFiles[doit]
@@ -76,20 +78,21 @@ islocal <- rep(NA,length(avFiles))
 
 	if (
 		!file.exists(paste(avFiles[u],".xml",sep=""))
-		| 
-		if (.Platform$OS.type == "unix" & file.exists(paste(avFiles[u],".xml",sep=""))) { # limited size control for xml files
-		as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000
-		} else if (.Platform$OS.type == "windows" & file.exists(paste(avFiles[u],".xml",sep=""))) {
-		as.numeric(shell(paste("for %I in (",avFiles[u],") do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...
-		}else{
-		FALSE
-		} 
-	){
-	fname <- strsplit(avFiles[u],"/")[[1]] # separate filename from path
-	fname <- fname[length(fname)]
-	secName  <- strsplit(fname,"\\.")[[1]] # decompose filename
-	product <-  getPRODUCT(product=secName[1])	
-
+		|
+		if (file.exists(paste(avFiles[u],".xml",sep=""))){
+			if (.Platform$OS.type == "unix") {
+				resu <- as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
+			} else  { #.Platform$OS.type == "windows"
+				resu <- as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
+			}
+		} else {
+			resu <- FALSE
+		}
+	) {
+		
+	fname   <- basename(avFiles[u]) # separate filename from path
+	secName <- strsplit(fname,"\\.")[[1]] # decompose filename
+	product <- getPRODUCT(product=secName[1])	
 	fdate <- substr(secName[2],2,8)
 	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
 
@@ -98,22 +101,20 @@ islocal <- rep(NA,length(avFiles))
 			} else if (product$raster_type=="CMG") {
 				secName[3]	
 			} else {
-			stop(product$raster_type," not supported yet!")			
+				stop(product$raster_type," not supported yet!")			
 			}
-
-	require(RCurl) # is it good here?
 
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(xml <- download.file(
+		try(isin <- download.file(
 		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		destfile=paste(avFiles[u],".xml",sep=""),
 		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-	if(sum(xml)==0) {break}
+	if(sum(isin)==0) {break}
 	g=g+1
 	}
-	islocal[u] <- xml
+	islocal[u] <- isin
 	} else {
 	islocal[u] <- 0
 	}
@@ -136,23 +137,10 @@ if (checkSize) {
 	
 	if (MetaSize != FileSize) {
 		if(!quiet){
-			cat("\nMETA check for file:",avFiles[u],"\nFileSize:",FileSize,"but expected:",MetaSize,"\n")
+		cat("\nSize Error detected: ",avFiles[u],"\nFileSize is ",FileSize,", but should be: ",MetaSize,"\n",sep="")
 		}
-	fname <- strsplit(avFiles[u],"/")[[1]] # separate filename from path
-	fname <- fname[length(fname)]
-	secName  <- strsplit(fname,"\\.")[[1]] # decompose filename
-	product <-  getPRODUCT(product=secName[1])	
-
-	fdate <- substr(secName[2],2,8)
-	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
-
-	collection <- if (product$raster_type=="Tile") {
-				secName[4]
-			} else if (product$raster_type=="CMG") {
-				secName[3]	
-			} else {
-			stop(product$raster_type," not supported yet!")			
-			}
+		
+# get the hdf file if size fails
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
@@ -166,13 +154,13 @@ if (checkSize) {
 
 	} else {
 		if(!quiet){
-			cat("\nSize check for: ",avFiles[u], "done!\n\n")
+			cat("\nSize check done for: ",avFiles[u], "\n\n")
 		}
 	}
 }
 
 }
-invisible(islocal)
+invisible(length(islocal))
 } # if avFiles > 0
 }
 
