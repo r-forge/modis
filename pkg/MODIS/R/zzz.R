@@ -41,7 +41,7 @@
 	write(paste('outProj        <- \'',opt$outProj,'\'',sep=''),filename)
 	write('  ', filename)	
 	write('#########################', filename)
-	write('# Example ftpstring\n# If you have a personal MODIS datapool within your LAN and you face problems in the creation of an additional \'ftpstring\' please contact one of us.\n# Use \'placeholders\' only in \'variablepath\'\n# Additional \'placeholders\':\n# DATE1DATE2 period start/end (MERIS specific)\n# REGION (MERIS specific) MERIS date is stores in regions\n\n# ftpstring0 <- list(name=\'sitename\',SENSOR=\'sensorname\', basepath=\'/base/path\',variablepath=\'/variable/path/\',content=c(\'what data is awailable? The idea is more images + aux data and not dataformats!',filename)	
+	write('# PLEASE DON\'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.\n# Example ftpstring\n# If you have a personal MODIS datapool within your LAN and you face problems in the creation of an additional \'ftpstring\' please contact one of us.\n# Use \'placeholders\' only in \'variablepath\'\n# Additional \'placeholders\':\n# DATE1DATE2 period start/end (MERIS specific)\n# REGION (MERIS specific) MERIS date is stores in regions\n\n# ftpstring0 <- list(name=\'sitename\',SENSOR=\'sensorname\', basepath=\'/base/path\',variablepath=\'/variable/path/\',content=c(\'what data is awailable? The idea is more images + aux data and not dataformats!',filename)	
 	write('  ', filename)	
 	a=0
 	for (i in grep(names(opt),pattern="^ftpstring.")) {

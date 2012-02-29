@@ -1,12 +1,12 @@
 # This file contains default values for the R package 'MODIS'.
 # version 0
 #########################
-# This file uses codified 'placeholders' for the creation the loacal archive structure, or to define the path on an remote location. This 'placeholders' are than substituted from internal package functions using the name of a EOS-file. Use 'placeholders only for 'arcStructure'!!! Don't substitute the 'placeholdes' with a specific value, do only modify the order or the existance of 'placeholders'.
+# This file uses codified 'placeholders' for the creation the local archive structure, or to define the path on an remote location. This 'placeholders' are than substituted from internal package functions using the name of a EOS-file. Use 'placeholders' only for 'arcStructure'!!! Don't substitute the 'placeholdes' with a specific value, do only modify the order or the existance of 'placeholders'.
 
 # Placeholders are:
 # PLATFORM = "Terra","Aqua", "Combined" or "ENVISAT"
-# PF1 = "MOD",MYD" or "MCD"
-# PF2 = "MOLT","MOLA" or "MOTA" 
+# PF1 = "MOLT","MOLA" or "MOTA"
+# PF2 = "MOD",MYD" or "MCD"
 # YYYY = year (i.e. '2009')
 # DDD  = doy of the year (i.e. '003')
 # DATE = YYYY.MM.DD (i.e. '2009.01.03')
@@ -39,6 +39,7 @@ resamplingType <- 'NN'
 outProj        <- 'GEOGRAPHIC'
   
 #########################
+# PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.
 # Example ftpstring
 # If you have a personal MODIS datapool within your LAN and you face problems in the creation of an additional 'ftpstring' please contact one of us.
 # Use 'placeholders' only in 'variablepath'

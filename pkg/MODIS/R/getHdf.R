@@ -38,7 +38,6 @@ if (!missing(HdfName)){
 	product <- getProduct(x=secName[1],quiet=TRUE)
   
 	collection <- sprintf("%03d",as.numeric(secName[4]))
-		if (getCollection(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCollection(localArcPath='",localArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 
 	fdate <- substr(secName[2],2,8)
 	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d") # doy to date
@@ -58,6 +57,7 @@ if (!missing(HdfName)){
 		if (g==1){qi <- quiet} else { qi <- TRUE}
 	
 		for (x in 1:length(serverList)){
+			hdf=1			
 			try(hdf <- download.file(
 				ftpPath[[x]],
 				destfile=paste(localArcPath,"/",arcPath,HdfName[i],sep=""),
@@ -79,7 +79,7 @@ if (!missing(HdfName)){
 		while(g <= sturheit) {
 		
 			if (g==1){qi <- quiet} else { qi <- TRUE}
-	
+			
 			try(xml <- getXml(HdfName = HdfName[i],checkSize=TRUE,wait=wait,quiet=qi,dlmethod=dlmethod))
 		if(sum(xml)==0) {break}
 		g=g+1
@@ -217,7 +217,7 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 			while(g <= sturheit) {
 			
 				if (g==1){qi <- quiet} else {qi <- TRUE}
-			
+				hdf=1
 				try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""),
 					destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE),silent=TRUE)
 				if(hdf==0 & !quiet) {

@@ -62,7 +62,7 @@ islocal <- rep(NA,length(avFiles))
 		
 	fname   <- basename(avFiles[u]) # separate filename from path
 	secName <- strsplit(fname,"\\.")[[1]] # decompose filename
-	product <- getProduct(x=secName[1])	
+	product <- getProduct(x=secName[1],quiet=TRUE)	
 	fdate <- substr(secName[2],2,8)
 	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
 
@@ -115,7 +115,8 @@ if (checkSize) {
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(hdf <- 	download.file( ##hdf file
+		hdf=1
+		try(hdf <- download.file( ##hdf file
 			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,sep=""),
 			destfile=paste(avFiles[u],sep=""),
 			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)

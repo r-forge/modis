@@ -21,7 +21,7 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	ftpdirs <- data.frame()
 	}
 
-productN <- getProduct(x=product)
+productN <- getProduct(x=product,quiet=quiet)
 
 for (i in 1:length(productN$PF1)){
 
