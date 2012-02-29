@@ -97,7 +97,7 @@ if (is.null(end))   {cat("No end(-date) set, getting up to the most actual data\
 if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
 #######
 # check product
-product <- getProduct(x=product,quiet=TRUE)
+product <- getProduct(x=toupper(product),quiet=TRUE)
 
 # check collection
 if (missing(collection)) {

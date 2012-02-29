@@ -16,8 +16,8 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 
 	if (!is.null(x)) {
 
-		inbase <- basename(x) # if x is a full filename(+path)
-		fname <- strsplit(inbase,"\\.")[[1]]		
+		inbase  <- basename(x) # if x is a full filename(+path)
+		fname   <- strsplit(inbase,"\\.")[[1]]		
 		product <- toupper(fname[1])
 		pattern <- sub(pattern="^MXD", replacement="M.D", x=product) 
 		
@@ -82,11 +82,11 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 			info <- MODIS_Products[ind,]
 		
 			if (!quiet) {
-    	    	for (i in 1:length(ind)) {
+    	    			for (i in 1:length(ind)) {
 					if (i > 1) {
 						cat("and\n")
 					}
-    	    	           cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+    	    	           	cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
 				}
 			}
 		
@@ -97,7 +97,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 		} else if (sensor == "MERIS") {
     		infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
 			return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
-    	}
+    		}
 	}
 	}
 }

@@ -51,83 +51,103 @@ islocal <- rep(NA,length(avFiles))
 		|
 		if (file.exists(paste(avFiles[u],".xml",sep=""))){
 			if (.Platform$OS.type == "unix") {
-				resu <- as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
+				as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
 			} else { #.Platform$OS.type == "windows"
-				resu <- as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
+				as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
 			}
 		} else {
-			resu <- FALSE
+			FALSE
 		}
 	) {
 		
-	fname   <- basename(avFiles[u]) # separate filename from path
-	secName <- strsplit(fname,"\\.")[[1]] # decompose filename
-	product <- getProduct(x=secName[1],quiet=TRUE)	
-	fdate <- substr(secName[2],2,8)
-	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
-
-	collection <- if (product$TYPE=="Tile") {
-				secName[4]
-			} else if (product$TYPE=="CMG") {
-				secName[3]	
-			} else {
-				stop(product$TYPE," not supported yet!")			
-			}
-
-	g=1
-	while(g <= sturheit) {
-		if (g==1){qi <- quiet} else { qi <- TRUE}
-		isin=1
-		try(isin <- download.file( #xml file
-		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,".xml",sep=""),
-		destfile=paste(avFiles[u],".xml",sep=""),
-		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-	if(sum(isin)==0) {break}
-	g=g+1
-	}
-	islocal[u] <- isin
+		fname   <- basename(avFiles[u]) # separate filename from path
+		secName <- strsplit(fname,"\\.")[[1]] # decompose filename
+		product <- getProduct(x=secName[1],quiet=TRUE)	
+		fdate <- substr(secName[2],2,8)
+		fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
+	
+		collection <- if (product$TYPE=="Tile") {
+					secName[4]
+				} else if (product$TYPE=="CMG") {
+					secName[3]	
+				} else {
+					stop(product$TYPE," not supported yet!")			
+				}
+	
+		g=1
+		while(g <= sturheit) {
+			if (g==1){qi <- quiet} else { qi <- TRUE}
+			isin=1
+			try(isin <- download.file( #xml file
+			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,".xml",sep=""),
+			destfile=paste(avFiles[u],".xml",sep=""),
+			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+		if(sum(isin)==0) {break}
+		g=g+1
+		}
+		islocal[u] <- isin # xml file is local T/F
 	} else {
-	islocal[u] <- 0
+		isin <- 0
+		islocal[u] <- 0 # xml file is local T
 	}
 
 # XML based checksum for HDF files
 if (checkSize) {
-	xml <- paste(avFiles[u],".xml",sep="")
+	if (isin==1) {
+		cat("'sizeCheck' not perfomed! It wasn't possible to download the xml file:\n",fname,".xml\n",sep="")
+	} else {
+	checksizefun <- function(hdfFile){
 	require(XML)
-	xml    <- xmlParse(xml) # removed "try()". T think it was just forgotten after a test!
-	MetaSize <- getNodeSet( xml, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
-	MetaSize <- as.numeric(xmlValue(MetaSize[[1]]))
+	xmlfile  <- paste(hdfFile,".xml",sep="")
+	xmlfile  <- xmlParse(xmlfile)
+	MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
+	MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
 
 	if (.Platform$OS.type == "unix") {
-		FileSize <- as.numeric(system(paste("stat -c %s ",avFiles[u],sep=""), intern=TRUE))
+		FileSize <- as.numeric(system(paste("stat -c %s ",hdfFile,sep=""), intern=TRUE))
 	} else if (.Platform$OS.type == "windows") {
-		FileSize <- as.numeric(shell(paste("for %I in (",avFiles[u],") do @echo %~zI",sep=""),intern=TRUE))
+		FileSize <- as.numeric(shell(paste("for %I in (",hdfFile,") do @echo %~zI",sep=""),intern=TRUE))
 	} else {
-	stop("Only Unix based and Windows supported, please tell me which system you use!")
+		stop("Only Unix based and Windows supported, please tell me which system you use!")
 	}
+	sizes <- list(MetaSize,FileSize)
+	names(sizes) <- c("MetaSize","FileSize")	
+	return(sizes)	
+	}
+	sizes <- checksizefun(avFiles[u])
 	
-	if (MetaSize != FileSize) {
+	if (sizes$MetaSize != sizes$FileSize) {
 		if(!quiet){
-		cat("\nSize Error detected: ",avFiles[u],"\nFileSize is ",FileSize,", but should be: ",MetaSize,"\n",sep="")
+			cat("\nSize Error detected: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
 		}
 		
 # get the hdf file if size fails
 	g=1
 	while(g <= sturheit) {
-		if (g==1){qi <- quiet} else { qi <- TRUE}
+		if (g==1){qi <- quiet} else {qi <- TRUE}
 		hdf=1
-		try(hdf <- download.file( ##hdf file
+		try(hdf <- download.file( ## hdf file
 			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,sep=""),
 			destfile=paste(avFiles[u],sep=""),
 			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
 	if(hdf==0) {break}
 	g=g+1
+	}	
+	sizes <- checksizefun(avFiles[u])
+	if (sizes$MetaSize != sizes$FileSize) {
+		if(!quiet){
+			cat("\nStill an Size Error detected, chould be an error in the xml file information: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
+		}
+	} else {
+	if(!quiet){
+			cat("\nFilesize ok for: ",avFiles[u], "\n\n")
+		}		
 	}
-
 	} else {
 		if(!quiet){
-			cat("\nSize check done for: ",avFiles[u], "\n\n")
+			cat("\nFilesize ok for: ",avFiles[u], "\n\n")
 		}
+	}
 	}
 }
 
