@@ -3,7 +3,7 @@
 \docType{methods}
 
 \alias{getCollection}
-\alias{localArcPath,product,collection,newest,forceCheck,as,stubbornness}
+\alias{localArcPath,product,collection,newest,forceCheck,as,stubbornness,quiet}
 
 \title{Retrieve available version of MODIS product collections}
 
@@ -11,7 +11,7 @@
 This function will become internal. It will be used if no collection is spezified in the different functions i.e.: \code{getHdf}
 }
 
-\usage{getCollection(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high")}
+\usage{getCollection(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)}
 
 \arguments{
   \item{localArcPath}{Character. Default \code{MODIS:::.getDef("localArcPath")}. Path to data archive for sting ftp-directory inforamtion.}
@@ -28,6 +28,7 @@ This function will become internal. It will be used if no collection is spezifie
 
   \item{stubbornness}{Used only if it is needed to go online. Default="high". See: \code{?getHdf}}
 
+  \item{quiet}{Default \code{TRUE}}
 }
 
 
