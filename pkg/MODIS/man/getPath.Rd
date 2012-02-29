@@ -1,15 +1,15 @@
-\name{getPATH}
+\name{getPath}
 
 \docType{methods}
 
-\alias{getPATH}
+\alias{getPath}
 
 \title{get path to MRT}
 
 \description{
   If PATH variable to MRT is not set, this function searchs for it.}
 
-\usage{getPATH(deep=FALSE,quiet=FALSE)}
+\usage{getPath(deep=FALSE,quiet=FALSE)}
 
 \arguments{
   \item{deep}{Logical. Default \code{FALSE}, search path ".". If \code{TRUE} search path "/"}
@@ -25,12 +25,12 @@
 }
 
 \seealso{
-  \code{\link{getXML},\link{getHDF}}
+  \code{\link{getXml},\link{getHdf}}
 }
 
 \examples{
-getPATH(quiet=TRUE)
-getPATH()
+getPath(quiet=TRUE)
+getPath()
 }
 
 

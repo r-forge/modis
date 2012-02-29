@@ -2,7 +2,7 @@
 # Date : January 2012
 # Licence GPL v3
 
-genTILE <- function(tileSize=1,offset=0) {
+genTile <- function(tileSize=1,offset=0) {
 
 # offset is used in case of pixel centrum reference. In such case the offset is res/2
 if (offset!=0) {cat("Warning! Tiles crossing LAT extremas (-90 and +90) are not meaningfull for now! For those tiles the resulting shift in LON is not computed!\n")} 

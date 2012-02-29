@@ -2,17 +2,21 @@
 \alias{MODIS_Products}
 \docType{data}
 \title{
-MODLAND product table 
+Internal Data description table 
 }
-\description{
-MODLAND product description table from: \url{https://lpdaac.usgs.gov/lpdaac/products/modis_products_table}
-}
+\description{Defines data products usable in MODIS package.}
+
 \usage{data(MODIS_Products)}
 
-\source{\url{https://lpdaac.usgs.gov/lpdaac/products/modis_products_table}}
+\source{
+MODIS data information taken from: \url{https://lpdaac.usgs.gov/lpdaac/products/modis_products_table}
+MERIS data description taken from: \url{ftp://ionia2.esrin.esa.int/CULTURE-MERIS_PDM_2.0.pdf}
+}
 
 \examples{
 data(MODIS_Products)
 MODIS_Products
+getProduct()
+
 }
 \keyword{datasets}

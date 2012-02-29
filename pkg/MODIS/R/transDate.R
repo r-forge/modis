@@ -2,7 +2,7 @@
 # Date : November 2011
 # Licence GPL v3
   
-transDATE <- function(begin=NULL,end=NULL){
+transDate <- function(begin=NULL,end=NULL){
 #########
 if(is.null(begin)) {
 	begin="1975.01.01" # maybe once MODIS package retrieves other data too!
@@ -31,9 +31,9 @@ end     <- as.Date(end,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
 if (is.na(end)) {stop("\n'end=",end,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
 
 if(end<begin){
-t <- begin
+t     <- begin
 begin <- end 
-end <- t
+end   <- t
 rm(t)
 }
 

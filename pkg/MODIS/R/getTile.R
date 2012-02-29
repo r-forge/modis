@@ -2,42 +2,43 @@
 # Date : August 2011
 # Licence GPL v3
 
-getTILE <- function (tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,system = "MODIS"){
+getTile <- function (tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,system = "MODIS"){
 	
 	if (system == "MODIS") {
 		data("tiletable")
 	} else if (system == "MERIS") {
-		tiletable <- genTILE(tileSize = 5)
+		tiletable <- genTile(tileSize = 5)
+	} else {
+		stop("Tiling system not recognised")
 	}
     if (is.null(extent)) {
         if (is.null(tileV) || is.null(tileH)) 
             stop("Provide or an 'extent' or 'tileV+tileH' information!")
         extent <- ""
     } else {
-        if (inherits(extent, "map")) {
+
+        if (inherits(extent, "map")) { # if MAP
             extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]), 
                 ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
-        }
-        if (inherits(extent, "character")) {
+
+        } else if (inherits(extent, "character")) { # if CHARACTER (country name of MAP)
             require(mapdata)
             try(test <- map("worldHires", extent, plot = FALSE), 
                 silent = TRUE)
-            if (exists("test")) {
-                extent <- map("worldHires", extent, plot = FALSE)
-            }
-            else {
+			if (!exists("test")) {
                 stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires',',", 
                   extent, "')", sep = ""))
             }
-            extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]), 
-                ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
-        }
-        if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) {
+        extent <- map("worldHires", extent, plot = FALSE)
+        extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
+
+        } else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) { # if RASTER* object
             if (class(extent) != "Extent") {
                 extent <- extent(extent)
             }
-            extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
-        }
+        extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
+        } 
+        
         if (inherits(extent, "list")) {
             if (length(extent$extent) == 4) {
                 extent <- extent$extent

@@ -2,27 +2,16 @@
 # Date : July 2011
 # Licence GPL v3
 
-getXML <- function(LocalArcPath,HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="extreme"){
+getXml <- function(HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="extreme",localArcPath=.getDef('localArcPath')){
 
-fsep <- .Platform$file.sep
-
-if (missing(LocalArcPath)) {
-	LocalArcPath <- normalizePath("~", winslash = fsep)
-	LocalArcPath <- file.path(LocalArcPath,"MODIS_ARC",fsep=fsep)
-		if(!quiet){
-		cat(paste("No archive path set, using/creating standard archive in: ",LocalArcPath,"\n",sep=""))
-		flush.console()
-		}
-}
-
-LocalArcPath <- paste(strsplit(LocalArcPath,fsep)[[1]],collapse=fsep)# removes "/" or "\" on last position (if present)
-dir.create(LocalArcPath,showWarnings=FALSE)
-# test local LocalArcPath
-try(testDir <- list.dirs(LocalArcPath,recursive=FALSE), silent=TRUE)
-if(!exists("testDir")) {stop("'LocalArcPath' not set properly!")} 
+localArcPath <- paste(strsplit(localArcPath,"/")[[1]],collapse="/")# removes "/" or "\" on last position (if present)
+dir.create(localArcPath,showWarnings=FALSE)
+# test local localArcPath
+try(testDir <- list.dirs(localArcPath,recursive=FALSE), silent=TRUE)
+if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 #################
 
-sturheit <- MODIS:::.stubborn(level=stubbornness)
+sturheit <- .stubborn(level=stubbornness)
 
 
 if(!missing(HdfName)) {
@@ -32,40 +21,21 @@ if(!missing(HdfName)) {
 	
 	for (i in seq(length(HdfName))){
 		if (file.exists(HdfName[i])) { # if exists than HdfName is a path+File+itexists
-		avFiles[[i]] <- HdfName[i] 
+			avFiles[[i]] <- HdfName[i] 
 		} else {
-		avFiles[[i]] <- list.files(LocalArcPath,pattern=HdfName[i],recursive=TRUE,full.names=TRUE)
-		avFiles[[i]] <- grep(avFiles[[i]], pattern=".hdf$",value=TRUE) # removes xml files from list 
+			avFiles[[i]] <- list.files(localArcPath,pattern=HdfName[i],recursive=TRUE,full.names=TRUE)
+			avFiles[[i]] <- grep(avFiles[[i]], pattern=".hdf$",value=TRUE) # no ".hdf.xml" files, only ".hdf" 
 		}
 	}
 	 
 avFiles <- unlist(avFiles)
 } else {
-avFiles <- list.files(LocalArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under the 'LocalArcPath'
+avFiles <- list.files(localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under 'localArcPath'
 }
 
 data(MODIS_Products)
 # tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
-doit <- sapply(avFiles,function(x) {
-	fname   <- basename(x)
-	secName <- strsplit(fname,"\\.")[[1]]
-	product <- getPRODUCT(secName[1])
-
-	if (product$sensor == "MODIS") {
-		if (product$raster_type == "Tile") {
-			Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
-		res <- all((grep(secName[3],pattern=Tpat)) + (substr(secName[2],1,1) == "A") + (product$PF2 %in% c("MOD","MYD","MCD")) + (length(secName)==6))
-		} else if (product$raster_type == "CMG") {
-		res <- all((substr(secName[2],1,1) == "A") + (product$PF2 %in% c("MOD","MYD","MCD")) + (length(secName)==5))
-		} else {
-		res <- FALSE
-		}
-	} else {
-		res <- FALSE
-	}
-return(res)}
-	)
-doit <- unlist(doit) # ??
+doit <- .isSupported(avFiles)
 avFiles <- avFiles[doit]
 
 if(length(avFiles)==0) {
@@ -82,7 +52,7 @@ islocal <- rep(NA,length(avFiles))
 		if (file.exists(paste(avFiles[u],".xml",sep=""))){
 			if (.Platform$OS.type == "unix") {
 				resu <- as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
-			} else  { #.Platform$OS.type == "windows"
+			} else { #.Platform$OS.type == "windows"
 				resu <- as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
 			}
 		} else {
@@ -92,23 +62,23 @@ islocal <- rep(NA,length(avFiles))
 		
 	fname   <- basename(avFiles[u]) # separate filename from path
 	secName <- strsplit(fname,"\\.")[[1]] # decompose filename
-	product <- getPRODUCT(product=secName[1])	
+	product <- getProduct(x=secName[1])	
 	fdate <- substr(secName[2],2,8)
 	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
 
-	collection <- if (product$raster_type=="Tile") {
+	collection <- if (product$TYPE=="Tile") {
 				secName[4]
-			} else if (product$raster_type=="CMG") {
+			} else if (product$TYPE=="CMG") {
 				secName[3]	
 			} else {
-				stop(product$raster_type," not supported yet!")			
+				stop(product$TYPE," not supported yet!")			
 			}
 
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(isin <- download.file(
-		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,".xml",sep=""),
+		try(isin <- download.file( #xml file
+		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		destfile=paste(avFiles[u],".xml",sep=""),
 		mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
 	if(sum(isin)==0) {break}
@@ -144,8 +114,8 @@ if (checkSize) {
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
-		try(hdf <- 	download.file(
-			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$productName,".",collection,"/",fdate,"/",fname,sep=""),
+		try(hdf <- 	download.file( ##hdf file
+			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,sep=""),
 			destfile=paste(avFiles[u],sep=""),
 			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
 	if(hdf==0) {break}

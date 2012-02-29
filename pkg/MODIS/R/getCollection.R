@@ -3,42 +3,47 @@
 # Licence GPL v3
 
 
-getCOLLECTION <- function(LocalArcPath,product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character"){
+getCollection <- function(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE){
 
-fsep <- .Platform$file.sep
+localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
+dir.create(localArcPath,showWarnings=FALSE)
+# test local localArcPath
+try(testDir <- list.dirs(localArcPath),silent=TRUE)
+if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 
-if (missing(LocalArcPath)) {
-	LocalArcPath <- normalizePath("~", winslash = fsep)
-	LocalArcPath <- file.path(LocalArcPath,"MODIS_ARC",fsep=fsep)
-} 
-LocalArcPath <- paste(strsplit(LocalArcPath,fsep)[[1]],collapse=fsep)# removes "/" or "\" on last position (if present)
-dir.create(LocalArcPath,showWarnings=FALSE)
-# test local LocalArcPath
-try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
-if(!exists("testDir")) {stop("'LocalArcPath' not set properly")} 
-
-auxPATH <- file.path(LocalArcPath,".auxiliaries",fsep=fsep)
+auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
 dir.create(auxPATH,showWarnings=FALSE)
 
 # load aux
-if (file.exists(file.path(auxPATH,"collections.txt",fsep=fsep))) {
-	ftpdirs <- read.table(file.path(auxPATH,"collections.txt",fsep=fsep),stringsAsFactors=TRUE)
+if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
+	ftpdirs <- read.table(file.path(auxPATH,"collections.txt",fsep="/"),stringsAsFactors=TRUE)
 	} else {
 	ftpdirs <- data.frame()
 	}
 
-product <- getPRODUCT(product=product)
+productN <- getProduct(x=product)
 
-for (i in 1:length(product$PF1)){
+#if (is.na(productN)) {stop(product, " not found, check spelling")}
 
-	if (forceCheck | !product$productName[i] %in% colnames(ftpdirs) ) {
+for (i in 1:length(productN$PF1)){
 
-		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1[i],"/",sep="")
-		# ftp <- paste("ftp://e4ftl01u.ecs.nasa.gov/",product$PF1[i],"/",sep="")
+	if (forceCheck | !productN$PRODUCT[i] %in% colnames(ftpdirs) ) {
 		
-	
+		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",productN$PF1[i],"/",sep="")
+		
+		cat("Cecking data on FTP\n")
 		require(RCurl)
-		dirs  <- getURL(ftp)
+
+		sturheit <- .stubborn(level=stubbornness)
+		if(exists("dirs")) {rm(dirs)}
+		for (g in 1:sturheit){
+		try(dirs <- getURL(ftp),silent=TRUE)
+		if(exists("dirs")){break}
+		} 
+		if (!exists("dirs")) {
+			cat("FTP is not available, using stored information from previous calls (this is mostly fine)\n")
+		} else {
+		
 		dirs  <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
 		dirs  <- dirs[substr(dirs, 1, 1)=='l'] 
 		dirs  <- sapply(strsplit(dirs, "/"), function(x){x[length(x)]})	
@@ -70,24 +75,29 @@ for (i in 1:length(product$PF1)){
 
 		}
 
-	write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep=fsep))
+	write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
+	}
 	}
 }	
-ind <- which(colnames(ftpdirs)==product$productName[i])
+ind <- which(colnames(ftpdirs)==productN$PRODUCT[i])
+
+if (length(ind)==0) {stop("Data not available")}
 
 res <- as.character(ftpdirs[!is.na(ftpdirs[,ind]),ind])
 
 if (!is.null(collection)) {
 	
-	isOk <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) # if collection is providen...return TRUE or FALSE
+	isOk <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) 
 
-	if (isOk) {
+	if (isOk) { # if collection is providen...return formatted collection or 'FALSE'
 		res <- sprintf("%03d",as.numeric(collection))
 	} else {
 		res <- FALSE
 	}
 	
 } else if (newest) {
+	if(!quiet) {cat("No Collection specified getting the newest for ",as.character(productN$PRODUCT),"\n",sep="")}
+
 	res <- as.numeric(res)
 	zeros <- sapply(nchar(res),function(x) {
 			x<- x-1
@@ -107,7 +117,7 @@ if (!is.null(collection)) {
 } else {
 	res <- sprintf("%03d",as.numeric(res))
 }
-if (as=="numeric") {res=as.numeric(res);if (res==0) {res <- FALSE}}
+if (as=="numeric") {res=as.numeric(res);if (sum(res,na.rm=TRUE)==0) {res <- FALSE}}
 return(res)
 }
 

@@ -3,38 +3,33 @@
 # Licence GPL v3
 
 
-getSTRUC <- function(LocalArcPath,product,collection=NULL,startdate=NULL,enddate=NULL,wait=1) {
+.getStruc <- function(localArcPath=.getDef("localArcPath"),product,collection=NULL,begin=NULL,end=NULL,wait=1) {
 
-fsep <- .Platform$file.sep
 
-if (missing(LocalArcPath)) {
-	LocalArcPath <- normalizePath("~", winslash = fsep)
-	LocalArcPath <- file.path(LocalArcPath,"MODIS_ARC",fsep=fsep)
-} 
-LocalArcPath <- paste(strsplit(LocalArcPath,fsep)[[1]],collapse=fsep)# removes "/" or "\" on last position (if present)
-dir.create(LocalArcPath,showWarnings=FALSE)
-# test local LocalArcPath
-try(testDir <- list.dirs(LocalArcPath),silent=TRUE)
-if(!exists("testDir")) {stop("'LocalArcPath' not set properly")} 
+localArcPath <- paste(strsplit(localArcPath,"/")[[1]],collapse="/")# removes "/" or "\" on last position (if present)
+dir.create(localArcPath,showWarnings=FALSE)
+# test local localArcPath
+try(testDir <- list.dirs(localArcPath),silent=TRUE)
+if(!exists("testDir")) {stop("'localArcPath' not set properly")} 
 
-auxPATH <- file.path(LocalArcPath,".auxiliaries",fsep=fsep)
+auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
 dir.create(auxPATH,showWarnings=FALSE)
 
 # Check Platform and product
-product <- getPRODUCT(product=product)
+product <- getProduct(x=product)
 #####
 # Check collection
 if (is.null(collection)) {
-	collection <- getCOLLECTION(product=product)
+	collection <- getCollection(product=product)
 	} else {
 	collection <- sprintf("%03d",as.numeric(collection))
-	if (getCOLLECTION(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCOLLECTION(LocalArcPath='",LocalArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
+	if (getCollection(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCollection(localArcPath='",localArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
 	}
 
 
 # load aux
-if (file.exists(file.path(auxPATH,"ftpdir.txt",fsep=fsep))) {
-	ftpdirs <- read.table(file.path(auxPATH,"ftpdir.txt",fsep=fsep),stringsAsFactors=FALSE)
+if (file.exists(file.path(auxPATH,"ftpdir.txt",fsep="/"))) {
+	ftpdirs <- read.table(file.path(auxPATH,"ftpdir.txt",fsep="/"),stringsAsFactors=FALSE)
 	} else {
 	ftpdirs <- data.frame()
 	}
@@ -44,10 +39,10 @@ result   <- list()
 resnames <- list()
 for (i in 1:length(product$PF2)){
 	
-	productName <- product$productName[i]
-	productNameFull <- paste(product$productName[i],".",collection,sep="")
+	productName <- product$PRODUCT[i]
+	productNameFull <- paste(product$PRODUCT[i],".",collection,sep="")
 
-	if (!paste(product$PF2[i],product$PD,sep="") %in% MODIS_Products[,1]) {stop(product$PF2[i],product$PD," is an unkown product\n",sep="")}
+	if (!paste(product$PF2[i],product$PD,sep="") %in% MODIS_Products$PRODUCT) {stop(product$PF2[i],product$PD," is an unkown product\n",sep="")}
 	
 		if (productNameFull %in% names(ftpdirs)) {
 			createNew <- FALSE
@@ -59,9 +54,9 @@ for (i in 1:length(product$PF2)){
 
 				avDates <- as.Date(ftpdirs[,ind],format="%Y.%m.%d")
 		
-				if (!is.null(startdate)){
-					begin <- transDATE(begin=startdate)$begin
-						if (is.na(begin)) {stop("\n'startdate=",startdate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
+				if (!is.null(begin)){
+					begin <- transDate(begin=begin)$begin
+						if (is.na(begin)) {stop("\n'begin=",begin,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (begin < min(avDates,na.rm=TRUE)) {
 					getIT <- TRUE
 					} else {
@@ -71,9 +66,9 @@ for (i in 1:length(product$PF2)){
 					getIT <- TRUE
 				}
 	
-				if (!is.null(enddate) & !getIT) {
-					end <- transDATE(end=enddate)$end 
-						if (is.na(end)) {stop("\n'enddate=",enddate,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
+				if (!is.null(end) & !getIT) {
+					end <- transDate(end=end)$end 
+						if (is.na(end)) {stop("\n'end=",end,"' is eighter wrong format (not:'YYYY.MM.DD') or an invalid date")}
 					if (end > max(avDates,na.rm=TRUE)) {
 					getIT <- TRUE
 					} else {
@@ -92,15 +87,21 @@ for (i in 1:length(product$PF2)){
 	if (getIT) { # the return is 'FtpDayDirs' of the requested product
 
 		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",product$PF1[i],"/", productNameFull,"/",sep="")
-		cat("Getting structure for:", ftp,"\n")	
+		cat("Getting structure in:", ftp,"\n")	
+		
 		require(RCurl)
-		FtpDayDirs  <- getURL(ftp)
+		
+		if(exists("FtpDayDirs")) {rm(FtpDayDirs)}
+		for (g in 1:MODIS:::.stubborn()){
+		try(FtpDayDirs <- getURL(ftp),silent=TRUE)
+		if(exists("FtpDayDirs")){break}
+		} 
+				
+		if (wait > 0 && i < length(product$PF2)) {
+			Sys.sleep(wait)
+		}
 	
-			if (wait > 0 && i != length(product$PF2)) {
-					Sys.sleep(wait)
-					}
-	
-		FtpDayDirs  <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
+		FtpDayDirs  <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # ok for Mac/Solaris?
 		FtpDayDirs  <- FtpDayDirs[substr(FtpDayDirs, 1, 1)=='d'] 
 		FtpDayDirs  <- unlist(lapply(strsplit(FtpDayDirs, " "), function(x){x[length(x)]}))
 		
@@ -139,7 +140,7 @@ for (i in 1:length(product$PF2)){
 
 res <- ftpdirs[,which(colnames(ftpdirs)==productNameFull)]
 res <- res[!is.na(res)]
-dates <- transDATE(begin=startdate,end=enddate)
+dates <- transDate(begin=begin,end=end)
 begin <- gsub("-","\\.",dates$begin)
 end   <- gsub("-","\\.",dates$end)
 
@@ -147,7 +148,7 @@ result[[i]] <- res[res >= begin & res <= end]
 
 resnames[[i]] <- productNameFull
 }
-write.table(ftpdirs,file.path(auxPATH,"ftpdir.txt",fsep=fsep))
+write.table(ftpdirs,file.path(auxPATH,"ftpdir.txt",fsep="/"))
 
 names(result) <- resnames
 invisible(result) 

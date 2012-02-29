@@ -1,15 +1,15 @@
-\name{transDATE}
+\name{transDate}
 
 \docType{methods}
 
-\alias{transDATE}
+\alias{transDate}
 
 \title{internal function that transform character to a object of class 'date'}
 
 \description{
-  Interal function, gets a }
+  Interal function, for date conversion}
 
-\usage{transDATE(begin,end)}
+\usage{transDate(begin=NULL,end=NULL)}
 
 \arguments{
   \item{begin}{character string with the following sequence: "YYYY.MM.DD", separator can be any (".","-","/",...)}
@@ -25,17 +25,17 @@
 }
 
 \seealso{
-  \code{\link{getHDF}}
+  \code{\link{getHdf}}
 }
 
 \examples{
-transDATE()
+transDate()
 
-transDATE(begin="2009.01.01")
+transDate(begin="2009.01.01")
 
-transDATE(end="2009.01.01")
+transDate(end="2009.01.01")
 
-transDATE(begin="2009-01-01",end="2011.03.16")
+transDate(begin="2009-01-01",end="2011.03.16")
 }
 
 

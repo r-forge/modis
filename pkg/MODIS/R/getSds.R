@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getSDS <- function(HdfName,SDSstring=NULL,method="gdal",...) {
+getSds <- function(HdfName,SDSstring=NULL,method="gdal",...) {
 ######
 
 method <- tolower(method) 
@@ -21,13 +21,14 @@ if (method=="gdal"){
 		sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
 	
 	} else if (.Platform$OS=="windows"){
+		warning("In Windows 'gdal' the HDF4 support is not a default, installing 'FWTools' (with phath) the problem should be solved, or maybe use method='mrt' if you have 'MRTool' installed!") 
 		sdsRaw <- shell(paste("gdalinfo ", HdfName,sep=""),intern=TRUE)
 
 	} else {
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
 	}
 
-	SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_*.._NAME",value=T)
+	SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_.._NAME",value=T)
 
 	SDSnames <- unlist(lapply(SDSnames,function(x) strsplit(x,"=")[[1]][2]))
 
@@ -39,7 +40,7 @@ if (method=="gdal"){
 } else if (method=="mrt"){
 
 	if (missing(MRTpath)) {
-		MRTpath <- getPATH(quiet=TRUE)
+		MRTpath <- getPath(quiet=TRUE)
 		}
 
 	if (!file.exists(MRTpath)) {stop("'MRTpath' is wrong or MRT not installed? Provide a good path, leave empty or run 'getPATH()' first!")}

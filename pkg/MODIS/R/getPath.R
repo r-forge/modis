@@ -4,7 +4,7 @@
 # Licence GPL v3
 
 
-getPATH <- function(deep=FALSE,quiet=FALSE){
+getPath <- function(deep=FALSE,quiet=FALSE){
 
 fsep <- .Platform$file.sep
 

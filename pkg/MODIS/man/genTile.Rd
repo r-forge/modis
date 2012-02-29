@@ -1,9 +1,9 @@
-\name{genTILE}
+\name{genTile}
 
 \docType{methods}
 
-\alias{genTILE}
-\alias{genTILE,tileSize,offset}
+\alias{genTile}
+\alias{genTile,tileSize,offset}
 
 \title{Generate tiling system}
 
@@ -11,7 +11,7 @@
 This function generates bounding box information for a global tiling system
 }
 
-\usage{genTILE(tileSize=1,offset=0)}
+\usage{genTile(tileSize=1,offset=0)}
 
 \arguments{
 
@@ -28,13 +28,13 @@ This function generates bounding box information for a global tiling system
 }
 
 \seealso{
-  \code{\link{getTILE}}
+  \code{\link{getTile}}
 }
 
 \examples{
 \dontrun{
-e1 <- genTILE() # 1x1 degree tiling system.  
-e2 <- genTILE(tileSize=10,offset=(1/112)/2) # 10x10 degree tiling system with shift to be aligned to the Geoland2 (BioPar) Dataset (1km Pixelcenter reference)
+e1 <- genTile() # 1x1 degree tiling system.  
+e2 <- genTile(tileSize=10,offset=(1/112)/2) # 10x10 degree tiling system with shift to be aligned to the Geoland2 (BioPar) Dataset (1km Pixelcenter reference)
 
 head(e1)
 head(e1)

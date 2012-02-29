@@ -1,9 +1,8 @@
-\name{getTILE}
+\name{getTile}
 
 \docType{methods}
-
-\alias{getTILE}
-\alias{getTILE,tileH,tileV,extent,buffer,system}
+\alias{getTile}
+\alias{getTile,tileH,tileV,extent,buffer,system}
 
 \title{Get MODIS tile id(s)}
 
@@ -11,7 +10,7 @@
 Get MODIS tile id(s) for a geographic area.
 }
 
-\usage{getTILE(tileH, tileV, extent,buffer=NULL,system="MODIS")}
+\usage{getTile(tileH,tileV,extent,buffer=NULL,system="MODIS")}
 
 \arguments{
 
@@ -23,7 +22,7 @@ Get MODIS tile id(s) for a geographic area.
   
   \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(x,y)}. }
 
-  \item{system}{Character. Default is \code{MODIS}. Working alternative is the \code{MERIS}  tiling system from culture-MERIS dataset. Other tiling systems not yet implemented!}
+  \item{system}{Character. Default is \code{MODIS}. Alternative is the \code{MERIS} tiling system, (implemented but not tested!!) from culture-MERIS dataset. See \code{?genTile}!}
 }
 
 \details{
@@ -40,37 +39,41 @@ Or one of the following objects \code{'extent','rasterLayer','rasterStack'} or \
 }
 
 \seealso{
-  \code{\link{getHDF}}, raster package: \code{?extent,?raster,?stack} or \code{?brick}
+  \code{\link{getHdf}}, raster package: \code{?extent,?raster,?stack} or \code{?brick}
 }
 
 \examples{
 \dontrun{
 # with tileH and tileV
-getTILE(tileH=18:19,tileV=4)
+getTile(tileH=18:19,tileV=4)
 
 # with Extent of class 'list'
 Austria <- list(ymin=46.12,ymax=49.3,xmin=9.2,xmax=17.47)
-getTILE(extent=Austria)
-getTILE(extent=Austria,buffer=10)
-getTILE(extent=Austria,buffer=c(0.5,10)) 
+getTile(extent=Austria)
+getTile(extent=Austria,buffer=10)
+getTile(extent=Austria,buffer=c(0.5,10)) 
 
 # with Extent or raster* object from raster package
 require(raster)
 # rasterObject
 rasterObject <- raster(xmn=9.2,xmx=17.47,ymn=46.12,ymx=49.3)
-getTILE(extent=rasterObject)
+getTile(extent=rasterObject)
 # raster extent
 ext <- extent(rasterObject)
-getTILE(extent=ext)
+getTile(extent=ext)
 
 # require(mapdata)
-# if you pass a character name to the extent option a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
-# Use with caution! The following example includes much more areas than the main USA. Look at \code{map('worldHires','usa')} result.  
-getTILE(extent="usa")
+# if you pass a character name to extent a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
+# Use with caution! The following example includes much more areas than the main USA. Look at \code{map('worldHires','usa')} result.
+# Maybe to detect the needed extent it helps to run: \code{map('worldHires','usa',plot=FALSE)$names} or to use the default low resolution map \code{map('usa')}
+
+getTile(extent='usa')
+getTile(extent=map('usa',plot=FALSE))
+ 
 # so you better always check befor applying an extent of the class 'character' that defines a 'map' object
 # if you want subsets or more detailed maps use ?map arguments 
-ext <-  map('state', region = c('new york', 'new jersey', 'penn'),plot=FALSE)
-getTILE(extent=ext)
+ext <-  map('state', region = c('new york', 'new jersey', 'penn'))
+getTile(extent=ext)
 }
 }
 
