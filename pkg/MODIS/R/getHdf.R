@@ -220,7 +220,13 @@ if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessa
 			
 				try(hdf <- download.file(paste(ftp, dates[[z]][i,1], "/", HDF,sep=""),
 					destfile=paste(arcPath, HDF, sep=""), mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE),silent=TRUE)
-				if(hdf==0 & !quiet) {cat("Downloaded after:",g,"retries\n")}
+				if(hdf==0 & !quiet) {
+					if (g==1) {
+						cat("Downloaded by the first try!\n\n")
+					} else {
+						cat("Downloaded after",g,"retries!\n\n")
+					}
+				}
 				if(hdf==0) {break}
 			g=g+1
 			}
