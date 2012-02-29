@@ -11,13 +11,13 @@
 This function will become internal. It will be used if no collection is spezified in the different functions i.e.: \code{getHDF}
 }
 
-\usage{getProduct(x,quiet=TRUE)}
+\usage{getProduct(x,quiet=FALSE)}
 
 \arguments{
 
   \item{x}{Character. MODIS grid product to check. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: \code{MOD13Q1}. For vegetation indices from TERRA and AQUA use \code{MxD13Q1}. See \url{https://lpdaac.usgs.gov/lpdaac/products/modis_products_table} for more Products.}   
 
-  \item{quiet}{Logical. Default \code{TRUE}. No Prints}
+  \item{quiet}{Logical. Default \code{FALSE}.}
 
 }
 
@@ -35,8 +35,8 @@ getProduct() # listavailable products
 
 getProduct(x="MxD11C3")
 
-getProduct(x="MxD11C3",quiet=FALSE)
+getProduct(x="MxD11C3",quiet=TRUE)
 
-getProduct(x="culture-MERIS",quiet=FALSE) # not fully supported yet
+getProduct(x="culture-MERIS") # not fully supported yet
 
 }

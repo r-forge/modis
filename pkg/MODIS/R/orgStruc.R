@@ -33,7 +33,7 @@ moved <- sapply(avFiles,function(x) {
 
 	########################
 	# generate structure
-	path <- MODIS:::.genSTRING(fname,remote=FALSE)$localPath
+	path <- MODIS:::.genString(fname,remote=FALSE)$localPath
 	dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	###################
 

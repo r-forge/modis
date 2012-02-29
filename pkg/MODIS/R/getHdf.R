@@ -35,7 +35,7 @@ if (!missing(HdfName)){
 	
 		if (secName[length(secName)]!= "hdf"){stop(HdfName[i],"is not a good HdfName")}
 					
-	product <- getProduct(x=secName[1])
+	product <- getProduct(x=secName[1],quiet=TRUE)
   
 	collection <- sprintf("%03d",as.numeric(secName[4]))
 		if (getCollection(product=product,collection=collection)==FALSE) {stop(paste("The collection you have requested may doesn't exist run: 'getCollection(localArcPath='",localArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
@@ -97,7 +97,7 @@ if (is.null(end))   {cat("No end(-date) set, getting up to the most actual data\
 if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
 #######
 # check product
-product <- getProduct(x=product)
+product <- getProduct(x=product,quiet=TRUE)
 
 # check collection
 if (missing(collection)) {

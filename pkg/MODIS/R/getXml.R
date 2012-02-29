@@ -77,6 +77,7 @@ islocal <- rep(NA,length(avFiles))
 	g=1
 	while(g <= sturheit) {
 		if (g==1){qi <- quiet} else { qi <- TRUE}
+		isin=1
 		try(isin <- download.file( #xml file
 		paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,".xml",sep=""),
 		destfile=paste(avFiles[u],".xml",sep=""),

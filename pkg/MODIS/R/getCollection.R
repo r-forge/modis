@@ -23,8 +23,6 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 
 productN <- getProduct(x=product)
 
-#if (is.na(productN)) {stop(product, " not found, check spelling")}
-
 for (i in 1:length(productN$PF1)){
 
 	if (forceCheck | !productN$PRODUCT[i] %in% colnames(ftpdirs) ) {
