@@ -53,11 +53,11 @@ getProduct <- function(x,quiet=TRUE) { # TODO improvement of automatic sensor de
        # PD <- substr(x, l, nchar(x))
 		PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
 	       
-        return(list(request = inVar, PF1 = info$PF1, PF2 = info$PF2, PD = PD, PLATFORM = info$PLATFORM, TYPE = info$TYPE[1], PRODUCT = info$PRODUCT,SENSOR = sensor))
+        return(list(request = inVar, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor))
     
     } else if (sensor == "MERIS") {
     	infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
-        return(list(request = infos$PRODUCT, PF1 = "", PF2 = "", PD = "", PLATFORM = infos$PLATFORM, TYPE = infos$TYPE, PRODUCT = infos$PRODUCT,SENSOR = infos$SENSOR))
+        return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
     }
 	} else { 
 		stop("Input product 'NULL', something is wrong!")
