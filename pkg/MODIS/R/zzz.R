@@ -11,7 +11,7 @@
 	# eval(parse("/home/matteo/R/x86_64-pc-linux-gnu-library/2.14/MODIS/external/MODIS_Opts.R"),env=opts)
 	opts  <- new.env()
 	eval(parse(file.path(find.package("MODIS"), "external","MODIS_Opts.R")),env=opts) # if we need to add an option, this makes it possible
-	eval(parse(file.path("~/.MODIS_Opts.R")),env=opts) # this options are overwriting the original one
+	eval(parse(file.path("~/.MODIS_Opts.R")),env=opts) # user options are overroling the defaults
 	opt <- as.list(opts)	
 
 	optfile  <- file.path("~/.MODIS_Opts.R")
