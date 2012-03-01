@@ -20,8 +20,10 @@
 
 # Example: The file 'MOD13Q1.A2009017.h18v04.005.2009036150230.hdf', the localArcPath<- '~/MODIS_ARC' and arcStructure <-'/SENSOR/PRODUCT.CCC/DATE' on a UNIX system will generate the following structure: '/home/YOURUSER/MODIS_ARC/MODIS/MOD13Q1.005/2009.01.17/MOD13Q1.A2009017.h18v04.005.2009036150230.hdf'
 
+# Once you have modyfied values in sec 1. use the function 'orgStruc()' to re-organise your archive
+
 #########################
-# Path and archive structure defaults:
+# 1.) Path and archive structure defaults:
   
 # set real path. All data will be stored below this directory. If it doesn't exist it is created.
 localArcPath <- '~/MODIS_ARC'
@@ -33,7 +35,7 @@ outDirPath   <- '~/MODIS_ARC/PROCESSED'
 arcStructure <- '/PRODUCT.CCC/DATE'
   
 #########################
-# Processing defaults:
+# 2.) Processing defaults:
   
 resamplingType <- 'NN'
 outProj        <- 'GEOGRAPHIC'
@@ -41,7 +43,7 @@ outProj        <- 'GEOGRAPHIC'
 #########################
 # PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.
 # Example ftpstring
-# If you have a personal MODIS datapool within your LAN and you face problems in the creation of an additional 'ftpstring' please contact one of us.
+# 3.) If you have a personal MODIS datapool within your LAN and you face problems in the creation of an additional 'ftpstring' please contact one of us.
 # Use 'placeholders' only in 'variablepath'
 # Additional 'placeholders':
 # DATE1DATE2 period start/end (MERIS specific)
@@ -49,9 +51,9 @@ outProj        <- 'GEOGRAPHIC'
 
 # ftpstring0 <- list(name='sitename',SENSOR='sensorname', basepath='/base/path',variablepath='/variable/path/',content=c('what data is awailable? The idea is more images + aux data and not dataformats!
   
-ftpstring1 <- list(name = "LPDAAC", SENSOR = "MODIS", basepath = "ftp://e4ftl01.cr.usgs.gov", variablepath = "/PF1/PRODUCT.CCC/DATE/", content = c("hdf", "xml"))
+ftpstring1 <- list(name = "LPDAAC", SENSOR = "MODIS", basepath = "ftp://e4ftl01.cr.usgs.gov", variablepath = "/PF1/PRODUCT.CCC/DATE/", content = c("images", "metadata"))
   
-ftpstring2 <- list(name = "LAADS", SENSOR = "MODIS", basepath = "ftp://ladsftp.nascom.nasa.gov/allData", variablepath = "/C/PRODUCT/YYYY/DDD/", content = "hdf")
+ftpstring2 <- list(name = "LAADS", SENSOR = "MODIS", basepath = "ftp://ladsftp.nascom.nasa.gov/allData", variablepath = "/C/PRODUCT/YYYY/DDD/", content = "images")
   
-ftpstring3 <- list(name = "Culture-MERIS", SENSOR = "MERIS", basepath = "ftp://culturemeris:culturemeris@ionia2.esrin.esa.int", variablepath = "/DATE1DATE2/REGION/", content = "tif")
+ftpstring3 <- list(name = "Culture-MERIS", SENSOR = "MERIS", basepath = "ftp://culturemeris:culturemeris@ionia2.esrin.esa.int", variablepath = "/DATE1DATE2/REGION/", content = "images")
   

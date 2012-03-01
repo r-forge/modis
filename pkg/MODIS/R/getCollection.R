@@ -23,6 +23,8 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 
 productN <- getProduct(x=product,quiet=quiet)
 
+if (is.null(productN)) {stop("Unknown product")}
+
 for (i in 1:length(productN$PF1)){
 
 	if (forceCheck | !productN$PRODUCT[i] %in% colnames(ftpdirs) ) {
@@ -90,7 +92,8 @@ if (!is.null(collection)) {
 	if (isOk) { # if collection is providen...return formatted collection or 'FALSE'
 		res <- sprintf("%03d",as.numeric(collection))
 	} else {
-		res <- FALSE
+		cat("The Collection you have specified doesn't exist. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
+		return(invisible(FALSE))
 	}
 	
 } else if (newest) {
@@ -115,7 +118,7 @@ if (!is.null(collection)) {
 } else {
 	res <- sprintf("%03d",as.numeric(res))
 }
-if (as=="numeric") {res=as.numeric(res);if (sum(res,na.rm=TRUE)==0) {res <- FALSE}}
+if (as=="numeric") {res=as.numeric(res)}
 return(res)
 }
 

@@ -2,7 +2,7 @@
 # Date : February 2012
 # Licence GPL v3
 
-.genString <- function(x,local=TRUE,remote=TRUE,collection=NULL,localArcPath=.getDef('localArcPath')) {
+.genString <- function(x,local=TRUE,remote=TRUE,collection=NULL,what="images",localArcPath=.getDef('localArcPath')) {
 
 	opts <- MODIS:::.getDef()
 	localArcPath <- path.expand(localArcPath)
@@ -11,8 +11,8 @@
 		stop("'x' must be a file name or a product name!")
 	}
 
-	x <- basename(x)
-	product <- getProduct(x,quiet=TRUE)
+	inbase <- basename(x)
+	product <- getProduct(inbase,quiet=TRUE)
 	
 	if (length(product)==1) {
 		if(is.null(product)) {
@@ -21,17 +21,12 @@
 	}
 
 	
-	if (length(strsplit(x,"\\.")[[1]])==1){ # if x is an product name
+	if (length(strsplit(inbase,"\\.")[[1]])==1){ # if x is an PRODUCT name
 
-		if (is.null(collection)) {
-			product$CCC <- getCollection(product=product)
-		} else {
-			product$CCC <- getCollection(product,collection)
-				if (product$CCC==FALSE) {stop(paste("The collection you have requested may doesn't exist, run: 'getCollection(localArcPath='",localArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
-		}
+		product$CCC <- getCollection(product=product,collection=collection)
 
 		if (local) {
-			struc <- opts$arcStructure
+			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
 			
 			string <- list()
@@ -63,7 +58,6 @@
 		localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
 		}
 		if (remote) {
-		
 			namesFTP <- names(opts)
 			Hmany <- grep(namesFTP,pattern="^ftpstring*.")
 		
@@ -73,7 +67,7 @@
 			
 				stringX <- opts[[e]]
 				
-				if (product$SENSOR %in% stringX$SENSOR) {
+				if (product$SENSOR %in% stringX$SENSOR & what %in% stringX$content) {
 					struc      <- stringX$variablepath	
 					tempString <- strsplit(struc,"/")[[1]]
 				
@@ -111,12 +105,9 @@
 		}
 	return(list(localPath=if(local){localPath} else {NULL}, remotePath=if(remote){remotePath} else {NULL}))
 	} else { # if x is a file name
-	
-		fname   <- MODIS:::.defineName(x) 
-		product <- as.list(c(fname,unlist(product)))
-				
+					
 		if (local) {
-			struc <- opts$arcStructure
+			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
 		
 			string <- list()
@@ -138,9 +129,9 @@
 		}
 	
 		if (remote) {
-		
+			if (!what %in% c("images","metadata")) {stop("the Parameter 'what' must be one of 'images' or 'metadata'")} 		
 			namesFTP <- names(opts)
-			Hmany <- grep(namesFTP,pattern="^ftpstring*.") # extract ftpstring in ./MODIS_opts.R
+			Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
 		
 			remotePath <- list()
 			n = 0
@@ -148,7 +139,7 @@
 			
 				stringX <- opts[[e]]
 				
-				if (product$SENSOR %in% stringX$SENSOR) {
+				if (product$SENSOR %in% stringX$SENSOR & what %in% stringX$content) {
 					struc <- stringX$variablepath	
 					tempString <- strsplit(struc,"/")[[1]]
 				
@@ -167,9 +158,9 @@
 						string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 						}
 					}
-			n=n+1
-			remotePath[[n]]      <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
-			names(remotePath)[n] <- stringX$name
+				n=n+1
+				remotePath[[n]]      <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+				names(remotePath)[n] <- stringX$name
 				}
 			}		
 		}
