@@ -10,7 +10,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	   	return(MODIS_Products[,c(1:3,6:9)])
   	}
 
-	if (is.list(x) && names(x) %in% c("request","PF1","PF2","PLATFORM","PD","TYPE","PRODUCT","SENSOR")) { # if TRUE than it is a result from a getProduct call. a good idea would be to have a CLASS "modisproduct"
+	if (is.list(x) && names(x) %in% c("request","PF1","PF2","PLATFORM","PD","TYPE","PRODUCT","SENSOR")) { # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS "modisproduct"
 		x <- x$request
 	}
 
@@ -19,7 +19,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 		inbase  <- basename(x) # if x is a full filename(+path)
 		fname   <- strsplit(inbase,"\\.")[[1]]		
 		product <- toupper(fname[1])
-		pattern <- sub(pattern="^MXD", replacement="M.D", x=product) 
+		pattern <- sub(pattern="MXD", replacement="M.D", x=product) 
 		
 		if (length(grep(pattern=pattern,x=MODIS_Products$PRODUCT))>0){
 			sensor="MODIS"
@@ -32,73 +32,73 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 		return(invisible(NULL))
 		}
 
-	if (length(fname)>1){ # in this case it must be a filename
-	
-	    if (sensor == "MODIS") {
+		if (length(fname)>1){ # in this case it must be a filename
 		
-		ind  <- grep(pattern=pattern,x=MODIS_Products$PRODUCT)
-		info <- MODIS_Products[ind,]
+		    if (sensor == "MODIS") {
+			
+				ind  <- grep(pattern=pattern,x=MODIS_Products$PRODUCT)
+				info <- MODIS_Products[ind,]
+				
+				if (info$TYPE == "Tile") {
+					Tpat    <- "h[0-3][0-9]v[0-1][0-9]"
+					isok <- all((grep(fname[2],pattern=Tpat)) + (substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
 		
-		if (info$TYPE == "Tile") {
-			Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
-			isok <- all((grep(fname[2],pattern=Tpat)) + (substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
-
-		} else if (info$TYPE == "CMG") {
-			isok <- all((substr(fname[2],1,1) == "A") + (fname[5]=="hdf") + (length(fname)==5))
-
-		} else if (info$TYPE == "Swath"){
-			isok <- all((substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
-		} else {
-			isok <- FALSE
-		}
-		if (!isok) stop("Check filename:", inbase,"\nIt seams to be not supported...if it should please send some feedback!") 
+				} else if (info$TYPE == "CMG") {
+					isok <- all((substr(fname[2],1,1) == "A") + (fname[5]=="hdf") + (length(fname)==5))
 		
-		PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
-	    
-		if (info$TYPE=="Tile") {
-			names(fname) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
-		} else if (info$TYPE=="CMG") {
-			names(fname) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
-			} else if (info$TYPE=="Swath") { 
-			names(fname) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
-		} else {
-			stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
-		}
-
-	    result <- c(fname,info)
-	    result <- result[!duplicated(names(result))]
-
-	return(result)  
-	  
-    } else if (sensor == "MERIS") {
-    	infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
-        return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
-    }
-	} else if (length(fname)==1){
-
-		if (sensor == "MODIS") {
-		
-			ind <- grep(pattern=x,x=MODIS_Products$PRODUCT)
-			info <- MODIS_Products[ind,]
-		
-			if (!quiet) {
-    	    			for (i in 1:length(ind)) {
-					if (i > 1) {
-						cat("and\n")
-					}
-    	    	           	cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+				} else if (info$TYPE == "Swath"){
+					isok <- all((substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
+				} else {
+					isok <- FALSE
 				}
-			}
+				if (!isok) stop("Check filename:", inbase,"\nIt seams to be not supported...if it should please send some feedback!") 
+				
+				PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
+			    
+				if (info$TYPE=="Tile") {
+					names(fname) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
+				} else if (info$TYPE=="CMG") {
+					names(fname) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
+					} else if (info$TYPE=="Swath") { 
+					names(fname) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
+				} else {
+					stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
+				}
 		
-			PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
+			    result <- c(fname,info)
+			    result <- result[!duplicated(names(result))]
+	
+			return(result)  
+		  
+    		} else if (sensor == "MERIS") {
+    			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
+    		    return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
+    		}
+		} else if (length(fname)==1){
+
+			if (sensor == "MODIS") {
+		
+				ind <- grep(pattern=pattern,x=MODIS_Products$PRODUCT)
+				info <- MODIS_Products[ind,]
+			
+				if (!quiet) {
+    		    	for (i in 1:length(ind)) {
+						if (i > 1) {
+							cat("and\n")
+						}
+    		    	    	cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+					}
+				}
+		
+				PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
 	       
-      	  return(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor))
+	      	 return(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor))
     
-		} else if (sensor == "MERIS") {
-    		infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
+			} else if (sensor == "MERIS") {
+    			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
 			return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
     		}
-	}
+		}
 	}
 }
 ##################################
