@@ -3,7 +3,7 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="veryhigh",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
+getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent,collection=NULL,dlmethod="auto",stubbornness="veryhigh",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
 
 serverList <- list() # Temporary! Thing to implement are alternative servers if datapool is down!
 serverList[[1]] <- "ftp://e4ftl01.cr.usgs.gov/" # xml in? YES
@@ -98,15 +98,8 @@ if (missing(product)){stop("Please provide the supported-'product'. See in: 'get
 #######
 # check product
 product <- getProduct(x=toupper(product),quiet=TRUE)
-
 # check collection
-if (missing(collection)) {
-		collection <- getCollection(product=product,quiet=quiet)
-	} else {
-		collection <- sprintf("%03d",as.numeric(collection))
-			if (getCollection(product=product,collection=collection)==FALSE) { # can be FALSE or collection number
-				stop(paste("The collection you have requested may doesn't exist run: 'getCollection(localArcPath='",localArcPath,"',product='",product$request ,"',forceCheck=TRUE,newest=FALSE)' to update internal list and see available once!",sep=""))}
-	}
+collection <- getCollection(product=product,collection=collection,quiet=quiet)
 #########
 # tranform dates
 tLimits <- transDate(begin=begin,end=end)

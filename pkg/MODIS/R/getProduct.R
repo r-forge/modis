@@ -17,7 +17,8 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	if (!is.null(x)) {
 
 		inbase  <- basename(x) # if x is a full filename(+path)
-		fname   <- strsplit(inbase,"\\.")[[1]]		
+		fname   <- strsplit(inbase,"\\.")[[1]]
+		if (!fname[length(fname)] %in% c("hdf","xml","tif","gz","tar")) {fname <- inbase}
 		product <- toupper(fname[1])
 		pattern <- sub(pattern="MXD", replacement="M.D", x=product) 
 		
@@ -64,15 +65,16 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 				} else {
 					stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
 				}
-		
-			    result <- c(fname,info)
-			    result <- result[!duplicated(names(result))]
+				request <- x
+				names(request) <- "request"
+			    result  <- c(request,fname,info)
+			    result  <- result[!duplicated(names(result))]
 	
-			return(result)  
+			return(invisible(result))  
 		  
     		} else if (sensor == "MERIS") {
     			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
-    		    return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
+    		    return(invisible(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR))))
     		}
 		} else if (length(fname)==1){
 
@@ -83,20 +85,17 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 			
 				if (!quiet) {
     		    	for (i in 1:length(ind)) {
-						if (i > 1) {
-							cat("and\n")
-						}
-    		    	    	cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+    		    	    cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
 					}
 				}
 		
-				PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
+				PD <- substr(info$PRODUCT, 4, nchar(as.character(info$PRODUCT)))
 	       
-	      	 return(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor))
+	      	 return(invisible(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor)))
     
 			} else if (sensor == "MERIS") {
     			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
-			return(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR)))
+			return(invisible(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR))))
     		}
 		}
 	}

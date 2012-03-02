@@ -9,10 +9,10 @@ source <- path.expand(source)
 
 if(missing(pattern)) {
 	cat(paste("No 'pattern' set, moving/coping all MODIS grid data found in '", source,"'.\n",sep=""))
-		avFiles <- unlist(list.files(source,pattern=".hdf$",recursive=TRUE,full.names=TRUE))
-	} else {
-		avFiles <- unlist(list.files(source,pattern=pattern,recursive=TRUE,full.names=TRUE))
-	}
+	avFiles <- unlist(list.files(source,pattern=".hdf$",recursive=TRUE,full.names=TRUE))
+} else {
+	avFiles <- unlist(list.files(source,pattern=pattern,recursive=TRUE,full.names=TRUE))
+}
 
 if (length(avFiles)==0) {stop("No HDF nor HDF.XML files found!\n")}
  
@@ -30,30 +30,47 @@ moved <- sapply(avFiles,function(x) {
 
 	orpath  <- dirname(x)
 	fname   <- basename(x)
-
+	product <- getProduct(fname,quiet=FALSE)
 	########################
 	# generate structure
-	path <- MODIS:::.genString(fname,remote=FALSE)$localPath
+	path <- .genString(x=product,remote=FALSE)$localPath
 	dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	###################
 
-if (!file.exists(file.path(path,fname,fsep="/"))) { # do nothing if file is already in dest dir 
+if (!file.exists(file.path(path,fname,fsep="/"))) { # if file doesn't exist in destdir copy/move
 
 		if (move) {
 			file.rename(from=x,to=paste(path,"/",fname,sep=""))			
+			if (file.exists(paste(x,".xml",sep=""))) {
+				file.rename(from=paste(x,".xml",sep=""),to=paste(path,"/",fname,".xml",sep=""))	
+			}
 			moved <- 1
 		} else {
 			file.copy(from=x,to=paste(path,"/",fname,sep=""),overwrite=FALSE)
+			if (file.exists(paste(x,".xml",sep=""))) {
+				file.copy(from=paste(x,".xml",sep=""),to=paste(path,"/",fname,".xml",sep=""))	
+			}
 			moved <- 2
 		}
 
 	} else if (file.exists(file.path(path,fname,fsep="/")) & orpath!=path) { # if file exists in destdir & inpath!=outPath...it is duplicated in 2 different locations, so remove it
 			unlink(x)
+			if (file.exists(paste(x,".xml",sep=""))) {
+				unlink(paste(x,".xml",sep=""))	
+			}
 			moved <- 3
 	} else {
 			moved <- 0
 	}
-	if (length(list.files(orpath))==0) {unlink(orpath,recursive=TRUE)} # delete empty dir
+	if (length(list.files(orpath))==0) {
+		unlink(orpath,recursive=TRUE)
+		onehigher <- strsplit(orpath,"/")[[1]]
+		onehigher <- paste(onehigher[-length(onehigher)],sep="",collapse="/")
+		if(length(list.files(onehigher))==0) {
+			unlink(onehigher,recursive=TRUE)
+		}
+		
+		} # delete empty dir
 	
 	return(moved)
 	})

@@ -5,17 +5,17 @@
 \alias{getProduct}
 \alias{product,quiet}
 
-\title{Check the avalability of a given product}
+\title{Check the avalability of a given product, create file related information}
 
 \description{
-This function will become internal. It will be used if no collection is spezified in the different functions i.e.: \code{getHDF}
+On user side it is a funtion to find the desidered product. On package site it generates internal information for string generation.  
 }
 
 \usage{getProduct(x,quiet=FALSE)}
 
 \arguments{
 
-  \item{x}{Character. MODIS grid product to check. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: \code{MOD13Q1}. For vegetation indices from TERRA and AQUA use \code{MxD13Q1}. See \url{https://lpdaac.usgs.gov/lpdaac/products/modis_products_table} for more Products.}   
+  \item{x}{Character. MODIS filename, MODIS Product name or Regular expression (for regular expression argument see in \code{?grep} the argument \code{pattern} for details).}   
 
   \item{quiet}{Logical. Default \code{FALSE}.}
 
@@ -31,12 +31,17 @@ An invisible list with usable information for other functions.
 
 \examples{
 
-getProduct() # listavailable products
+getProduct() # list available products
 
-getProduct(x="MxD11C3")
+getProduct("MxD11C3") # 'x' for backward compatibility
+getProduct("MxD11C3",quiet=TRUE)
+# or
+getProduct("M.D11C3") # regular expression
+getProduct("MOD14") # regular expression
+getProduct("MOD14$") # regular expression
 
-getProduct(x="MxD11C3",quiet=TRUE)
 
-getProduct(x="culture-MERIS") # not fully supported yet
+
+getProduct("culture-MERIS") # not fully supported yet
 
 }

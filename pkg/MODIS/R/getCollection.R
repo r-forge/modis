@@ -20,6 +20,7 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	} else {
 	ftpdirs <- data.frame()
 	}
+if (missing(product)){stop("Please provide a valid product")}
 
 productN <- getProduct(x=product,quiet=quiet)
 

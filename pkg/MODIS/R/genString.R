@@ -11,17 +11,9 @@
 		stop("'x' must be a file name or a product name!")
 	}
 
-	inbase <- basename(x)
-	product <- getProduct(inbase,quiet=TRUE)
-	
-	if (length(product)==1) {
-		if(is.null(product)) {
-			stop("'x' is not a valid 'product'")
-		}
-	}
+	product <- getProduct(x=x,quiet=FALSE)
 
-	
-	if (length(strsplit(inbase,"\\.")[[1]])==1){ # if x is an PRODUCT name
+	if (length(product$CCC)==0){ # if x is an PRODUCT name CCC should not exist
 
 		product$CCC <- getCollection(product=product,collection=collection)
 
@@ -30,30 +22,23 @@
 			tempString <- strsplit(struc,"/")[[1]]
 			
 			string <- list()
+			l=0
 			for (i in 1:length(tempString)){
 	
-			s <- strsplit(tempString[i],"\\.")[[1]]
+				s <- strsplit(tempString[i],"\\.")[[1]]
 			
-			if (length(s)> 1) {
-				tmp <- list()
-				
-				for (u in 1:length(s)){
-					if (s[u] %in% c("DATE","YYYY","DDD")) {
-						tmp[[u]] <- s[u]
-					} else {
-						tmp[[u]] <- .getPart(product,s[u])[[1]]
+				if (length(s)> 1) {
+					tmp <- list()
+					for (u in 1:length(s)){
+						l=l+1
+						if (s[u] %in% c("DATE","YYYY","DDD")) {
+							tmp[[u]] <- s[u]
+						} else {
+							tmp[[u]] <- .getPart(x=product,s[u])
+						}
+					string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 					}
 				}
-			string[[i]] <- paste(unlist(tmp),sep="",collapse=".")
-			}
-			
-			if  (length(s)==1) {
-				if (s %in% c("DATE","YYYY","DDD")) {
-					string[[i]] <- s 
-				} else {
-					string[[i]] <- .getPart(product,s) 
-				}
-			}
 			}
 		localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
 		}
@@ -72,29 +57,22 @@
 					tempString <- strsplit(struc,"/")[[1]]
 				
 					string <- list()
+					l=0
 					for (i in 1:length(tempString)){
 				
 						s <- strsplit(tempString[i],"\\.")[[1]]
 				
 						if (length(s)> 1) {
-							
+							l=l+1	
 							tmp <- list()
 							for (u in 1:length(s)){
 								if (s[u] %in% c("DATE","YYYY","DDD")) {
 									tmp[[u]] <- s[u]
 								} else {
-									tmp[[u]] <- .getPart(product,s[u])[[1]]
+									tmp[[u]] <- .getPart(x=product,s[u])
 								}
 							}
-							string[[i]] <- paste(unlist(tmp),sep="",collapse=".")
-						}
-				
-						if  (length(s)==1) {
-							if (s %in% c("DATE","YYYY","DDD")) {
-								string[[i]] <- s 
-							} else {
-								string[[i]] <- .getPart(product,s) 
-							}
+						string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 						}
 					}
 			n=n+1
@@ -105,7 +83,7 @@
 		}
 	return(list(localPath=if(local){localPath} else {NULL}, remotePath=if(remote){remotePath} else {NULL}))
 	} else { # if x is a file name
-					
+			
 		if (local) {
 			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
@@ -120,14 +98,14 @@
 					l=l+1
 					tmp <- list()
 					for (u in 1:length(s)){
-						tmp[[u]] <- MODIS:::.getPart(product,s[u])
+						tmp[[u]] <- .getPart(x=product,s[u])
 					}
 				string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 				}
 			}	
 		localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
 		}
-	
+	cat(5)
 		if (remote) {
 			if (!what %in% c("images","metadata")) {stop("the Parameter 'what' must be one of 'images' or 'metadata'")} 		
 			namesFTP <- names(opts)
@@ -153,7 +131,7 @@
 							l=l+1
 							tmp <- list()
 							for (u in 1:length(s)){
-								tmp[[u]] <- MODIS:::.getPart(product,s[u])
+								tmp[[u]] <- .getPart(x=product,s[u])
 							}
 						string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 						}
