@@ -5,7 +5,7 @@
 .genString <- function(x,local=TRUE,remote=TRUE,collection=NULL,what="images",localArcPath=.getDef('localArcPath')) {
 
 	opts <- MODIS:::.getDef()
-	localArcPath <- path.expand(localArcPath)
+	localArcPath <- normalizePath(localArcPath,"/") # for windows
 	
 	if (missing(x)) {
 		stop("'x' must be a file name or a product name!")
@@ -13,10 +13,17 @@
 
 	product <- getProduct(x=x,quiet=FALSE)
 
-	if (length(product$CCC)==0){ # if x is an PRODUCT name CCC should not exist
-
-		product$CCC <- getCollection(product=product,collection=collection)
-
+	if (length(product$DATE)==0){ # if x is an PRODUCT name DATE should not exist
+		
+		collection <- getCollection(product=product,collection=collection)
+		
+		if (collection!=FALSE) {
+			product$CCC <- collection
+		} else {
+			stop("The collection you have specified doesn't exist") # little mor info would be good!
+		}
+		
+		
 		if (local) {
 			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
@@ -98,14 +105,14 @@
 					l=l+1
 					tmp <- list()
 					for (u in 1:length(s)){
-						tmp[[u]] <- .getPart(x=product,s[u])
+						tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
 					}
 				string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 				}
 			}	
 		localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
 		}
-	cat(5)
+
 		if (remote) {
 			if (!what %in% c("images","metadata")) {stop("the Parameter 'what' must be one of 'images' or 'metadata'")} 		
 			namesFTP <- names(opts)
@@ -131,7 +138,7 @@
 							l=l+1
 							tmp <- list()
 							for (u in 1:length(s)){
-								tmp[[u]] <- .getPart(x=product,s[u])
+								tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
 							}
 						string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 						}

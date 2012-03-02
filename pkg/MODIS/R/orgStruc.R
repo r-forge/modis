@@ -4,7 +4,8 @@
 
 orgStruc <- function(source=.getDef("localArcPath"),to=.getDef("localArcPath"),structure=.getDef('arcStructure'),pattern,move=TRUE,quiet=FALSE) {	
 	
-source <- path.expand(source)
+source <- normalizePath(source,"/") # for windows
+to     <- normalizePath(to,"/") # for windows
 ###########################
 
 if(missing(pattern)) {
@@ -18,7 +19,7 @@ if (length(avFiles)==0) {stop("No HDF nor HDF.XML files found!\n")}
  
 data("MODIS_Products")
 
-doit <- .isSupported(avFiles)
+doit <- MODIS:::.isSupported(avFiles)
 if (sum(doit)==0) {stop("No supported files Found")}
 avFiles <- avFiles[doit]
 
@@ -33,7 +34,7 @@ moved <- sapply(avFiles,function(x) {
 	product <- getProduct(fname,quiet=FALSE)
 	########################
 	# generate structure
-	path <- .genString(x=product,remote=FALSE)$localPath
+	path <- MODIS:::.genString(x=product,remote=FALSE,localArcPath=to)$localPath
 	dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	###################
 

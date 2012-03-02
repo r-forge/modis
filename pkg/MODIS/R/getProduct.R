@@ -67,13 +67,14 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 				}
 				request <- x
 				names(request) <- "request"
-			    result  <- c(request,fname,info)
-			    result  <- result[!duplicated(names(result))]
-	
+			    result <- c(request,fname,info)
+			    result <- result[!duplicated(names(result))]
+				result <- as.list(sapply(result,function(x)as.character(x)))
+
 			return(invisible(result))  
 		  
     		} else if (sensor == "MERIS") {
-    			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
+    			infos  <- MODIS_Products[MODIS_Products$SENSOR==sensor,]
     		    return(invisible(list(request = as.character(infos$PRODUCT), PF1 = "", PF2 = "", PD = "", PLATFORM = as.character(infos$PLATFORM), TYPE = as.character(infos$TYPE), PRODUCT = as.character(infos$PRODUCT),SENSOR = as.character(infos$SENSOR))))
     		}
 		} else if (length(fname)==1){
