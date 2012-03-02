@@ -5,13 +5,17 @@
 .genString <- function(x,local=TRUE,remote=TRUE,collection=NULL,what="images",localArcPath=.getDef('localArcPath')) {
 
 	opts <- MODIS:::.getDef()
-	localArcPath <- normalizePath(localArcPath,"/") # for windows
+	localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE) # for windows
 	
 	if (missing(x)) {
 		stop("'x' must be a file name or a product name!")
 	}
 
-	product <- getProduct(x=x,quiet=FALSE)
+product <- getProduct(x=x,quiet=FALSE)
+
+#	fe  <- new.env() # workaround for a very strange behavior of the simple call of "product <- getProduct(x=x,quiet=FALSE)" 
+#	eval(parse(paste(text="product <- getProduct(x='",x,"',quiet=FALSE)",sep="")),env=fe)
+ #   product <- as.list(fe)[[1]]
 
 	if (length(product$DATE)==0){ # if x is an PRODUCT name DATE should not exist
 		
@@ -20,9 +24,8 @@
 		if (collection!=FALSE) {
 			product$CCC <- collection
 		} else {
-			stop("The collection you have specified doesn't exist") # little mor info would be good!
+			stop("The collection you have specified doesn't exist") # little more info would be good!
 		}
-		
 		
 		if (local) {
 			struc <- opts$arcStruc

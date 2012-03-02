@@ -4,8 +4,12 @@
 
 orgStruc <- function(source=.getDef("localArcPath"),to=.getDef("localArcPath"),structure=.getDef('arcStructure'),pattern,move=TRUE,quiet=FALSE) {	
 	
-source <- normalizePath(source,"/") # for windows
-to     <- normalizePath(to,"/") # for windows
+source <- normalizePath(source,"/",mustWork=FALSE) # for windows
+dir.create(source,showWarnings=FALSE,recursive=TRUE)
+
+to <- normalizePath(to,"/",mustWork=FALSE) # for windows
+dir.create(to,showWarnings=FALSE,recursive=TRUE)
+
 ###########################
 
 if(missing(pattern)) {
@@ -31,10 +35,10 @@ moved <- sapply(avFiles,function(x) {
 
 	orpath  <- dirname(x)
 	fname   <- basename(x)
-	product <- getProduct(fname,quiet=FALSE)
+	#product <- getProduct(fname)
 	########################
-	# generate structure
-	path <- MODIS:::.genString(x=product,remote=FALSE,localArcPath=to)$localPath
+	# generate and create local path to file!
+	path <- MODIS:::.genString(x=fname,remote=FALSE,localArcPath=to)$localPath
 	dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	###################
 
