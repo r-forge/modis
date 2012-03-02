@@ -35,7 +35,6 @@ moved <- sapply(avFiles,function(x) {
 
 	orpath  <- dirname(x)
 	fname   <- basename(x)
-	#product <- getProduct(fname)
 	########################
 	# generate and create local path to file!
 	path <- MODIS:::.genString(x=fname,remote=FALSE,localArcPath=to)$localPath
@@ -68,15 +67,26 @@ if (!file.exists(file.path(path,fname,fsep="/"))) { # if file doesn't exist in d
 			moved <- 0
 	}
 	if (length(list.files(orpath))==0) {
-		unlink(orpath,recursive=TRUE)
-		onehigher <- strsplit(orpath,"/")[[1]]
-		onehigher <- paste(onehigher[-length(onehigher)],sep="",collapse="/")
-		if(length(list.files(onehigher))==0) {
-			unlink(onehigher,recursive=TRUE)
-		}
-		
-		} # delete empty dir
-	
+		if (.Platform$OS=="unix") { # I'm looking for a windows/MAC(?) eqal to the linux "rmdir -p" command!!
+			warn <- options("warn") 
+			options(warn=-2)
+			try(xxx <- invisible(system(paste("rmdir -p --ignore-fail-on-non-empty ", orpath,sep=""),intern=TRUE)),silent=TRUE)
+			options(warn=warn$warn)
+		} else { # work arount for rmdir -p on windows/MAC(?)
+			unlink(orpath,recursive=T)
+			secPath <- strsplit(orpath,"/")[[1]]
+			
+			for (o in length(secPath):1){
+			
+				delpath <- paste(secPath[-o:-length(secPath)],sep="",collapse="/")
+
+				if (length(list.files(delpath))==0){
+					unlink(delpath,recursive=T)
+				} else {break}
+
+			}
+		} 
+	}
 	return(moved)
 	})
 	

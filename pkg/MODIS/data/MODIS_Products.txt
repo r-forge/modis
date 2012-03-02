@@ -76,4 +76,5 @@
 "81" "MODIS" "MYD02HKM" "Aqua" "MOLA" "MYD" "Calibrated Radiances" "Swath" "500m" "5 Min" "."
 "82" "MODIS" "MYD021KM" "Aqua" "MOLA" "MYD" "Calibrated Radiances" "Swath" "1000m" "5 Min" "."
 "83" "MODIS" "MYD03" "Aqua" "MOLA" "MYD" "Geolocation Data Set" "Swath" "1000m" "5 Min" "."
-"84" "MERIS" "culture-MERIS" "ENVISAT" "" ""  "MERIS FR surface reflectance" "Tile" "300m" "7 Day" "_"
+"84" "MODIS" "MOD17A3" "Terra" "MOLT" "MOD" "Gross Primary Productivity" "Tile" "1000m" "Yearly" "."
+"85" "MERIS" "culture-MERIS" "ENVISAT" "" ""  "MERIS FR surface reflectance" "Tile" "300m" "7 Day" "_"

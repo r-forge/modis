@@ -11,18 +11,16 @@
 		stop("'x' must be a file name or a product name!")
 	}
 
-product <- getProduct(x=x,quiet=FALSE)
-
-#	fe  <- new.env() # workaround for a very strange behavior of the simple call of "product <- getProduct(x=x,quiet=FALSE)" 
-#	eval(parse(paste(text="product <- getProduct(x='",x,"',quiet=FALSE)",sep="")),env=fe)
- #   product <- as.list(fe)[[1]]
-
+	product <- getProduct(x=x,quiet=FALSE)
+	
+	#for (w in 1:length(product$PRODUCT)){
+	
 	if (length(product$DATE)==0){ # if x is an PRODUCT name DATE should not exist
 		
-		collection <- getCollection(product=product,collection=collection)
+		coll <- getCollection(product=product,collection=collection)
 		
 		if (collection!=FALSE) {
-			product$CCC <- collection
+			product$CCC <- coll
 		} else {
 			stop("The collection you have specified doesn't exist") # little more info would be good!
 		}

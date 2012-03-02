@@ -5,10 +5,6 @@
 
 getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent,collection=NULL,dlmethod="auto",stubbornness="veryhigh",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
 
-serverList <- list() # Temporary! Thing to implement are alternative servers if datapool is down!
-serverList[[1]] <- "ftp://e4ftl01.cr.usgs.gov/" # xml in? YES
-serverList[[2]] <- "ftp://ladsweb.nascom.nasa.gov/allData/" # xml in? NO
-
 localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
 dir.create(localArcPath,showWarnings=FALSE)
 # test local localArcPath
@@ -30,76 +26,60 @@ if (!missing(HdfName)){
 	fname <- basename(HdfName[i]) # separate name from path
 	HdfName[i] <- fname
 	rm(fname)
+
+	product <- getProduct(x=HdfName[i],quiet=TRUE)		
+	path    <- MODIS:::.genString(product)
+	dir.create(path$localPath,recursive=TRUE,showWarnings=FALSE)
+	
+	if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) {
+
+		for (x in 1:length(path$remotePath)){ # begins with the first ftp source...until subborness is reached, then it tries the nest available server
+			if (!quiet) {cat("\n#####################\nTrying to get the file from",names(path$remotePath)[x],"server\n\n")}
+			g=1
+			while(g <= sturheit) {
 		
-	secName <- strsplit(HdfName[i],"\\.")[[1]]
-	
-		if (secName[length(secName)]!= "hdf"){stop(HdfName[i],"is not a good HdfName")}
-					
-	product <- getProduct(x=secName[1],quiet=TRUE)
-  
-	collection <- sprintf("%03d",as.numeric(secName[4]))
-
-	fdate <- substr(secName[2],2,8)
-	fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d") # doy to date
-	
-	arcPath <- paste(product$PRODUCT,".",collection,"/",fdate,"/",sep="")
-	dir.create(paste(localArcPath,"/",arcPath,sep=""),recursive=TRUE,showWarnings=FALSE) # this always generates the same structure as the original ftp (this makes sense if the local localArcPath becomes big!)
-	
-	if (!file.exists(paste(localArcPath,"/",arcPath,HdfName[i],sep=""))) {
-		ftpPath <- list()
-		ftpPath[[1]] <- paste(serverList[[1]],product$PF1,"/", product$PRODUCT,".",collection,"/",fdate,"/",HdfName[i],sep="")
-		ftpPath[[2]] <- paste(serverList[[2]],as.numeric(collection),"/", product$PRODUCT,"/",substr(secName[2],2,5),"/",substr(secName[2],6,8),HdfName[i],sep="")
-
-			
-		g=1
-		while(g <= sturheit) {
-
-		if (g==1){qi <- quiet} else { qi <- TRUE}
-	
-		for (x in 1:length(serverList)){
-			hdf=1			
-			try(hdf <- download.file(
-				ftpPath[[x]],
-				destfile=paste(localArcPath,"/",arcPath,HdfName[i],sep=""),
-				mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE)
-			)
-		if(hdf==0 & !quiet) {cat("Downloaded after:",g,"retries\n")}
-		if(hdf==0) {break}	
+				if (g==1){qi <- quiet} else { qi <- TRUE}
+				hdf=1			
+				try(hdf <- download.file(
+					paste(path$remotePath[[x]],"/",HdfName[i],sep=""),
+					destfile=paste(path$local,"/",HdfName[i],sep=""),
+					mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE)
+				)
+				if (hdf!=0 & !quiet) {cat("Remote connection fail! Re-try:",g,"\r")} 
+				if (hdf==0 & !quiet & g>1) {cat("Downloaded after:",g,"retries\n")}
+				if (hdf==0 & !quiet & g==1) {cat("Downloaded by the first try!\n")}
+				if (hdf==0) {break}	
+				Sys.sleep(as.numeric(wait))
+				g=g+1	
+			}
+			if(hdf==0) {break}	
 		}
-		g=g+1	
-		Sys.sleep(0.3) # not proven that it works here! 
-		}
-
-		Sys.sleep(as.numeric(wait))
-
 	}
 		
 	if(checkSize){
 		g=1
 		while(g <= sturheit) {
-		
 			if (g==1){qi <- quiet} else { qi <- TRUE}
-			
 			try(xml <- getXml(HdfName = HdfName[i],checkSize=TRUE,wait=wait,quiet=qi,dlmethod=dlmethod))
-		if(sum(xml)==0) {break}
-		g=g+1
+			if(sum(xml)==0) {break}
+			g=g+1
 		}
 	}
 
-dates[[i]] <- paste(localArcPath,"/",arcPath,HdfName[i],sep="")
+dates[[i]] <- paste(path$local,"/",HdfName[i],sep="")
 	}
 return(invisible(unlist(dates)))
 
 } else { # if HdfName isn't provided:
 
 if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
-if (is.null(end))   {cat("No end(-date) set, getting up to the most actual data\n")} 
+if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
 if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
 #######
 # check product
 product <- getProduct(x=toupper(product),quiet=TRUE)
 # check collection
-collection <- getCollection(product=product,collection=collection,quiet=quiet)
+collection <- getCollection(product=product,collection=collection,quiet=TRUE)
 #########
 # tranform dates
 tLimits <- transDate(begin=begin,end=end)
@@ -125,7 +105,8 @@ l=0
 for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
 
 	productName <- product$PRODUCT[z]
-
+	product$CCC <- 
+	path <- MODIS:::.genString(product)
 		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$PRODUCT[z],".",collection,"/",sep="")
 		
 	ftpdirs <- unlist(.getStruc(localArcPath=localArcPath,product=product$PRODUCT[z],collection=collection,begin=tLimits$begin,end=tLimits$end,wait=0))

@@ -86,13 +86,13 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 			
 				if (!quiet) {
     		    	for (i in 1:length(ind)) {
-    		    	    cat(paste('You are looking for ', info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+    		    	    cat(paste(info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
 					}
 				}
 		
 				PD <- substr(info$PRODUCT, 4, nchar(as.character(info$PRODUCT)))
 	       
-	      	 return(invisible(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE[1]), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor)))
+	      	 return(invisible(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = sensor)))
     
 			} else if (sensor == "MERIS") {
     			infos <- MODIS_Products[MODIS_Products$SENSOR==sensor,]

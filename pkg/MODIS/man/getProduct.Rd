@@ -8,7 +8,7 @@
 \title{Check the avalability of a given product, create file related information}
 
 \description{
-On user side it is a funtion to find the desidered product. On package site it generates internal information for string generation.  
+On user side it is a funtion to find the desidered product. On package site it generates central internal information to hande files.  
 }
 
 \usage{getProduct(x,quiet=FALSE)}
@@ -36,11 +36,14 @@ getProduct() # list available products
 getProduct("MxD11C3") # 'x' for backward compatibility
 getProduct("MxD11C3",quiet=TRUE)
 # or
-getProduct("M.D11C3") # regular expression
-getProduct("MOD14") # regular expression
-getProduct("MOD14$") # regular expression
+getProduct("M.D11C3") # regular expression style
+getProduct("M.D11C") # regular expression style
 
+getProduct("MOD14$") # regular expression style
+getProduct("MOD14") # regular expression style
 
+internal_info <- getProduct("MOD11C3",quiet=TRUE) # regular expression style
+internal_info
 
 getProduct("culture-MERIS") # not fully supported yet
 
