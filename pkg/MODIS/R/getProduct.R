@@ -40,7 +40,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 				ind  <- grep(pattern=pattern,x=MODIS_Products$PRODUCT)
 				info <- MODIS_Products[ind,]
 				
-				if (info$TYPE == "Tile") {
+				if (info$TYPE == "Tile") { # file check.
 					Tpat    <- "h[0-3][0-9]v[0-1][0-9]"
 					isok <- all((grep(fname[2],pattern=Tpat)) + (substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
 		
@@ -86,7 +86,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 			
 				if (!quiet) {
     		    	for (i in 1:length(ind)) {
-    		    	    cat(paste(info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ', info$TOPIC[i],' ',info$TYPE[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
+    		    	    cat(paste(info$PRODUCT[i], ', the ', info$TEMP_RES[i],' ',info$TYPE[i],' ', info$TOPIC[i],' product from ',info$SENSOR[i],'-', info$PLATFORM[i],' with a ground resolution of ', info$RES[i], '\n', sep = ""))
 					}
 				}
 		
