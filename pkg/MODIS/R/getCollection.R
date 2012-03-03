@@ -35,7 +35,7 @@ if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 
 		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
 		
-		cat("Getting collections from FTP for platform:",unique(productN$PLATFORM)[i],"\n")
+		cat("Getting available collections FTP for platform:",unique(productN$PLATFORM)[i],"\n")
 	
 		if(exists("dirs")) {rm(dirs)}
 		for (g in 1:sturheit){
@@ -82,58 +82,55 @@ if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 	}
 }
 ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
-if (length(ind)==0) {stop("Data not available")}
 
-res <- as.list(ftpdirs[,ind])
-res <- lapply(res, function(x){x[!is.na(x)]})
+if(length(ind)==1){
+	res <- list(ftpdirs[,ind])
+	names(res) <- colnames(ftpdirs)[ind]
+} else if (length(ind)>=1) {
+	res <- as.list(ftpdirs[,ind])
+} else {
+	stop("No data available, check product input?") # should not happen getProduct() should catch that before
+}
+res <- lapply(res, function(x){as.numeric(as.character(x[!is.na(x)]))})
 
-if (!is.null(collection)) {
+if (!is.null(collection)) { # if collection is provided...return formatted collection or 'FALSE'
 	
-	isOk <- sprintf("%03d",as.numeric(collection)) %in% sprintf("%03d",as.numeric(res)) 
-
-	if (isOk) { # if collection is providen...return formatted collection or 'FALSE'
-		res <- sprintf("%03d",as.numeric(collection))
-	} else {
-		cat("The Collection you have specified doesn't exist. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
-		return(invisible(FALSE))
+	isOk <- lapply(res,function(x){
+			if (as.numeric(collection) %in% x){
+				as.numeric(collection)
+			} else {
+				FALSE		
+			}
+		})
+	
+	if (sum(isOk==FALSE)==length(isOk)) {
+		cat("Product(s) not awailable in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
+	return(invisible(isOk))
+	} else if (sum(isOk==FALSE)>0 & sum(isOk==FALSE)<length(isOk)){
+		cat("Not all the products in your input are available in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
 	}
-	
+
+	res <- isOk[isOk!=FALSE]
+
 } else if (newest) {
 	if(!quiet) {cat("No Collection specified getting the newest for",productN$PRODUCT,"\n",sep=" ")}
 
-	## oioioi! what a caos
-	
-res <- unlist(res)
-########################### brocken!!!!!!!!!!!!!!!!!!!
-size <- lapply(res,function(x){
-			sapply(x,function(c){
-			c <- nchar(c)-1
-			if (c==0) {
-				as.numeric(1)
-			} else {
-				as.numeric(paste(1,rep(0,c),sep=""))	
-			}})})
-for(u in 1:length(res)){
-res[[u]]/size[[u]]
-}	
-	})
-	res <- res / size
-	or  <- apply(res,2,order)
-	maxpos <- apply(or,2,function(x){which(x==max(x))})
-	
-	maxes <- list()
-	for(u in 1:ncol(res)){
-	zaza <- sprintf("%03d",res[maxpos[u],u]*size[maxpos[u],u])
-	names(zaza) <- colnames(res)[u]
-	maxes[[u]] <- zaza
-	}
-	res <- matrix(maxes,ncol=length(maxes))
-	colnames(res) <- name
-	
+	res <- lapply(res,function(x){ #select the newest
+		x[order(sapply(x,function(c){
+		s <- nchar(c)-1
+		if (s==0) {
+			c
+		} else {
+			c/as.numeric(paste(1,rep(0,s),sep=""))
+		}}),decreasing=TRUE)][1]
+		})
 }
+
 if (as=="character") {
-	res <- matrix(sprintf("%03d",res),nrow=nrow(res),ncol=ncol(res),byrow=F)
-	}
+	res <- lapply(res,function(x){
+		sprintf("%03d",x)
+	})	
+}
 
 return(res)
 }
