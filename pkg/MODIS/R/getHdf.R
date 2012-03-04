@@ -84,6 +84,8 @@ product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
 # tranform dates
 tLimits <- transDate(begin=begin,end=end)
 #########
+# getStruc
+.getStruc(localArcPath=localArcPath,product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
 
 dates  <- list()
 output <- list() # path info for the invisible output
@@ -108,9 +110,7 @@ if (product$TYPE[z]=="CMG") {
 	ntiles <- length(tileID)
 }
 
-	path <- MODIS:::.genString(product$PRODUCT[z])
-		
-	ftpdirs <- unlist(.getStruc(localArcPath=localArcPath,product=product$PRODUCT[z],collection=collection,begin=tLimits$begin,end=tLimits$end,wait=0))
+	#path <- MODIS:::.genString(product$PRODUCT[z])
 	
 	sel <- as.Date(ftpdirs,format="%Y.%m.%d") # convert to date
 	us  <- sel >= tLimits$begin & sel <= tLimits$end
