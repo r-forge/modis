@@ -11,20 +11,16 @@
 		stop("'x' must be a file name or a product name!")
 	}
 
-	product <- getProduct(x=x,quiet=FALSE)
-	
-	#for (w in 1:length(product$PRODUCT)){
+	product <- getProduct(x=x,quiet=TRUE)
+	if(length(product$PRODUCT)>1){cat(".genString() does not support multiple products! Generating the string only for the first:",product$PRODUCT[1],"\n")}
+	product <- lapply(product,function(x){x[1]})
+
 	
 	if (length(product$DATE)==0){ # if x is an PRODUCT name DATE should not exist
 		
-		coll <- getCollection(product=product,collection=collection)
-		
-		if (collection!=FALSE) {
-			product$CCC <- coll
-		} else {
-			stop("The collection you have specified doesn't exist") # little more info would be good!
+		if(length(product$CCC)==0){
+		product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
 		}
-		
 		if (local) {
 			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
@@ -35,14 +31,14 @@
 	
 				s <- strsplit(tempString[i],"\\.")[[1]]
 			
-				if (length(s)> 1) {
+				if (length(s)>0) {
 					tmp <- list()
 					for (u in 1:length(s)){
 						l=l+1
 						if (s[u] %in% c("DATE","YYYY","DDD")) {
 							tmp[[u]] <- s[u]
 						} else {
-							tmp[[u]] <- .getPart(x=product,s[u])
+							tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
 						}
 					string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
 					}
@@ -70,7 +66,7 @@
 				
 						s <- strsplit(tempString[i],"\\.")[[1]]
 				
-						if (length(s)> 1) {
+						if (length(s)> 0) {
 							l=l+1	
 							tmp <- list()
 							for (u in 1:length(s)){

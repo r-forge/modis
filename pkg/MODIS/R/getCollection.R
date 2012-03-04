@@ -29,7 +29,7 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 
 if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 	require(RCurl)
-	#sturheit <- .stubborn(level=stubbornness)
+	sturheit <- .stubborn(level=stubbornness)
 
 	for (i in 1:length(unique(productN$PF1))) {		
 
@@ -116,7 +116,7 @@ if (!is.null(collection)) { # if collection is provided...return formatted colle
 	if(!quiet) {cat("No Collection specified getting the newest for",productN$PRODUCT,"\n",sep=" ")}
 
 	res <- lapply(res,function(x){ #select the newest
-		x[order(sapply(x,function(c){
+		x[order(sapply(x,function(c){		
 		s <- nchar(c)-1
 		if (s==0) {
 			c

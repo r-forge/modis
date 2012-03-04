@@ -77,15 +77,26 @@ if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\
 if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
 #######
 # check product
-product <- getProduct(x=toupper(product),quiet=TRUE)
+product <- getProduct(x=product,quiet=TRUE)
 # check collection
-collection <- getCollection(product=product,collection=collection,quiet=TRUE)
+product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
 #########
 # tranform dates
 tLimits <- transDate(begin=begin,end=end)
 #########
+
+dates  <- list()
+output <- list() # path info for the invisible output
+l=0
+
+for(z in 1:length(product$PRODUCT)){ # Platforms MOD/MYD
+
+if (product$TYPE[z]=="Swath") {
+		cat("'Swath'-products not yet supported, yumping to the next.\n")
+	}else{
+
 # tileID
-if (product$TYPE=="CMG") {
+if (product$TYPE[z]=="CMG") {
 	tileID="GLOBAL"
 	ntiles=1 
 	} else {
@@ -97,17 +108,7 @@ if (product$TYPE=="CMG") {
 	ntiles <- length(tileID)
 }
 
-
-dates  <- list()
-output <- list() # path info for the invisible output
-l=0
-
-for(z in 1:length(product$PF1)){ # Platforms MOD/MYD
-
-	productName <- product$PRODUCT[z]
-	product$CCC <- 
-	path <- MODIS:::.genString(product)
-		ftp <- paste(serverList[[1]], product$PF1[z],"/", product$PRODUCT[z],".",collection,"/",sep="")
+	path <- MODIS:::.genString(product$PRODUCT[z])
 		
 	ftpdirs <- unlist(.getStruc(localArcPath=localArcPath,product=product$PRODUCT[z],collection=collection,begin=tLimits$begin,end=tLimits$end,wait=0))
 	
@@ -243,6 +244,7 @@ output[[l]] <- paste(arcPath,grep(dates[[z]][i,-1],pattern=".hdf$",value=TRUE),s
 #		}
 	}
 } # if no files are avalaible for product in date AND end platform z
+}
 return(invisible(paste(unlist(output),sep="")))
 } # end if not HdfName
 } ## END: FTP vs ARC check and download 
