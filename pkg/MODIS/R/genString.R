@@ -2,7 +2,9 @@
 # Date : February 2012
 # Licence GPL v3
 
-.genString <- function(x,local=TRUE,remote=TRUE,collection=NULL,what="images",localArcPath=.getDef('localArcPath')) {
+# 'date' is an EXISTING date! result from .getStruc() and passed as single date! For format see ?transDate
+
+.genString <- function(x,date=NULL,collection=NULL,what="images",local=TRUE,remote=TRUE,localArcPath=.getDef('localArcPath')) {
 
 	opts <- MODIS:::.getDef()
 	localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE) # for windows
@@ -15,12 +17,16 @@
 	if(length(product$PRODUCT)>1){cat(".genString() does not support multiple products! Generating the string only for the first:",product$PRODUCT[1],"\n")}
 	product <- lapply(product,function(x){x[1]})
 
-	
-	if (length(product$DATE)==0){ # if x is an PRODUCT name DATE should not exist
-		
-		if(length(product$CCC)==0){
+	if(length(product$CCC)==0){
 		product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
-		}
+	}
+	
+	if (!is.null(date)) { # date can be supplied as argument! 
+		product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) #simulates a MODIS file date "AYYYDDD"
+	}
+	
+	if (length(product$DATE)==0){ # if x is an PRODUCT + date is not provided 
+		
 		if (local) {
 			struc <- opts$arcStruc
 			tempString <- strsplit(struc,"/")[[1]]
@@ -32,18 +38,19 @@
 				s <- strsplit(tempString[i],"\\.")[[1]]
 			
 				if (length(s)>0) {
+					l=l+1
 					tmp <- list()
-					for (u in 1:length(s)){
-						l=l+1
-						if (s[u] %in% c("DATE","YYYY","DDD")) {
-							tmp[[u]] <- s[u]
-						} else {
-							tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
+						for (u in 1:length(s)){
+							if (s[u] %in% c("DATE","YYYY","DDD")) {
+								tmp[[u]] <- s[u]
+							} else {
+								tmp[[u]] <- .getPart(x=product,s[u])
+							}
 						}
 					string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
-					}
 				}
 			}
+			
 		localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
 		}
 		if (remote) {
@@ -75,13 +82,13 @@
 								} else {
 									tmp[[u]] <- .getPart(x=product,s[u])
 								}
-							}
-						string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
+							}								
+							string[[l]] <- paste(unlist(tmp),sep="",collapse=".")	
 						}
 					}
-			n=n+1
-			remotePath[[n]] <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
-			names(remotePath)[n] <- stringX$name
+					n=n+1
+					remotePath[[n]] <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+					names(remotePath)[n] <- stringX$name
 				}
 			}
 		}
@@ -147,6 +154,6 @@
 			}		
 		}
 	return(list(localPath=if(local){localPath} else {NULL}, remotePath=if(remote){remotePath} else {NULL}))
-	}	
-}	
+	}		
+}
 
