@@ -13,28 +13,29 @@ if (is.null(end)) {
 } 
 
 if (nchar(begin)==7) {
-Byear  <- substr(begin,1,4)
-Bdoy   <- substr(begin,5,7)
-begin  <- format(as.Date(as.numeric(Bdoy)-1,origin=paste(Byear,"-01-01",sep="")),"%Y.%m.%d")   
+	Byear <- substr(begin,1,4)
+	Bdoy  <- substr(begin,5,7)
+	begin <- format(as.Date(as.numeric(Bdoy)-1,origin=paste(Byear,"-01-01",sep="")),"%Y.%m.%d")   
 }
 if (nchar(end)==7) {
-Eyear  <- substr(end,1,4)
-Edoy   <- substr(end,5,7)
-end    <- format(as.Date(as.numeric(Edoy)-1,origin=paste(Eyear,"-01-01",sep="")),"%Y.%m.%d")  
+	Eyear <- substr(end,1,4)
+	Edoy  <- substr(end,5,7)
+	end   <- format(as.Date(as.numeric(Edoy)-1,origin=paste(Eyear,"-01-01",sep="")),"%Y.%m.%d")  
 }
 
 divisor <- substr(begin,5,5)
 begin   <- as.Date(begin,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
+
 if (is.na(begin)) {stop("\n'begin=",begin,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
-divisor <- substr(end,5,5)
-end     <- as.Date(end,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
+	divisor <- substr(end,5,5)
+	end     <- as.Date(end,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
 if (is.na(end)) {stop("\n'end=",end,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
 
 if(end<begin){
-t     <- begin
-begin <- end 
-end   <- t
-rm(t)
+	t     <- begin
+	begin <- end 
+	end   <- t	
+	rm(t)
 }
 
 beginDOY <- format(as.Date(begin,format="%Y.%m.%d"), "%Y%j")
