@@ -72,66 +72,74 @@ return(invisible(unlist(dates)))
 
 } else { # if HdfName isn't provided:
 
-if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
-if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
-if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
-#######
-# check product
-product <- getProduct(x=product,quiet=TRUE)
-# check collection
-product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
-#########
-# tranform dates
-tLimits <- transDate(begin=begin,end=end)
-#########
-# getStruc
-.getStruc(localArcPath=localArcPath,product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
+	if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
+	if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
+	if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
 
-dates  <- list()
-output <- list() # path info for the invisible output
-l=0
+	#######
+	# check product
+	product <- getProduct(x=product,quiet=TRUE)
+	# check collection
+	product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
+	#########
+	# tranform dates
+	tLimits <- transDate(begin=begin,end=end)
+	#########
+	# getStruc
+	.getStruc(localArcPath=localArcPath,product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
 
-for(z in 1:length(product$PRODUCT)){ # Platforms MOD/MYD
+	ftpdirs <- list()
+	ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+	ftpdirs[[2]] <- read.table(file.path(auxPATH,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
-if (product$TYPE[z]=="Swath") {
-		cat("'Swath'-products not yet supported, yumping to the next.\n")
-	}else{
+	dates  <- list()
+	output <- list() # path info for the invisible output
+	l=0
+		
+	for(z in 1:length(product$PRODUCT)){ # Platforms MOD/MYD
 
-# tileID
-if (product$TYPE[z]=="CMG") {
-	tileID="GLOBAL"
-	ntiles=1 
-	} else {
-	if (!missing(extent)) {
-  	tileID <- getTile(extent=extent)$tile
- 	 } else if (!missing(tileH) & !missing(tileV)) {
-    tileID <- getTile(tileH=tileH,tileV=tileV)$tile
- 	 } else {stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")}
-	ntiles <- length(tileID)
-}
+		todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
+		
+		if (product$TYPE[z]=="Swath") {
+			cat("'Swath'-products not yet supported, yumping to the next.\n")
+		}else{
 
-	#path <- MODIS:::.genString(product$PRODUCT[z])
+			# tileID
+			if (product$TYPE[z]=="CMG") {
+				tileID="GLOBAL"
+				ntiles=1 
+			} else {
+				if (!missing(extent)) {
+  					tileID <- getTile(extent=extent)$tile
+ 				 } else if (!missing(tileH) & !missing(tileV)) {
+    				tileID <- getTile(tileH=tileH,tileV=tileV)$tile
+ 				 } else {stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")}
+				ntiles <- length(tileID)
+			}
+
+			us <- lapply(ftpdirs,function(x){
+					x <- as.Date(x,format="%Y.%m.%d")
+					x <- sel >= tLimits$begin & x <= tLimits$end
+			}) # convert to date
 	
-	sel <- as.Date(ftpdirs,format="%Y.%m.%d") # convert to date
-	us  <- sel >= tLimits$begin & sel <= tLimits$end
+			if (sum(us[[1]],na.rm=TRUE)>0){ 
 
-	if (sum(us,na.rm=TRUE)>0){ 
+				dates[[z]] <- ftpdirs[us[[1]]]
 
-	dates[[z]] <- ftpdirs[us]
+				dates[[z]] <- cbind(dates[[z]],matrix(rep(NA, length(dates[[z]])*ntiles),ncol=ntiles,nrow=length(dates[[z]])))
+				colnames(dates[[z]]) <- c("date",tileID)
 
-	dates[[z]] <- cbind(dates[[z]],matrix(rep(NA, length(dates[[z]])*ntiles),ncol=ntiles,nrow=length(dates[[z]])))
-	colnames(dates[[z]]) <- c("date",tileID)
+				for (i in 1:nrow(dates[[z]])){
+	
+					year <- format(as.Date(dates[[z]][i,1],format="%Y.%m.%d"), "%Y")
+					doy  <- as.integer(format(as.Date(dates[[z]][i,1],format="%Y.%m.%d"), "%j"))
+					doy  <- sprintf("%03d",doy)
+					datu <- paste("A",year,doy,sep="")
+					mtr  <- rep(1,ntiles) # for file availability flaging
 
-	for (i in 1:nrow(dates[[z]])){
-
-		year <- format(as.Date(dates[[z]][i,1],format="%Y.%m.%d"), "%Y")
-		doy  <- as.integer(format(as.Date(dates[[z]][i,1],format="%Y.%m.%d"), "%j"))
-		doy  <- sprintf("%03d",doy)
-		datu <- paste("A",year,doy,sep="")
-		mtr  <- rep(1,ntiles) # for file availability flaging
-
-# creates local directory (HDF file container)
-arcPath <- paste(localArcPath,"/",product$PF2[z],product$PD,".",collection,"/",dates[[z]][i,1],"/",sep="")
+					# creates local directory (HDF file container)
+					path <- MODIS:::.genString()
+					arcPath <- paste(localArcPath,"/",product$PF2[z],product$PD,".",collection,"/",dates[[z]][i,1],"/",sep="")
 dir.create(arcPath,showWarnings=FALSE,recursive=TRUE)
 
 for(j in 1:ntiles){
@@ -248,6 +256,4 @@ output[[l]] <- paste(arcPath,grep(dates[[z]][i,-1],pattern=".hdf$",value=TRUE),s
 return(invisible(paste(unlist(output),sep="")))
 } # end if not HdfName
 } ## END: FTP vs ARC check and download 
-
-
 
