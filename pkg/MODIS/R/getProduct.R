@@ -7,7 +7,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	data(MODIS_Products)
     
     if (missing(x)){
-	   	return(MODIS_Products[,c(1:3,6:9)])
+	   	return(MODIS_Products[order(MODIS_Products$PRODUCT),c(1:3,6:9)])
   	}
 
 	if (is.list(x) && names(x) %in% c("request","PF1","PF2","PLATFORM","PD","TYPE","PRODUCT","SENSOR")) { # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS "modisproduct"
