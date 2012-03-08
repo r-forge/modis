@@ -23,19 +23,19 @@ if (is.null(productN)) {stop("Unknown product")}
 # load aux
 if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	ftpdirs <- read.table(file.path(auxPATH,"collections.txt",fsep="/"),stringsAsFactors=TRUE)
-	} else {
+} else {
 	ftpdirs <- data.frame()
-	}
+}
 
 if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 	require(RCurl)
 	sturheit <- .stubborn(level=stubbornness)
 
 	for (i in 1:length(unique(productN$PF1))) {		
-
+		
 		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
 		
-		cat("Getting available collections FTP for platform:",unique(productN$PLATFORM)[i],"\n")
+		cat("Updating collections from LP DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
 	
 		if(exists("dirs")) {rm(dirs)}
 		for (g in 1:sturheit){
