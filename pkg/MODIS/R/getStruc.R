@@ -10,14 +10,14 @@ if(!server %in% c("LPDAAC","LAADS")) {stop(".getStruc() Error! server must be or
 
 sturheit <- 10
 
-localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)
-# test local localArcPath
-try(testDir <- list.dirs(localArcPath),silent=TRUE)
-if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
+	localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
+	dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)	
+	# test local localArcPath
+	try(testDir <- list.dirs(localArcPath),silent=TRUE)
+	if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 
-auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
-dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
+	auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+	dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
 
 # Check Platform and product
 product <- getProduct(x=product,quiet=TRUE)
@@ -27,12 +27,15 @@ product$CCC <- getCollection(product=product) # if collection isn't provided, th
 }
 dates <- transDate(begin=begin,end=end)
 
+
 # load aux
 if (file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))) {
-	ftpdirs   <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
+	ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
 } else {
-	ftpdirs   <- data.frame()
+	ftpdirs <- read.table(file.path(find.package('MODIS'),'data',paste(server,"_ftp.txt",sep=""))) 
 }
+good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
+ftpdirs <- ftpdirs[,good] # remove wrong colls
 
 for (i in 1:length(product$PRODUCT)){
 
@@ -47,11 +50,11 @@ for (i in 1:length(product$PRODUCT)){
 				hm <- url.exists(strsplit(path$remotePath$LAADS,"YYYY")[[1]][1])
 				if(hm) {break}
 			}
-		}
+		} else {hm <- FALSE}
 		
-		if (server== "LPDAAC" | (server == "LAADS" & hm )){
+		if (server == "LPDAAC" | (server == "LAADS" & hm )){
 
-			if (todo[u] %in% names(ftpdirs)) {
+			if (todo[u] %in% colnames(ftpdirs)) {
 			
 				ind <- which(names(ftpdirs)==todo[u])
 	
@@ -110,7 +113,8 @@ for (i in 1:length(product$PRODUCT)){
 		
 				} else if (server=="LAADS"){
 					
-					wait <- max(30,wait) # here the 'wait' helps definitivley! For getting only a few structures 'wait' could be small. Nut after ~4-5 Products if breaks or hangs!  
+					# here the 'wait' helps definitivley! For getting only a few structures 'wait' could be small. Nut after ~4-5 Products if breaks or hangs!
+					wait <- max(30,wait)   
 
 					startPath <- strsplit(path$remotePath$LAADS,"YYYY")[[1]][1] # cut away everything behind YYYY
 					
@@ -155,7 +159,7 @@ for (i in 1:length(product$PRODUCT)){
 				}
 				
 				rowdim <- max(nrow(ftpdirs),length(FtpDayDirs))
-				if (todo[u] %in% names(ftpdirs)) { 
+				if (todo[u] %in% colnames(ftpdirs)) { 
 					coldim <- ncol(ftpdirs)
 					colnam <- colnames(ftpdirs)
 				} else {
@@ -172,10 +176,8 @@ for (i in 1:length(product$PRODUCT)){
 					}
 				}
 				mtr[,todo[u]] <- replace(mtr[,todo[u]], 1:length(FtpDayDirs),FtpDayDirs)
-	
 				ftpdirs <- mtr
-
-		
+	
 				write.table(ftpdirs,file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))
 			}
 		}
