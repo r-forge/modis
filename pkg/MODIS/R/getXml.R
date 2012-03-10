@@ -35,124 +35,98 @@ avFiles <- list.files(localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRU
 
 data(MODIS_Products)
 # tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
-doit <- .isSupported(avFiles)
+doit <- MODIS:::.isSupported(avFiles)
 avFiles <- avFiles[doit]
 
-if(length(avFiles)==0) {
-	return(cat("No MODIS grid files found.\n"))
+	if(length(avFiles)==0) {
+		return(cat("No MODIS grid files found.\n"))
 	} else {
 
-islocal <- rep(NA,length(avFiles))
+	islocal <- rep(NA,length(avFiles))
 
-    for (u in seq(along=avFiles)){
+	for (u in seq(along=avFiles)){
 
-	if (
-		!file.exists(paste(avFiles[u],".xml",sep=""))
-		|
-		if (file.exists(paste(avFiles[u],".xml",sep=""))){
-			if (.Platform$OS.type == "unix") {
-				as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
-			} else { #.Platform$OS.type == "windows"
-				as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
-			}
-		} else {
-			FALSE
-		}
-	) {
-		
-		fname   <- basename(avFiles[u]) # separate filename from path
-		secName <- strsplit(fname,"\\.")[[1]] # decompose filename
-		product <- getProduct(x=secName[1],quiet=TRUE)	
-		fdate <- substr(secName[2],2,8)
-		fdate <- format(as.Date(as.numeric(substr(fdate,5,7))-1,origin=paste(substr(fdate,1,4),"-01-01",sep="")),"%Y.%m.%d")
-	
-		collection <- if (product$TYPE=="Tile") {
-					secName[4]
-				} else if (product$TYPE=="CMG") {
-					secName[3]	
-				} else {
-					stop(product$TYPE," not supported yet!")			
+		product    <- getProduct(avFiles[u],quiet=TRUE)
+		fdate      <- .getPart(product,"DATE")
+		collection <- .getPart(product,"CCC")
+		path       <- .genString(product)
+
+		if (
+			!file.exists(paste(avFiles[u],".xml",sep=""))
+			|
+			if (file.exists(paste(avFiles[u],".xml",sep=""))){ # check filesize of xml file! TODO  Needs improvement!!
+				if (.Platform$OS.type == "unix") {
+					as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
+				} else { #.Platform$OS.type == "windows"
+					as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
 				}
-	
-		g=1
-		while(g <= sturheit) {
-			if (g==1){qi <- quiet} else { qi <- TRUE}
-			isin=1
-			try(isin <- download.file( #xml file
-			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,".xml",sep=""),
-			destfile=paste(avFiles[u],".xml",sep=""),
-			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-		if(sum(isin)==0) {break}
-		g=g+1
-		}
-		islocal[u] <- isin # xml file is local T/F
-	} else {
-		isin <- 0
-		islocal[u] <- 0 # xml file is local T
-	}
-
-# XML based checksum for HDF files
-if (checkSize) {
-	if (isin==1) {
-		cat("'sizeCheck' not perfomed! It wasn't possible to download the xml file:\n",fname,".xml\n",sep="")
-	} else {
-	checksizefun <- function(hdfFile){
-	require(XML)
-	xmlfile  <- paste(hdfFile,".xml",sep="")
-	xmlfile  <- xmlParse(xmlfile)
-	MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
-	MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
-
-	if (.Platform$OS.type == "unix") {
-		FileSize <- as.numeric(system(paste("stat -c %s ",hdfFile,sep=""), intern=TRUE))
-	} else if (.Platform$OS.type == "windows") {
-		FileSize <- as.numeric(shell(paste("for %I in (",hdfFile,") do @echo %~zI",sep=""),intern=TRUE))
-	} else {
-		stop("Only Unix based and Windows supported, please tell me which system you use!")
-	}
-	sizes <- list(MetaSize,FileSize)
-	names(sizes) <- c("MetaSize","FileSize")	
-	return(sizes)	
-	}
-	sizes <- checksizefun(avFiles[u])
-	
-	if (sizes$MetaSize != sizes$FileSize) {
-		if(!quiet){
-			cat("\nSize Error detected: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
-		}
+			} else {
+				FALSE
+			}
+		) {
 		
-# get the hdf file if size fails
-	g=1
-	while(g <= sturheit) {
-		if (g==1){qi <- quiet} else {qi <- TRUE}
-		hdf=1
-		try(hdf <- download.file( ## hdf file
-			paste("ftp://e4ftl01.cr.usgs.gov/", product$PF1,"/",product$PRODUCT,".",collection,"/",fdate,"/",fname,sep=""),
-			destfile=paste(avFiles[u],sep=""),
-			mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-	if(hdf==0) {break}
-	g=g+1
-	}	
-	sizes <- checksizefun(avFiles[u])
-	if (sizes$MetaSize != sizes$FileSize) {
-		if(!quiet){
-			cat("\nStill an Size Error detected, chould be an error in the xml file information: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
+			for(g in 1:sturheit) {
+				isin=1
+				try(isin <- download.file( # get xml file !Avalable only on LPDAAC!
+					paste(path$remotePath$LPDAAC,"/",basename(avFiles[u]),".xml",sep=""),
+					destfile=paste(avFiles[u],".xml",sep=""),
+					mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),
+				silent=TRUE)
+				if(isin==0) {break}
+				isin=1
+			}
+			islocal[u] <- isin # xml file is local T/F
+		} else {
+			isin       <- 0
+			islocal[u] <- 0 # xml file is local T
 		}
-	} else {
-	if(!quiet){
-			cat("\nFilesize ok for: ",avFiles[u], "\n\n")
-		}		
-	}
-	} else {
-		if(!quiet){
-			cat("\nFilesize ok for: ",avFiles[u], "\n\n")
-		}
-	}
-	}
-}
 
+		# XML based checksum for HDF files
+		if (checkSize) {
+			if (isin==1) {
+				cat("'sizeCheck' not perfomed! It wasn't possible to download the xml file:\n",basename(avFiles[u]),".xml\n",sep="")
+			} else {
+				sizes <- .checksizefun(avFiles[u])
+	
+				if (!sizes$isOK) {
+					if(!quiet){
+						cat("Size Error detected: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
+					}
+			
+					# get the hdf file if size fails
+					for (g in 1:sturheit){
+						server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
+						cat("Getting HDF file from:",server,"\n")
+	
+						hdf=1
+						try(hdf <- download.file( ## hdf file
+							paste(path$remotePath[[server]],"/",basename(avFiles[u]),sep=""),
+							destfile=avFiles[u],
+							mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE)
+						,silent=TRUE)
+						if(hdf==0) {break}
+					}
+	
+					sizes <- .checksizefun(avFiles[u])
+
+					if (!sizes$isOK) {
+						if(!quiet){
+							cat("Still an Size Error detected: ",avFiles[u],"\nFileSize is ",sizes$FileSize,", but should be: ",sizes$MetaSize,"\n",sep="")
+						}
+					} else {
+						if(!quiet){
+							cat("Filesize ok for: ",avFiles[u], "\n")
+						}		
+					}
+				} else {
+					if(!quiet){
+						cat("Filesize ok for: ",avFiles[u], "\n")
+					}
+				}
+			}
+		}
+	}
+invisible(islocal)
 }
-invisible(length(islocal))
-} # if avFiles > 0
 }
 

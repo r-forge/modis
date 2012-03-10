@@ -3,12 +3,12 @@
 # Licence GPL v3
 
 
-.getStruc <- function(product,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1,localArcPath=.getDef("localArcPath")) {
+.getStruc <- function(product,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1, stubbornness=10,localArcPath=.getDef("localArcPath")) {
 
 server <- toupper(server)
 if(!server %in% c("LPDAAC","LAADS")) {stop(".getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")}
 
-sturheit <- 10
+sturheit <- .stubborn(level=stubbornness)
 
 	localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
 	dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)	
@@ -32,7 +32,8 @@ dates <- transDate(begin=begin,end=end)
 if (file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))) {
 	ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
 } else {
-	ftpdirs <- read.table(file.path(find.package('MODIS'),'data',paste(server,"_ftp.txt",sep=""))) 
+#	data(paste(server,"_ftp.txt",sep="")
+	ftpdirs <- read.table(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep=""))) 
 }
 good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
 ftpdirs <- ftpdirs[,good] # remove wrong colls
@@ -45,7 +46,7 @@ for (i in 1:length(product$PRODUCT)){
 		
 		path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
 		
-		if (server =="LAADS") { # test if the product is available on "LAADS"
+		if (server =="LAADS") { # test if the product is available on "LAADS", may it is better to first check "getIT=T/F" and than to make this test 
 			for (g in 1:sturheit){
 				hm <- url.exists(strsplit(path$remotePath$LAADS,"YYYY")[[1]][1])
 				if(hm) {break}
@@ -55,10 +56,8 @@ for (i in 1:length(product$PRODUCT)){
 		if (server == "LPDAAC" | (server == "LAADS" & hm )){
 
 			if (todo[u] %in% colnames(ftpdirs)) {
-			
-				ind <- which(names(ftpdirs)==todo[u])
 	
-					avDates <- as.Date(ftpdirs[,ind],format="%Y.%m.%d")
+					avDates <- as.Date(as.character(ftpdirs[,which(colnames(ftpdirs)==todo[u])]),format="%Y.%m.%d")
 			
 					if (!is.null(begin)){
 						if (dates$begin < min(avDates,na.rm=TRUE)) {
@@ -105,84 +104,107 @@ for (i in 1:length(product$PRODUCT)){
 							break
 						}
 					}
-					if(!exists("FtpDayDirs")) {stop("Couldn't get structure from LPDAAC server!")}
+					if(exists("FtpDayDirs")) {
 		
-					FtpDayDirs <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
-					FtpDayDirs <- FtpDayDirs[substr(FtpDayDirs, 1, 1)=='d'] 
-					FtpDayDirs <- unlist(lapply(strsplit(FtpDayDirs, " "), function(x){x[length(x)]}))
-		
-				} else if (server=="LAADS"){
-					
-					# here the 'wait' helps definitivley! For getting only a few structures 'wait' could be small. Nut after ~4-5 Products if breaks or hangs!
-					wait <- max(30,wait)   
+						FtpDayDirs <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
+						FtpDayDirs <- FtpDayDirs[substr(FtpDayDirs, 1, 1)=='d'] 
+						FtpDayDirs <- unlist(lapply(strsplit(FtpDayDirs, " "), function(x){x[length(x)]}))
+					}
 
+				} else if (server=="LAADS"){
+					 
 					startPath <- strsplit(path$remotePath$LAADS,"YYYY")[[1]][1] # cut away everything behind YYYY
 					
 					opt <-options("warn")
 					options("warn"=-1)
 					rm(p,years)
 					options("warn"=opt$warn)
-					
+
+					once <- TRUE
 					for (g in 1:sturheit){
 						cat("Getting Year(s) try:",g,"\r") #",todo[u],"
 						try(years <- getURL(startPath),silent=TRUE)
-						Sys.sleep(wait)
+						if(g < (sturheit/2)) {
+							Sys.sleep(wait)
+						} else {
+							if(once & (30 > wait)) {cat("Server problems, trying with 'wait=",max(30,wait),"\n")}
+							once <- FALSE						
+							Sys.sleep(max(30,wait))
+						}
 						if(exists("years")){	
 							break
 						}
 						cat("                          \r") 
 					}
+
 					years <- unlist(strsplit(years[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
 					years <- years[substr(years, 1, 1)=='d'] 
 					years <- unlist(lapply(strsplit(years, " "), function(x){x[length(x)]}))
 					Ypath <- paste(startPath,years,"/",sep="")
 
+					once <- TRUE
 					for (g in 1:sturheit){
 						cat("                          \r")
 						cat("Getting day(s) try:",g,"\r") # for",todo[u],"
 						try(p <- getURL(Ypath),silent=TRUE) # async=T!
-						Sys.sleep(wait)
+						if(g < (sturheit/2)) {
+							Sys.sleep(wait)
+						} else {
+							if(once & (30 > wait)) {cat("Server problems, trying with 'wait=",max(30,wait),"\n")}
+							once <- FALSE						
+							Sys.sleep(max(30,wait))
+						}
 						if(exists("p")){	
 							break
 						}
 					}
 					cat("                          \r")					
-					if(!exists("p")) {stop("Couldn't get structure from LAADS server!")}
+					if(exists("p")) {
 					
-					FtpDayDirs <- as.character(unlist(sapply(p, function(pb,l=0) {
-						pb <- unlist(strsplit(pb, if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
-						pb <- pb[substr(pb, 1, 1)=='d'] 
-						pb <- unlist(lapply(strsplit(pb, " "), function(x){x[length(x)]}))
-						l=l+1
-						format(as.Date(as.numeric(pb) - 1, origin = paste(years[l],"-01-01", sep = "")), "%Y.%m.%d")
-						})))
+						FtpDayDirs <- as.character(unlist(sapply(p, function(pb,l=0) {
+							pb <- unlist(strsplit(pb, if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
+							pb <- pb[substr(pb, 1, 1)=='d'] 
+							pb <- unlist(lapply(strsplit(pb, " "), function(x){x[length(x)]}))
+							l=l+1
+							format(as.Date(as.numeric(pb) - 1, origin = paste(years[l],"-01-01", sep = "")), "%Y.%m.%d")
+							})))
+					}				
 				}
-				
-				rowdim <- max(nrow(ftpdirs),length(FtpDayDirs))
-				if (todo[u] %in% colnames(ftpdirs)) { 
-					coldim <- ncol(ftpdirs)
-					colnam <- colnames(ftpdirs)
+
+				if(!exists("FtpDayDirs")){
+
+					warning("Couldn't get structure from",server,"server using offline information!")
+					return(invisible(NULL))		
+		
 				} else {
-					coldim <- ncol(ftpdirs) + 1
-					colnam <- c(colnames(ftpdirs),todo[u])
-				}
-				
-				mtr <- matrix(NA,ncol=coldim,nrow=rowdim)
-				colnames(mtr) <- colnam	
-				
-				if (ncol(ftpdirs)>0){
-					for(j in 1:(ncol(ftpdirs))){
-						mtr[,j] <- replace(mtr[,j], 1:nrow(ftpdirs),ftpdirs[,j])
+
+					rowdim <- max(nrow(ftpdirs),length(FtpDayDirs))
+					if (todo[u] %in% colnames(ftpdirs)) { 
+						coldim <- ncol(ftpdirs)
+						colnam <- colnames(ftpdirs)
+					} else {
+						coldim <- ncol(ftpdirs) + 1
+						colnam <- c(colnames(ftpdirs),todo[u])
 					}
+					
+					mtr <- matrix(NA,ncol=coldim,nrow=rowdim)
+					colnames(mtr) <- colnam	
+					
+					if (ncol(ftpdirs)>0){
+						for(j in 1:(ncol(ftpdirs))){
+							mtr[,j] <- replace(mtr[,j], 1:nrow(ftpdirs),ftpdirs[,j])
+						}
+					}
+					mtr[,todo[u]] <- replace(mtr[,todo[u]], 1:length(FtpDayDirs),FtpDayDirs)
+					ftpdirs <- mtr
+		
+					write.table(ftpdirs,file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))
 				}
-				mtr[,todo[u]] <- replace(mtr[,todo[u]], 1:length(FtpDayDirs),FtpDayDirs)
-				ftpdirs <- mtr
-	
-				write.table(ftpdirs,file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))
 			}
 		}
 	}
 }
+return(invisible(0))
 }
 
 

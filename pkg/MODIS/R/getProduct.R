@@ -6,11 +6,12 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	
 	data(MODIS_Products)
     
-    if (missing(x)){
+    if (missing(x)){ # if x isn't provided, return table of supported files.
 	   	return(MODIS_Products[order(MODIS_Products$PRODUCT),c(1:3,6:9)])
   	}
 
-	if (is.list(x) && names(x) %in% c("request","PF1","PF2","PLATFORM","PD","TYPE","PRODUCT","SENSOR")) { # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS "modisproduct"
+	if (is.list(x) && names(x) %in% c("request","PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT","SENSOR","PLATFORM","PF1","PF2","TOPIC","TYPE","RES","TEMP_RES","INTERNALSEPARATOR"
+)) { # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS "modisproduct"
 		x <- x$request
 	}
 

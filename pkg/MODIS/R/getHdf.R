@@ -131,9 +131,7 @@ return(invisible(unlist(dates)))
 				
 				if (sum(us,na.rm=TRUE)>0){ 
 				
-					l=l+1
-
-					
+					l=l+1				
 					dates[[l]] <- datedirs[us]
 
 					dates[[l]] <- cbind(dates[[l]],matrix(rep(NA, length(dates[[l]])*ntiles),ncol=ntiles,nrow=length(dates[[l]])))
@@ -152,22 +150,22 @@ return(invisible(unlist(dates)))
 	
 						for(j in 1:ntiles){
 	
-							dates[[l]][i,j+1] <- paste(product$PF2[z],product$PD,".",datu,".",if (tileID[j]!="GLOBAL") {paste(tileID[j],".",sep="")},collection,".*.hdf$",sep="") # create pattern
+							dates[[l]][i,j+1] <- paste(strsplit(todo[u],"\\.")[[1]][1],".",datu,".",if (tileID[j]!="GLOBAL") {paste(tileID[j],".",sep="")},strsplit(todo[u],"\\.")[[1]][2],".*.hdf$",sep="") # create pattern
 		
-								if (length(dir(path$localPath,pattern=dates[[l]][i,j+1]))>0){ # if available locally
-			
-									HDF <- dir(path$localPath,pattern=dates[[l]][i,j+1])  # extract HDF file
-			
-									if (length(HDF)>1) { # in very recent files sometimes there is more than 1 file/tile/date if so get the last
-										select <- list()
-										for (d in 1:length(HDF)){ 
-											select[[d]]<- strsplit(HDF[d],"\\.")[[1]][5]
-										}
-										HDF <- HDF[which.max(unlist(select))]		
+							if (length(dir(path$localPath,pattern=dates[[l]][i,j+1]))>0){ # if available locally
+		
+								HDF <- dir(path$localPath,pattern=dates[[l]][i,j+1])  # extract HDF file
+		
+								if (length(HDF)>1) { # in very recent files sometimes there is more than 1 file/tile/date if so get the last
+									select <- list()
+									for (d in 1:length(HDF)){ 
+										select[[d]]<- strsplit(HDF[d],"\\.")[[1]][5]
 									}
-									dates[[l]][i,j+1] <- HDF
-									mtr[j] <- 0
+									HDF <- HDF[which.max(unlist(select))]		
 								}
+								dates[[l]][i,j+1] <- HDF
+								mtr[j] <- 0
+							}
 						}
 
 						if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessary to go on ftp
@@ -204,16 +202,22 @@ return(invisible(unlist(dates)))
 												HDF <- HDF[which.max(unlist(select))]		
 											}
 											dates[[l]][i,j+1] <- HDF
-
+											
+											dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
+											
 											for(g in 1:sturheit) {
 												server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
 												cat("Getting file from:",server,"\n")
+											
 												hdf=1
-												try(hdf <- download.file(
-													paste(path$remotePath[[(g%%length(path$remotePath))+1]],"/", HDF,sep=""),
-													destfile=paste(path$localPath,"/", HDF, sep=""),
-													mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),
-												silent=TRUE)
+												try(
+													hdf <- download.file(
+														paste(path$remotePath[[server]],"/", HDF,sep=""),
+														destfile=paste(path$localPath,"/", HDF, sep=""),
+														mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),
+													silent=TRUE
+												)
+
 												if(hdf==0 & !quiet) {
 													if (g==1) {
 														cat("Downloaded by the first try!\n\n")
@@ -235,19 +239,23 @@ return(invisible(unlist(dates)))
 								dates[[l]][i,(j+1):ncol(dates[[l]])] <- "No files for that date on FTP"
 							} # on ftp is possible to find empty folders!
 						}
-					}
-					if (log) {
+						if(checkSize){ # after each 'i' do the sizeCheck
+							xmlIn <- 1
+							for (g in 1:sturheit){ 
+								try(
+									xmlIn <- getXml(paste(path$localPath,"/",dates[[l]][i,-1],sep=""))
+								,silent=TRUE)
+								if(sum(xmlIn)==0) {break}
+							}
+						}
+					} # end i
+
+					if (log) { # write a log for each "PRODUCT.CCC" (todo[u])
 						dir.create(file.path(localArcPath,"LOGS",fsep="/"),showWarnings=FALSE)	
 						write.csv(dates[[l]],file=file.path(localArcPath,"LOGS",paste(todo[u],"_LOG.csv",sep=""),fsep="/"))
 					}
 		
-					if(checkSize){
-						for (g in 1:sturheit){ 
-							try(xmlIn <- getXml(HdfName = as.list(paste(path$localPath,"/",dates[[l]]		[i,-1],sep="")),wait=wait,quiet=qi,dlmethod=dlmethod),silent=TRUE)
-							if(sum(xmlIn)==0) {break}
-						}
-					}
-					output[[l]] <- paste(path$localPath,"/",grep(dates[[l]][i,-1],pattern=".hdf$",value=TRUE),sep="")
+					output[[l]] <- paste(path$localPath,"/",dates[[l]][,-1],sep="")
 					names(output)[l] <- todo[u]
 				} else {
 					cat(paste("No files on ftp in date range for: ",todo[u],"\n\n",sep=""))
