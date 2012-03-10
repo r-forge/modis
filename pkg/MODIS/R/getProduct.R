@@ -154,6 +154,8 @@ return(unlist(res))
 		stop("x is missing, must be a MODIS or culture-MERIS filename!")
 	} else {
 	
+	data(MODIS_Products)
+	
 	fname <- basename(x)
 	secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"
 	
@@ -183,7 +185,7 @@ return(unlist(res))
 		
 		data(MODIS_Products)
 		product  <- getProduct(x="culture-MERIS",quiet=TRUE)
-		secName  <- strsplit(fname,subset(MODIS_Products,PRODUCT==product$PRODUCT)$INTERNALSEPARATOR)[[1]]
+		secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
 		lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
 		secName  <- secName[-length(secName)]
     	secName  <- c(secName,lastpart)

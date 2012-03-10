@@ -4,9 +4,9 @@
 
 \alias{orgStruc}
 
-\title{Organise the structure of the local MODIS data archive}
+\title{Re-organise MODIS files in the local data archive}
 
-\description{This function organises the storage structure. You can also use this function to gatter all MODIS-grid files on you Computer and organise it like it is set in '~/.MODIS_opts.R'}
+\description{This function organises the storage structure. You can also use this function to gatter all MODIS-grid files on you Computer and organise it like it is set in '~/.MODIS_opts.R'. The main purpose is the organisation of the archive, but it should be possible to use it for coping a subset of files to a desidered location!}
 
 \usage{orgStruc(source=.getDef('localArcPath'),to=.getDef('localArcPath'),structure=.getDef('arcStructure'),pattern,move=TRUE,quiet=FALSE)}
 

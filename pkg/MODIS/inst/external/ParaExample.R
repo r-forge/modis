@@ -1,37 +1,53 @@
 # 'ParaSource' file for runMrt(). package 'MODIS'; by Matteo Mattiuzzi 25.11.2011
 # You can set all parameters or here or directly in the runMrt function. Parameters inside this file are overruling all the others.
-# Absolutely needed is only the 'product' (in case of global 'CMG' products!). For tiled data also an extent (or tileH/V) must be spezified! All the rest is facultativ and provided with defaults!
+# Absolutely needed is only the 'product' (in case of global 'CMG' products!). For tiled data also an extent (or tileH/V) must be specified! All the rest is facultativ and provided with defaults!
 
-job        <- "MOD11_Austria" # if not set a partially randomised name is created! 
-product    <- "MOD11A1"       # see: absolute needed Parameter! Type getProduct() to list supported products
-begin      <- "2010.01.01"    # see: ?transDate. if not set the function will process MODIS from the beginning.
-end        <- "2010-01-05"    # if not set the function will process MODIS to the last available date.
-collection <-  5              # see: ?getCollection. if not set the newest collection for the given product is used.
-extent     <- "austria"       # see: ?getTile for possibilities. 'extent' or 'tileH/V' are absolutly needed for "TILE" product, but ignored for "CMG" products. If both are provided,'extent' is priorised to tileH/V. 
-buffer     <- 0.1             # See: ?getTile 
-tileH      <- 5:8
-tileV      <- 10:15
+# if not set a partially randomised name is created! 
+job        <- "MOD11_Austria" 
+outDirPath <- NULL # if not set MODIS:::.getDef('outDirPath')
 
-## 'NULL' is just for visualisation here. You can also remove them completely!
-localArcPath <- NULL    # if not set see MODIS:::.getDef('localArcPath')?runMrt
-outDirPath   <- NULL    # if not set MODIS:::.getDef('outDirPath')
+# product information see: ?getProduct or ?getCollection
+product    <- "MOD11A1" # absolute needed Parameter! Type "getProduct()" to list supported products
+collection <-  5        # if not set the newest collection for the given product is used.
 
-#### MRT parameters:
-# consult MRT manual for details
-pixelSize <- NULL # if missing input pixel size is used. 
-# resamplingType <- NULL # iff missing MODIS:::.getDef('resamplingType') is used!
-outProj   <- NULL # if missing MODIS:::.getDef('outProj')
-zone      <- NULL # needed only for outProj="UTM", if missing MRT automated detection is used!
-datum     <- NULL # if missing "WGS84" is used.   
-outPara   <- NULL # if missing all parameters are set to 0.0
+# temporal subset see: ?transDate
+begin  <- "2010.01.01" # if not set the function will process MODIS from the beginning.
+end    <- "2010005"    # if not set the function will process MODIS to the last available date.
 
+# spatial subset see: ?getTile
+extent     <- "austria" 
+buffer     <- 0.1             
+tileH      <- 5:8							
+tileV      <- 10:15						
+
+##############################
+##############################
+## CORRENTLY ONLY MRT WORKS!
+## if you use MRT, consult: https://lpdaac.usgs.gov/tools/modis_reprojection_tool
+## if you use GDAL(FWT), consult: http://www.gdal.org/
+## if you use SSOAP, consult: http://daac.ornl.gov/MODIS/MODIS-menu/modis_webservice.html
+##
+# process_with <- MRT # one of "GDAL/MRT/SSOAP" not enabled for now!
+##############################
+
+pixelSize      <- NULL # if missing input pixel size is used. 
+resamplingType <- NULL # if missing MODIS:::.getDef('resamplingType') is used!
+outProj        <- NULL # if missing MODIS:::.getDef('outProj')
+zone           <- NULL # needed only for outProj="UTM", if missing MRT automated detection is used!
+datum          <- NULL # if missing "WGS84" is used.   
+outPara        <- NULL # if missing all parameters are set to 0.0
+
+# Extract strings
 SDSstring <- "110011000000" # see: ?getSds and MRT manual. If not sett all SDS are extraced!
 
+# should multiple input tiles be mosaicked? Normaly TRUE is ok, but HDF has a size limit of 2GB, in such a case the processing will not be acomplished. In this case you have to set FALSE
 mosaic <- TRUE # should multiple MODIS tiles be mosaiced?
-anonym <- TRUE # no job name in output files
 
+# If anonym <- FALSE the jobname is included to the output filenames
+anonym <- TRUE
 
 # TODO bit extraction 
+# require bitops
 
 ####
 

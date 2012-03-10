@@ -6,19 +6,22 @@
 .getStruc <- function(product,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1, stubbornness=10,localArcPath=.getDef("localArcPath")) {
 
 server <- toupper(server)
-if(!server %in% c("LPDAAC","LAADS")) {stop(".getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")}
+if(!server %in% c("LPDAAC","LAADS")) {
+	stop(".getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
+}
 
 sturheit <- .stubborn(level=stubbornness)
 
-	localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-	dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)	
-	# test local localArcPath
-	try(testDir <- list.dirs(localArcPath),silent=TRUE)
-	if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
+localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
+dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)	
+# test local localArcPath
+try(testDir <- list.dirs(localArcPath),silent=TRUE)
+if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 
-	auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
-	dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
+auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
 
+#########################
 # Check Platform and product
 product <- getProduct(x=product,quiet=TRUE)
 # Check collection
@@ -26,17 +29,18 @@ if (length(product$CCC)==0) {
 product$CCC <- getCollection(product=product) # if collection isn't provided, this gets the newest for the selected products.
 }
 dates <- transDate(begin=begin,end=end)
-
+########################
 
 # load aux
 if (file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))) {
 	ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
 } else {
-#	data(paste(server,"_ftp.txt",sep="")
+	#	data(paste(server,"_ftp.txt",sep="")
 	ftpdirs <- read.table(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep=""))) 
 }
 good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
 ftpdirs <- ftpdirs[,good] # remove wrong colls
+
 
 for (i in 1:length(product$PRODUCT)){
 
