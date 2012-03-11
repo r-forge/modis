@@ -12,7 +12,7 @@ collection <-  5        # if not set the newest collection for the given product
 
 # temporal subset see: ?transDate
 begin  <- "2010.01.01" # if not set the function will process MODIS from the beginning.
-end    <- "2010005"    # if not set the function will process MODIS to the last available date.
+end    <- "2010002"    # if not set the function will process MODIS to the last available date.
 
 # spatial subset see: ?getTile
 extent     <- "austria" 
@@ -33,12 +33,12 @@ tileV      <- 10:15
 pixelSize      <- NULL # if missing input pixel size is used. 
 resamplingType <- NULL # if missing MODIS:::.getDef('resamplingType') is used!
 outProj        <- NULL # if missing MODIS:::.getDef('outProj')
-zone           <- NULL # needed only for outProj="UTM", if missing MRT automated detection is used!
 datum          <- NULL # if missing "WGS84" is used.   
 outPara        <- NULL # if missing all parameters are set to 0.0
+zone           <- NULL # needed only for outProj="UTM", if missing MRT automated detection is used!
 
 # Extract strings
-SDSstring <- "110011000000" # see: ?getSds and MRT manual. If not sett all SDS are extraced!
+SDSstring <- "101" # exteract only the first and the third layer (SDS). If not set all SDS are extraced! see: ?getSds and MRT manual. 
 
 # should multiple input tiles be mosaicked? Normaly TRUE is ok, but HDF has a size limit of 2GB, in such a case the processing will not be acomplished. In this case you have to set FALSE
 mosaic <- TRUE # should multiple MODIS tiles be mosaiced?
