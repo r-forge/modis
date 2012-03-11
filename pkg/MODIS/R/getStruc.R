@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-.getStruc <- function(product,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1, stubbornness=10,localArcPath=.getDef("localArcPath")) {
+.getStruc <- function(product,collection=NULL,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1, stubbornness=10,localArcPath=.getDef("localArcPath")) {
 
 server <- toupper(server)
 if(!server %in% c("LPDAAC","LAADS")) {
@@ -25,8 +25,11 @@ dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
 # Check Platform and product
 product <- getProduct(x=product,quiet=TRUE)
 # Check collection
+if (!is.null(collection)){
+product$CCC <- getCollection(product=product,collection=collection) 
+}
 if (length(product$CCC)==0) {
-product$CCC <- getCollection(product=product) # if collection isn't provided, this gets the newest for the selected products.
+	product$CCC <- getCollection(product=product) # if collection isn't provided, this gets the newest for the selected products.
 }
 dates <- transDate(begin=begin,end=end)
 ########################

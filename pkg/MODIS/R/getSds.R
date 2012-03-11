@@ -39,7 +39,7 @@ if (method=="gdal"){
 
 } else if (method=="mrt"){
 
-	if (missing(MRTpath)) {
+	if (!exists("MRTpath")) {
 		MRTpath <- getPath(quiet=TRUE)
 		}
 

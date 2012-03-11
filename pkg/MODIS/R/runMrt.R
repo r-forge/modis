@@ -15,15 +15,15 @@ if (!is.null(ParaSource)) {
 	  pm <- list(...)
 } 
 
+
+
 if(length(pm)==0) {
 	ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
 	stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
 }
 	
 pm$product     <- getProduct(pm$product,quiet=TRUE)
-if (is.null(pm$collection)) {
-	pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
-}
+pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
 tLimits        <- transDate(begin=pm$begin,end=pm$end)
 
 ################################
@@ -44,6 +44,11 @@ dir.create(pm$localArcPath,showWarnings=FALSE)
 # test local localArcPath
 try(testDir <- list.dirs(pm$localArcPath),silent=TRUE)
 if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
+# auxPath
+auxPATH <- file.path(pm$localArcPath,".auxiliaries",fsep="/")
+dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
+
+
 #################
 
 if (is.null(pm$outDirPath)) {
@@ -131,24 +136,24 @@ for (z in 1:length(pm$product$PRODUCT)){
 
 ######################## along platform (TerraAqua)
 
-		MODIS:::.getStruc(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=pm$begin,end=pm$end)
+		MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=pm$begin,end=pm$end)
 		ftpdirs <- list()
 		ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
 
-		datedirs <- ftpdirs[[1]][,todo[u]]
-		datedirs <- datedirs[!is.na(datedirs)]			
-		sel <- as.Date(datedirs,format="%Y.%m.%d")
+		avDates <- ftpdirs[[1]][,todo[u]]
+		avDates <- avDates[!is.na(avDates)]			
+		sel <- as.Date(avDates,format="%Y.%m.%d")
 		us  <- sel >= tLimits$begin & sel <= tLimits$end
 
 		if (sum(us,na.rm=TRUE)>0){
 
 			avDates <- avDates[us]
 
-######################### along start-end-date
+######################### along begin->end date
 			for (l in 1:length(avDates)){ 
-			
-				files <- getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath)
+
+				files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
 
 				if (length(files)!=0){
 	
@@ -175,12 +180,12 @@ for (z in 1:length(pm$product$PRODUCT)){
 					for (q in v) {
 		
 						if (is.null(pm$SDSstring)) {
-							pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],MRTpath=pm$MRTpath)))
+							pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],MRTpath=pm$MRTpath,method="mrt")))
 						}	
 			
-						SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,MRTpath=pm$MRTpath)
+						SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,method="mrt",MRTpath=pm$MRTpath)
 	
-						if (!pm$quiet && i == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
+						if (!pm$quiet && u == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
 	
 						if (mos) {
 							TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")

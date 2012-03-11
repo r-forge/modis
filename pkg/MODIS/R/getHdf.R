@@ -130,7 +130,7 @@ return(invisible(unlist(dates)))
 				us  <- sel >= tLimits$begin & sel <= tLimits$end
 				
 				if (sum(us,na.rm=TRUE)>0){ 
-				
+					suboutput <- list()
 					l=l+1				
 					dates[[l]] <- datedirs[us]
 
@@ -174,7 +174,8 @@ return(invisible(unlist(dates)))
 							require(RCurl) # get the filenames
 							
 							for (g in 1:sturheit){ # get list of files in remote dir
-								try(ftpfiles <- getURL(paste(path$remotePath[[(g%%length(path$remotePath))+1]],"/",sep="")),silent=TRUE)
+								server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
+								try(ftpfiles <- getURL(paste(path$remotePath[[server]],"/",sep="")),silent=TRUE)
 								if(exists("ftpfiles")){break}
 								Sys.sleep(as.numeric(wait))
 							}
@@ -233,7 +234,7 @@ return(invisible(unlist(dates)))
 										} else { 
 											dates[[l]][i,j+1] <- "No tile for location" 
 										}
-									} # if mtr==1
+									}
 								}
 							} else {
 								dates[[l]][i,(j+1):ncol(dates[[l]])] <- "No files for that date on FTP"
@@ -248,6 +249,7 @@ return(invisible(unlist(dates)))
 								if(sum(xmlIn)==0) {break}
 							}
 						}
+					suboutput[[i]] <- paste(path$localPath,"/",dates[[l]][i,-1],sep="")					
 					} # end i
 
 					if (log) { # write a log for each "PRODUCT.CCC" (todo[u])
@@ -255,7 +257,7 @@ return(invisible(unlist(dates)))
 						write.csv(dates[[l]],file=file.path(localArcPath,"LOGS",paste(todo[u],"_LOG.csv",sep=""),fsep="/"))
 					}
 		
-					output[[l]] <- paste(path$localPath,"/",dates[[l]][,-1],sep="")
+					output[[l]] <-  as.character(unlist(suboutput))
 					names(output)[l] <- todo[u]
 				} else {
 					cat(paste("No files on ftp in date range for: ",todo[u],"\n\n",sep=""))
