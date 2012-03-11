@@ -4,17 +4,17 @@
 	
 	if (!file.exists("~/.MODIS_Opts.R")) {
 
-	packageStartupMessage("#########################\n IMPORTANT PLEASE READ!\n#########################\nThe 'defaults' file does not exist. This file contains all important package options.\nOpen \'", file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", path.expand("~/.MODIS_Opts.R"),"\'")
+	packageStartupMessage("#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe 'defaults' file does not exist! This file contains all important package options.\nOpen \'", file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", file.path("~/.MODIS_Opts.R",fsep="/"),"\'")
 
 	} else {
 	
 	# eval(parse("/home/matteo/R/x86_64-pc-linux-gnu-library/2.14/MODIS/external/MODIS_Opts.R"),env=opts)
 	opts  <- new.env()
 	eval(parse(file.path(find.package("MODIS"), "external","MODIS_Opts.R")),env=opts) # if we need to add an option, this makes it possible
-	eval(parse(file.path("~/.MODIS_Opts.R")),env=opts) # user options are overroling the defaults
+	eval(parse(file.path("~/.MODIS_Opts.R",fsep="/")),env=opts) # user options are overroling the defaults
 	opt <- as.list(opts)	
 
-	optfile  <- file.path("~/.MODIS_Opts.R")
+	optfile  <- file.path("~/.MODIS_Opts.R", fsep = "/")
 	filename <- file(optfile, open="wt")
 
 	write('# This file contains default values for the R package \'MODIS\'.', filename)
