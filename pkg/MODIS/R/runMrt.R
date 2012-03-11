@@ -190,7 +190,7 @@ for (z in 1:length(pm$product$PRODUCT)){
 						if (mos) {
 							TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
 							### in subset
-							paraname <- file.path(pm$outDirPath,"MRTgMosaic.prm",fsep="/") # create mosaic prm file
+							paraname <- file.path(pm$outDirPath,"/MRTgMosaic.prm",fsep="/") # create mosaic prm file
 							filename = file(paraname, open="wt")
 							write(paste(files,sep='',collapse=' '), filename)
 							close(filename)
@@ -220,7 +220,7 @@ for (z in 1:length(pm$product$PRODUCT)){
 						}
 	
 #### Write prm File
-						paraname <- paste(pm$outDirPath,"MRTgResample.prm",sep="")
+						paraname <- paste(pm$outDirPath,"/MRTgResample.prm",sep="")
 						filename = file(paraname, open="wt")
 
 						if (mos){
