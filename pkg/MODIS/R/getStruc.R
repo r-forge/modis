@@ -35,14 +35,13 @@ dates <- transDate(begin=begin,end=end)
 ########################
 
 # load aux
-if (file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))) {
-	ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
-} else {
-	#	data(paste(server,"_ftp.txt",sep="")
-	ftpdirs <- read.table(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep=""))) 
+if (!file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))) {
+	invisible(file.copy(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep="")),file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/")))
 }
+
+ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
 good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
-ftpdirs <- ftpdirs[,good] # remove wrong colls
+ftpdirs <- ftpdirs[,good] # remove wrong cols
 
 
 for (i in 1:length(product$PRODUCT)){
@@ -51,7 +50,7 @@ for (i in 1:length(product$PRODUCT)){
 	
 	for(u in 1:length(todo)){
 		
-		path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
+		path <- .genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
 		
 		if (server =="LAADS") { # test if the product is available on "LAADS", may it is better to first check "getIT=T/F" and than to make this test 
 			for (g in 1:sturheit){

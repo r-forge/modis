@@ -100,7 +100,7 @@ return(invisible(unlist(dates)))
 
 		if (product$TYPE[z]=="Swath") {
 			cat("'Swath'-products not yet supported, yumping to the next.\n")
-		}else{
+		} else {
 
 			todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
 		
@@ -145,8 +145,7 @@ return(invisible(unlist(dates)))
 						datu <- paste("A",year,doy,sep="")
 						mtr  <- rep(1,ntiles) # for file availability flaging
 	
-						# creates local directory (HDF file container)
-						path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
+						path <- .genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
 	
 						for(j in 1:ntiles){
 	
@@ -154,7 +153,7 @@ return(invisible(unlist(dates)))
 		
 							if (length(dir(path$localPath,pattern=dates[[l]][i,j+1]))>0){ # if available locally
 		
-								HDF <- dir(path$localPath,pattern=dates[[l]][i,j+1])  # extract HDF file
+								HDF <- dir(path$localPath,pattern=dates[[l]][i,j+1]) # extract HDF file
 		
 								if (length(HDF)>1) { # in very recent files sometimes there is more than 1 file/tile/date if so get the last
 									select <- list()
