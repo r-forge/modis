@@ -178,14 +178,17 @@ for (z in 1:length(pm$product$PRODUCT)){
 					}
 		
 					for (q in v) {
-		
+						
+						w <- options("warn")
+						options(warn=-1)
 						if (is.null(pm$SDSstring)) {
 							pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],MRTpath=pm$MRTpath,method="mrt")))
 						}	
 			
 						SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,method="mrt",MRTpath=pm$MRTpath)
-	
-						if (!pm$quiet && u == 1 && l == 1) {cat("\nExtracing SDS:",SDSstringIntern$SDSnames,sep="\n ")}
+						options(warn=w$warn)
+						
+						if (!pm$quiet && u == 1 && l == 1) {cat("\n#############################\nExtracing SDS:",SDSstringIntern$SDSnames,"#############################\n",sep="\n")}
 	
 						if (mos) {
 							TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
