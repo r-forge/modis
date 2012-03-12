@@ -26,13 +26,13 @@
 # 1.) Path and archive structure defaults:
   
 # set real path. All data will be stored below this directory. If it doesn't exist it is created.
-localArcPath <- '~/MODIS_ARC'
+localArcPath <- '~/MODIS_ARC' # Don't forget to call the function 'orgStruc()' after changing here!!
   
 # set, real path, default output location for GDAL, FWT, SSOAP, MRT processing results. If it doesn't exist it is created.
 outDirPath   <- '~/MODIS_ARC/PROCESSED'
   
 # define, local archive structure. USE 'placeholdes'!!
-arcStructure <- '/PRODUCT.CCC/DATE'
+arcStructure <- '/PRODUCT.CCC/DATE' # Don't forget to call the function 'orgStruc()' after changing here!!
   
 #########################
 # 2.) Processing defaults:
@@ -49,7 +49,7 @@ outProj        <- 'GEOGRAPHIC'
 # DATE1DATE2 period start/end (MERIS specific)
 # REGION (MERIS specific) MERIS date is stores in regions
 
-# ftpstring0 <- list(name='sitename',SENSOR='sensorname', basepath='/base/path',variablepath='/variable/path/',content=c('what data is awailable? The idea is more images + aux data and not dataformats!
+# ftpstring0 <- list(name='sitename',SENSOR='sensorname', basepath='/base/path',variablepath='/variable/path/',content=c('what data is awailable? 'images', 'metadata'!
   
 ftpstring1 <- list(name = "LPDAAC", SENSOR = "MODIS", basepath = "ftp://e4ftl01.cr.usgs.gov", variablepath = "/PF1/PRODUCT.CCC/DATE/", content = c("images", "metadata"))
   
