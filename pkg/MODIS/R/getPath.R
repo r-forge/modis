@@ -3,6 +3,7 @@
 # Version 0.1
 # Licence GPL v3
 
+# TODO Path ounce found put it to /.MODIS_opts.R # Then if path exists in /.MODIS_opts.R just test it! 
 
 getPath <- function(deep=FALSE,quiet=FALSE){
 
