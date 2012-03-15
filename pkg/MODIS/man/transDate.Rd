@@ -4,31 +4,27 @@
 
 \alias{transDate}
 
-\title{internal function that transform character to a object of class 'date'}
+\title{Function for MODIS date conversions and testing.}
 
-\description{
-  Interal function, for date conversion}
+\description{This function converts input dates (begin and end) to 'YYYY-MM-DD' and 'YYYYDDD'. If no dartes are specified the function uses a past and future date!}
 
 \usage{transDate(begin=NULL,end=NULL)}
 
 \arguments{
-  \item{begin}{character string with the following sequence: "YYYY.MM.DD", separator can be any (".","-","/",...)}
-  \item{end}{character string with the following sequence: "YYYY.MM.DD", separator can be any (".","-","/",...)}
+  \item{begin}{character string with the following sequences: "YYYY.MM.DD" or "YYYYDDD", separator can be any (".","-","/",...)}
+  \item{end}{character string with the following sequences: "YYYY.MM.DD" or "YYYYDDD", separator can be any (".","-","/",...)}
 } 
 
 \value{
-  list with 2 slots of class 'date'
+  character list with 4 slots of class (run the function to see)
 }
 
 \author{
   Matteo Mattiuzzi
 }
 
-\seealso{
-  \code{\link{getHdf}}
-}
-
 \examples{
+
 transDate()
 
 transDate(begin="2009.01.01")

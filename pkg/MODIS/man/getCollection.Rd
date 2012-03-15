@@ -5,11 +5,9 @@
 \alias{getCollection}
 \alias{localArcPath,product,collection,newest,forceCheck,as,stubbornness,quiet}
 
-\title{Retrieve available version of MODIS product collections}
+\title{Get available collections of MODIS product}
 
-\description{
-This function will become internal. It will be used if no collection is spezified in the different functions i.e.: \code{getHdf}
-}
+\description{Handles the input of a MODIS product collection.}
 
 \usage{getCollection(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)}
 
@@ -46,13 +44,16 @@ This function will become internal. It will be used if no collection is spezifie
 }
 
 \examples{
-\dontrun{
-# update or get the existing collections for MOD11C3 and MYD11C3
-getCollection(product="MxD11C3")
-getCollection(product="MxD11C3",newest=FALSE)
+# update or get collections for MOD11C3 and MYD11C3
+getCollection(product="M.D11C3")
+getCollection(product="M.D11C3",newest=FALSE)
 
-getCollection(product="MxD11C3",collection=3)
-getCollection(product="MxD11C3",collection=41)
-getCollection(product="MxD11C3",collection="041")
+getCollection(product="M.D11C3",collection=3)
+getCollection(product="M.D11C3",collection=41)
+getCollection(product="M.D11C3",collection="041")
+
+\dontrun{
+getCollection(product="M.D11C3",forceCheck=TRUE)
 }
+
 }

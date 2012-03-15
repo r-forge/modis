@@ -15,7 +15,7 @@ This function generates bounding box information for a global tiling system
 
 \arguments{
 
-  \item{tileSize}{Numeric. Size of a single tile, in degree (Lat/Lon, WGS84)}
+  \item{tileSize}{Numeric. Size of a single tile, in degrees (Lat/Lon, WGS84)}
 
   \item{offset}{Numeric. Shift the tiling system in upper-left direction.}
 

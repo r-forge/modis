@@ -7,13 +7,13 @@
 \title{Run MRT-grid with specified parameters}
 
 \description{
-  Spezifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
+Specifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
 
 \usage{runMrt(ParaSource=NULL,...)}
 
 \arguments{
-  \item{ParaSource}{Text file. Run: \code{runMrt()} or the MRT grid Manual for more information.}
-  \item{...}{See: Section Methods or see ParaSource file.}
+  \item{ParaSource}{Text file. Run: \code{runMrt()} and look in the MRT-grid Manual for more information.}
+  \item{...}{See: Methods or see ParaSource file.}
 
 } 
 
