@@ -63,7 +63,7 @@ getTile(extent=ext)
 # require(mapdata)
 # If you pass a character name to extent a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
 # Use with caution! The following example includes much more areas than the main USA. Look at \code{map('worldHires','usa')} result.
-# Maybe before using this option run a test \code{map('worldHires',yourExtent)}. Check awailability of maps with: \code{map('worldHires',plot=FALSE)$names}.}
+# Maybe before using this option run a test \code{map('worldHires',yourExtent)}. Check awailability of maps with: \code{map('worldHires',plot=FALSE)$names}.
 
 getTile(extent='usa')
 getTile(extent=map('usa',plot=FALSE)) # it is also possible to put an map object. in this specific example the low resolution map is used!

@@ -44,6 +44,8 @@
 }
 
 \examples{
+\dontrun{
+
 # update or get collections for MOD11C3 and MYD11C3
 getCollection(product="M.D11C3")
 getCollection(product="M.D11C3",newest=FALSE)
@@ -51,8 +53,6 @@ getCollection(product="M.D11C3",newest=FALSE)
 getCollection(product="M.D11C3",collection=3)
 getCollection(product="M.D11C3",collection=41)
 getCollection(product="M.D11C3",collection="041")
-
-\dontrun{
 getCollection(product="M.D11C3",forceCheck=TRUE)
 }
 
