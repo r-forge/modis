@@ -28,7 +28,7 @@ if (method=="gdal"){
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
 	}
 
-	SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_.._NAME",value=T)
+	SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_[0-9]{1,2}_NAME",value=T)
 
 	SDSnames <- unlist(lapply(SDSnames,function(x) strsplit(x,"=")[[1]][2]))
 
