@@ -7,7 +7,7 @@ runMrt <- function(ParaSource=NULL,...){ #, mosaic=TRUE, anonym=TRUE, MRTpath="c
 # Collect parameters from any possible source
 if (!is.null(ParaSource)) {
 		fe  <- new.env()
-		eval(parse(ParaSource),env=fe)
+		eval(parse(ParaSource),envir=fe)
     sp <- as.list(fe)
     dp <- list(...)
  		pm <- c(sp, dp[(!names(dp) %in% names(sp))])

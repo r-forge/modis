@@ -5,7 +5,7 @@
     if(!file.exists("~/.MODIS_Opts.R")) {stop("\nCan't find the MODIS settings file in: \'",path.expand('~/.MODIS_Opts.R'),"\'\nCheck the location or copy and modify: \'",file.path(find.package('MODIS'),'external','MODIS_Opts.R'),"\' to: \'",path.expand('~/.MODIS_Opts.R'), "\'",sep="")}
 
 defOpts  <- new.env() # opts are loaded to a personal envir
-eval(parse(file.path("~/.MODIS_Opts.R")),env=defOpts)
+eval(parse(file.path("~/.MODIS_Opts.R")),envir=defOpts)
 opt2 <- as.list(defOpts)    
 opt1 <- list(...) # if only a subset of opts should be readed
 
