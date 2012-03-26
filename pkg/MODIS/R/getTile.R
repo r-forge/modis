@@ -33,10 +33,26 @@ getTile <- function (tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sy
         extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
 
         } else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) { # if RASTER* object
-            if (class(extent) != "Extent") {
-                extent <- extent(extent)
-            }
-        extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
+        	if (!inherits(extent,"Extent")) {
+        	 	inproj <- projection(extent)
+           	if (!inproj %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) {
+        	 		require(rgdal)
+           		ex <- extent(extent)
+           		xy <- matrix(c(ex@xmin,ex@ymin,ex@xmin,ex@ymax,ex@xmax,ex@ymax,ex@xmax,ex@ymin),ncol=2,nrow=4,byrow=TRUE)
+           		colnames(xy) <- c("x","y")
+           		xy <- as.data.frame(xy)
+           		coordinates(xy) <- c("x","y")
+           		proj4string(xy) <- CRS(inproj)
+ 							outBB  <- spTransform(xy,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))@bbox
+							extent <- list(xmin=outBB["x","min"],xmax=outBB["x","max"],ymin=outBB["y","min"],ymax=outBB["y","max"])
+						} else {
+	      	  	extent <- extent(extent)
+							extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
+						}
+					} else {
+	    	  	extent <- extent(extent)
+						extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
+        	}
         } 
         
         if (inherits(extent, "list")) {
