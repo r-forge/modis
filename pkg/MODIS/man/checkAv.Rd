@@ -28,7 +28,7 @@
 
   \item{collection}{Character or integer. Refers to the MODIS product collection-version. Often '005', but see MODIS pages for more information.} 
 
-  \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}, if \code{TRUE} the \code{getHDF} becomes really boring.}
+  \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}, if \code{TRUE} the \code{getHdf} becomes really boring.}
 
   \item{localArcPath}{Character. Default is \code{MODIS:::.getDef('localArcPath')}. Set path to the data archive, it is created if it doesn't exists.}
 }
