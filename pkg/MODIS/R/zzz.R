@@ -4,7 +4,7 @@
 	
 	if (!file.exists("~/.MODIS_Opts.R")) {
 
-	packageStartupMessage("#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe 'defaults' file does not exist! This file contains all important package options.\nOpen \'", file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", file.path("~/.MODIS_Opts.R",fsep="/"),"\'")
+	packageStartupMessage("#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe 'defaults' file does not exist! This file contains all important package options.\nOpen \'", file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"\'")
 
 	} else {
 	
