@@ -25,9 +25,9 @@
 
 \details{
 \code{extent}: \cr
-\tab If 'list': \code{myExtent <- list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
-\tab If 'character', the country name from \code{mapdata}. \cr
-\tab Or one of the following objects from package raster: \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'}. If extent is a raster* object, and has a valid CRS a re-projection of the raster*object's bbox (using \code{rgdal:::spTransform()}) to LatLon is performed, so you should be able to use a raster*object of any projection as extent argument (double check the result!).
+If 'list': \code{myExtent <- list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
+If 'character', the country name from \code{mapdata}. \cr
+Or one of the following objects from package raster: \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'}. If extent is a raster* object, and has a valid CRS a re-projection of the raster*object's bbox (using \code{rgdal:::spTransform()}) to LatLon is performed, so you should be able to use a raster*object of any projection as extent argument (double check the result!).
 }
 
 \value{List}
