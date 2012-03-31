@@ -34,7 +34,7 @@
 }
 
 \value{
-  list with 2 slots: number of 'requested' files and the mumber of locally 'available' data
+  list with 2 slots: number of totaly needed ('requested') files and the mumber of localy 'available' data.
 }
 
 \author{
