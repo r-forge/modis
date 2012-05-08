@@ -10,7 +10,7 @@
   Each MODIS-HDF file has a xml-metafile. This data contains useful
   meta-information about the MODIS-hdf file. Within that package, the
   xml-files are used to check the size of the downloaded hdf files, and
-  correcting the so often broken downloads. 'getXML' checks locally for the presence of spezified xml files and if not available it retrieves them from the MODIS ftp server.
+  correcting the so often broken downloads. 'getXml' checks locally for the presence of spezified xml files and if not available it retrieves them from the MODIS ftp server.
 }
 
 \usage{
