@@ -3,7 +3,7 @@
 \docType{data}
 \title{Sinusoidal Grid Bounding Coordinates of MODLAND Tiles}
 \description{
-Function \code{?getTILE} uses this information to get the tile id for any location (Lat/Lon)
+Function \code{?getTile} uses this information to get the tile id for any location (Lat/Lon)
 }
 \usage{data(tiletable)}
 \format{
