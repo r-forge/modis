@@ -22,6 +22,6 @@ Function \code{?getTile} uses this information to get the tile id for any locati
 }
 \examples{
 data(tiletable)
-## maybe str(tiletable) ; plot(tiletable) ...
+tiletable[160:170,]
 }
 \keyword{datasets}
