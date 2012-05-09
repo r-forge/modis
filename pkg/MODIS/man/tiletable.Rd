@@ -18,7 +18,7 @@ Function \code{?getTile} uses this information to get the tile id for any locati
   }
 }
 \source{
-\code{http://landdb1.nascom.nasa.gov/developers/sn_tiles/sn_bound_10deg.txt}
+\code{http://landweb.nascom.nasa.gov/developers/sn_tiles/sn_bound_10deg.txt}
 }
 \examples{
 data(tiletable)
