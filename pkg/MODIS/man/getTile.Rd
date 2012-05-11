@@ -2,13 +2,13 @@
 
 \docType{methods}
 \alias{getTile}
-\alias{getTile,tileH,tileV,extent,buffer,system}
+\alias{getTile,tileH,tileV,extent,buffer,system, zoom}
 
 \title{Get MODIS tile id(s)}
 
 \description{Get MODIS tile id(s) for a geographic area.}
 
-\usage{getTile(tileH,tileV,extent,buffer=NULL,system="MODIS")}
+\usage{getTile(tileH=NULL,tileV=NULL,extent=NULL,buffer=NULL,system="MODIS",zoom=TRUE)}
 
 \arguments{
 
@@ -21,12 +21,14 @@
   \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(x,y)}. }
 
   \item{system}{Character. Default is \code{MODIS}. Alternative is the \code{MERIS} tiling system, (implemented but not tested!!) from culture-MERIS dataset. See \code{?genTile}!}
+  \item{zoom}{Logical, default \code{TRUE}. The interactive mode is only activated if no other extent arguments ("extent","tileH", "tileV") are specified. If \code{zoom==TRUE} the first 2 clicks on the map are defining the zoom-in area, and the next 2 clicks the download area. For large areas you can set to \code{FALSE}.}  
+
 }
 
 \details{
 \code{extent}: \cr
 If 'list': \code{myExtent <- list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
-If 'character', the country name of \code{mapdata}. \cr
+If 'character', the country name check \code{mapdata} for it. \cr
 Or one of the following objects of the package raster: \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'}. If extent is a raster* object, and has a valid CRS a re-projection of the raster*object's bbox (using \code{rgdal:::spTransform()}) to LatLon is performed, so you should be able to use a raster*object of any projection as extent argument (double check the result!).
 }
 
@@ -41,7 +43,16 @@ Or one of the following objects of the package raster: \code{'extent','rasterLay
 }
 
 \examples{
+\dontrun{
+#############
+# drawing the extent. NOTE: It is not possible to draw a date-line crossing area!
+# draw extent with zoom, for smaller extents
+getTile()
 
+# draw extent without zoom, for large areas
+getTile(zoom=FALSE)
+
+}
 #############
 # with tileH and tileV
 getTile(tileH=18:19,tileV=4)

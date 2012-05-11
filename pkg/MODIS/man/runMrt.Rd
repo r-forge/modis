@@ -45,6 +45,10 @@ Specifying input parameters this function, gets MODIS grid data from archive (FT
   \code{\link{getHdf}}
 }
 
+\source{
+You can obtain MRT-grid after registration from: \url{https://lpdaac.usgs.gov/tools/modis_reprojection_tool}
+}
+
 \examples{
 \dontrun{
 runMrt()
