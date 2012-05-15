@@ -2,14 +2,16 @@
 # Date : January 2012
 # Licence GPL v3
 
-genTile <- function(tileSize=1,offset=0) {
+genTile <- function(tileSize=1,offset=0,StartNameFrom=c(0,0),extent=list(xmin=-180,xmax=180,ymin=-90,ymax=90)) {
 
 # offset is used in case of pixel centrum reference. In such case the offset is res/2
 if (offset!=0) {cat("Warning! Tiles crossing LAT extremas (-90 and +90) are not meaningfull for now! For those tiles the resulting shift in LON is not computed!\n")} 
 
 # set origin in UL
-LON <- seq(-180,179,by=tileSize)
-LAT <- seq(90,-89,by=-tileSize)
+LON <- seq(extent$xmin,extent$xmax,by=tileSize)
+LON <- LON[-length(LON)]
+LAT <- seq(extent$ymax,extent$ymin,by=-tileSize)
+LAT <- LAT[-length(LAT)]
 
 LON <- LON - offset 
 LAT <- LAT + offset
@@ -17,8 +19,8 @@ LAT <- LAT + offset
 tiles <- expand.grid(LON,LAT)
 colnames(tiles) <- c("xmin","ymax")
 
-iv <- 0:(length(LON)-1)
-ih <- 0:(length(LAT)-1)
+iv <- (0:(length(LON)-1)) + StartNameFrom[2]
+ih <- (0:(length(LAT)-1)) + StartNameFrom[1]
 
 vh <- expand.grid(iv,ih)
 tiles$iv <- vh[,2]

@@ -27,10 +27,28 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	ftpdirs <- data.frame()
 }
 
+if(productN$PRODUCT=="SRTM") { # TEMP!
+	if (sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
+		SRTM <- rep(NA,nrow(ftpdirs))
+		SRTM[1] <- 41	
+		ftpdirs <- cbind(ftpdirs,SRTM)
+		write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
+	}
+	ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
+	cols <- ftpdirs[,ind]
+	cols <- cols[!is.na(cols)]
+
+	if (as=="character"){
+		return(as.character(sprintf("%03d",cols[1])))
+	} else {
+		return(cols[1])
+	}
+}
+
 if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 	require(RCurl)
 	sturheit <- .stubborn(level=stubbornness)
-
+	
 	for (i in 1:length(unique(productN$PF1))) {		
 		
 		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")

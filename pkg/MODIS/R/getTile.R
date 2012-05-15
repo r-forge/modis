@@ -9,6 +9,9 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 	if (toupper(system) == "MERIS") {
 		tiletable <- genTile(tileSize = 5)
 		old <- TRUE
+	} else if (toupper(system) == "SRTM") {
+		tiletable <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
+		old <- TRUE
 	}
 	
 	if (isTRUE(is.null(c(tileH,tileV,extent)))) {

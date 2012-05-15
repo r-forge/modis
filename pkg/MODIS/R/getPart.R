@@ -28,7 +28,7 @@
               COMPRESSION = x$COMPRESSION,
               DATE1DATE2 = x$DATE1DATE2,
               PROCESSINGDATE = x$PROCESSINGDATE,
-              #REGION = getTILE(x$TILE,system="MERIS") # TODO get REGION by Tile
+              #REGION = getTile(x$TILE,system="MERIS") # TODO get REGION by Tile
               REGION = "EuropeAfrica", # the only supported for now!
               TIME = x$TIME
               )
