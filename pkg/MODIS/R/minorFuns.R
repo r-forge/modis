@@ -8,24 +8,41 @@ if (is.numeric(level)) {
 	}
 }
 
-.checksizefun <- function(HdfWithPath){
-	require(XML)
 
-	xmlfile  <- paste(HdfWithPath,".xml",sep="")
-	xmlfile  <- xmlParse(xmlfile)
-	MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
-	MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
-	
+file.size <- function(file,units="b"){
 	if (.Platform$OS.type == "unix") {
-		FileSize <- as.numeric(system(paste("stat -c %s ",HdfWithPath,sep=""), intern=TRUE))
+		FileSize <- as.numeric(system(paste("stat -c %s ",file,sep=""), intern=TRUE))
 	} else if (.Platform$OS.type == "windows") {
-		FileSize <- as.numeric(shell(paste("for %I in (",HdfWithPath,") do @echo %~zI",sep=""),intern=TRUE))
+		FileSize <- as.numeric(shell(paste("for %I in (",file,") do @echo %~zI",sep=""),intern=TRUE))
 	} else {
 		stop("Only Unix/Linux and Windows supported, please tell me which system you use!")
 	}
+	uni <- c(1,1024,1024*1024,1024*1024*1024) 
+	names(uni) <- toupper(c("b","Kb", "Mb", "Gb"))
+	FileSize <- as.numeric(FileSize/uni[toupper(units)])
+return(FileSize)
+}
 
-	isOK <- (MetaSize == FileSize)
 
+.checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0){
+
+	# determine reference size
+	if (type=="MODIS"){ 
+		require(XML)
+		xmlfile  <- paste(file,".xml",sep="")
+		xmlfile  <- xmlParse(xmlfile)
+		MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
+		MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
+	} else {
+		MetaSize <- as.numeric(SizeInfo[which(SizeInfo[,1]==basename(file)),2])
+	}
+	
+	FileSize <- file.size(file)
+	if (flexB!=0){
+		isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB) 	
+	} else {
+		isOK <- (MetaSize == FileSize)
+	}
 	res  <- list(MetaSize,FileSize,isOK)	
 	names(res) <- c("MetaSize","FileSize","isOK")
 return(res)	

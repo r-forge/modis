@@ -5,12 +5,12 @@
 ################################
 # getPATH takes as argument ONLY a .defineName() or a getProduct() result, or basicaly a vector with named "nodes"
 ################################
-.getPart <- function(x , what = c("YYYY","DDD","DATE","SENSOR","PF1","PF2","PLATFORM","TILE","C","CCC","PRODUCT","FORMAT","COMPRESSION","DATE1DATE2","PROCESSINGDATE","REGION","TIME")){    
+.getPart <- function(x , what = c('YYYY','DDD','DATE','SENSOR','PF1','PF2','PLATFORM','TILE','C','CCC','PRODUCT','FORMAT','COMPRESSION','DATE1DATE2','PROCESSINGDATE','REGION','TIME')){    
       if (missing(x)){return(cat("Available 'placeholders' are:",what,"\n",sep=" "))}
       
       what <- match.arg(what)
       switch(what,
-              YYYY = substring(x$DATE,2,5), # works with AYYYYDDD input
+              YYYY = substring(x$DATE,2,5), # works with AYYYYDDD input # TODO a scanning function to detect teh first numeric value in x$DATE
               DDD  = substring(x$DATE,6,8), # works with AYYYYDDD input
               DATE = gsub(transDate(begin=substring(x$DATE,2,8),)$begin,pattern="-",replacement="."), # works with AYYYYDDD input
               SENSOR = x$SENSOR,

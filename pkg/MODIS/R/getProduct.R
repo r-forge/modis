@@ -141,7 +141,7 @@ return(unlist(res))
 # TODO enhancement of SENSOR/PRODUCT detection capabilities! 
 # the metods below are based on the results of the strsplit().
 
-.defineName <- function(x) { # "x" is a MODIS or culture-MERIS filename
+.defineName <- function(x) { # "x" is a MODIS,SRTM or culture-MERIS filename
 	
 	if(missing(x)) {
 		stop("x is missing, must be a MODIS, SRTM or culture-MERIS filename!")

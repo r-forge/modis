@@ -3,7 +3,7 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent,collection=NULL,dlmethod="auto",stubbornness="veryhigh",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
+getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
 
 localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
 dir.create(localArcPath,showWarnings=FALSE)
@@ -27,7 +27,7 @@ if (!missing(HdfName)){
 	HdfName[i] <- fname
 	rm(fname)
 
-	product <- getProduct(x=HdfName[i],quiet=TRUE)		
+	product <- getProduct(x=HdfName[i],quiet=TRUE)	
 	path    <- MODIS:::.genString(product)
 	dir.create(path$localPath,recursive=TRUE,showWarnings=FALSE)
 	
@@ -72,16 +72,20 @@ return(invisible(unlist(dates)))
 
 } else { # if HdfName isn't provided:
 
-	if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
-	if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
 	if (missing(product)){stop("Please provide the supported-'product'. See in: 'getProduct()'")}
-
-	#######
+	
+		#######
 	# check product
 	product <- getProduct(x=product,quiet=TRUE)
 	# check collection
 	product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
 	#########
+	
+	if (product$SENSOR=="MODIS"){
+	
+	if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
+	if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
+
 	# tranform dates
 	tLimits <- transDate(begin=begin,end=end)
 	#########
@@ -92,6 +96,84 @@ return(invisible(unlist(dates)))
 	ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 	#ftpdirs[[2]] <- read.table(file.path(auxPATH,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
+	} else if (product$SENSOR=="C-Band RADAR") {
+
+		if (!missing(tileH) & !missing(tileV)) {
+    	tileID <- getTile(tileH=tileH,tileV=tileV,system="SRTM")$tile
+		} else {
+			tileID <- getTile(extent=extent,system="SRTM")$tile
+ 		}
+ 		ntiles <- length(tileID)
+		path   <- MODIS:::.genString("SRTM")
+		files  <- paste("srtm",tileID,".zip",sep="")
+		dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
+		
+		if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) {
+			cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once, and the methadata is not used at the moment!\n")
+			download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
+			mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE)
+		}
+		if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/"))){
+			require(RCurl)
+			sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
+			sizes <- strsplit(sizes, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+			sizes <- sapply(sizes,function(x){x <- strsplit(x," ")[[1]];paste(x[length(x)],x[length(x)-5],sep=" ")})
+			names(sizes) <- NULL
+			write.table(sizes,paste(path$localPath,".SRTM_sizes",sep="/"),quote=FALSE,row.names=FALSE,col.names=FALSE)
+		}
+		sizes <- read.table(paste(path$localPath,".SRTM_sizes",sep="/"))
+
+		startIND <- 1:length(path$remotePath) # for cycling better over the servers
+		startIND <- rep(startIND,length(files))
+		
+		cat("Be avare, that the data sources for SRTM data have limited the number of requests!\n")
+		
+		for(d in seq(along=files)) {
+		
+			isOK <- TRUE
+			if (file.exists(paste(path$localPath,"/",files[d],sep=""))){
+				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=5000)$isOK
+			}
+			if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK) {
+				timeout <- options("timeout") # TEST I'm not sure if it helps
+				options(timeout=15)
+
+				for(g in 1:sturheit) {
+					server <- names(path$remotePath)[rep(startIND[d:(d+length(path$remotePath)-1)],length=sturheit)]
+					cat("Getting SRTM data from:",server[g],"\n")
+					Sys.sleep(wait)		
+									
+					hdf=1
+					try(
+						hdf <- download.file(
+							paste(path$remotePath[[server[g]]],"/", files[d],sep=""),
+							destfile=paste(path$localPath,"/", files[d], sep=""),
+							mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE),
+						silent=TRUE
+					)
+					if (hdf==0) {
+						SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",SizeInfo=sizes,flexB=5000)
+						if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
+					}
+					if(hdf==0 & !quiet) {
+						lastused <- server[g] 
+						if (g==1) {
+							cat("Downloaded by the first try!\n\n")
+						} else {
+							cat("Downloaded after",g,"retries!\n\n")
+						}
+					}
+					if(hdf==0) {break}	
+				}
+			options(timeout=as.numeric(timeout)) # set timeout back to default
+			}
+		}
+		SRTM <- paste(path$localPath,"/",files,sep="")
+
+
+		return(invisible(SRTM))
+	}
+	
 	dates  <- list()
 	output <- list() # path info for the invisible output
 	l=0

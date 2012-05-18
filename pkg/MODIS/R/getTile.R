@@ -44,7 +44,7 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 		} else {
 			text(x=-4,y=21,"OK extent set!\nclosing window...",cex=5)
 		}
-		Sys.sleep(1.9)
+		Sys.sleep(1.7)
 		dev.off()
 	}
 	
@@ -67,10 +67,10 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 			extent <- map("worldHires", extent, plot = FALSE)
 			extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
 	
-		} else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) { # if RASTER* object
+		} else if (class(extent) %in% c("Extent", "RasterLaer", "RasterStack","RasterBrick")) { # if RASTER* object
 			if (!inherits(extent,"Extent")) {
 				inproj <- projection(extent)
-				if (!inproj %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) {
+				if (!inproj %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) { # TODO a more trustful check than %in%!
 					require(rgdal)
 					ex <- extent(extent)
 					xy <- matrix(c(ex@xmin,ex@ymin,ex@xmin,ex@ymax,ex@xmax,ex@ymax,ex@xmax,ex@ymin),ncol=2,nrow=4,byrow=TRUE)
@@ -105,6 +105,14 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 			}
   	          
 			if(old){
+			
+				if (toupper(system) == "SRTM") {
+					if (extent$ymin >  60){stop("Latitudes are ouside SRTM coverage. Select an area inside Latitudes -60/+60\n")}
+					if (extent$ymax < -60){stop("Latitudes are ouside SRTM coverage. Select an area inside Latitudes -60/+60\n")}
+					if (extent$ymin < -60){extent$ymin <- -60; warning("Minimum Latitude is out of SRTM coverage, extent is reduced to min LAT -60\n")}
+					if (extent$ymax >  60){extent$ymax <- 60;  warning("Maximum Latitude is out of SRTM coverage, extent is reduced to max LAT 60\n")}
+				}
+				
 				minTile <- subset(tiletable, (tiletable$xmin <= extent$xmin & tiletable$xmax >= extent$xmin) & (tiletable$ymin <= extent$ymin & tiletable$ymax >= extent$ymin), select = c(iv, ih))
 				minTile <- c(min(minTile$iv), min(minTile$ih))
 				maxTile <- subset(tiletable, (tiletable$xmin <= extent$xmax & tiletable$xmax >= extent$xmax) & (tiletable$ymin <= extent$ymax & tiletable$ymax >= extent$ymax), select = c(iv, ih))
@@ -123,7 +131,11 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 				hsize <- nchar(hmax)
 				tiles <- list()
 				for (i in seq(along = tileH)) {
-					tiles[[i]] <- paste("h", sprintf(paste("%0", hsize, "d", sep = ""), tileH[i]), "v", sprintf(paste("%0", hsize, "d", sep = ""), tileV), sep = "")
+					if (toupper(system) == "SRTM"){
+						tiles[[i]] <- paste("_", sprintf(paste("%0", hsize, "d", sep = ""), tileH[i]), "_", sprintf(paste("%0", hsize, "d", sep = ""), tileV), sep = "")
+					} else {
+						tiles[[i]] <- paste("h", sprintf(paste("%0", hsize, "d", sep = ""), tileH[i]), "v", sprintf(paste("%0", hsize, "d", sep = ""), tileV), sep = "")						
+					}
 				}
 				result <- list(tile = unlist(tiles), tileH = tileH, tileV = tileV,extent = extent, system = system)
 				return(result)

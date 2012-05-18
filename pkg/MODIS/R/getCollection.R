@@ -27,75 +27,67 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	ftpdirs <- data.frame()
 }
 
-if(productN$PRODUCT=="SRTM") { # TEMP!
+if(productN$PRODUCT=="SRTM") { # TEMP! SRTM versions are added manually, no online chack is performad!
 	if (sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
 		SRTM <- rep(NA,nrow(ftpdirs))
 		SRTM[1] <- 41	
 		ftpdirs <- cbind(ftpdirs,SRTM)
 		write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
-	}
-	ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
-	cols <- ftpdirs[,ind]
-	cols <- cols[!is.na(cols)]
+	}	
+}	else {
+	
+	if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
+		require(RCurl)
+		sturheit <- .stubborn(level=stubbornness)
 
-	if (as=="character"){
-		return(as.character(sprintf("%03d",cols[1])))
-	} else {
-		return(cols[1])
-	}
-}
+		for (i in 1:length(unique(productN$PF1))) {		
+		
+			ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
+			
+			cat("Updating collections from LP DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
 
-if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
-	require(RCurl)
-	sturheit <- .stubborn(level=stubbornness)
-	
-	for (i in 1:length(unique(productN$PF1))) {		
-		
-		ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
-		
-		cat("Updating collections from LP DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
-	
-		if(exists("dirs")) {rm(dirs)}
-		for (g in 1:sturheit){
-			try(dirs <- getURL(ftp),silent=TRUE)
-			if(exists("dirs")){break}
-		} 
-	
-		if (!exists("dirs")) {
-			cat("FTP is not available, using stored information from previous calls (this is mostly fine)\n")
-		} else {
+			if(exists("dirs")) {rm(dirs)}
+				for (g in 1:sturheit){
+					try(dirs <- getURL(ftp),silent=TRUE)
+					if(exists("dirs")){break}
+				} 
+
+			if (!exists("dirs")) {
+				cat("FTP is not available, using stored information from previous calls (this is mostly fine)\n")
+			} else {
 			
-			dirs <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
-			dirs <- dirs[substr(dirs, 1, 1)=='l'] 
-			dirs <- sapply(strsplit(dirs, "/"), function(x){x[length(x)]})	
+				dirs <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
+				dirs <- dirs[substr(dirs, 1, 1)=='l'] 
+				dirs <- sapply(strsplit(dirs, "/"), function(x){x[length(x)]})	
+			
+				prod <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][1]})
+				coll <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][2]})
 		
-			prod <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][1]})
-			coll <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][2]})
-	
-			mtr  <- cbind(prod,coll)
-			mtr  <- tapply(INDEX=mtr[,1],X=mtr[,2],function(x){x})
-	
-			maxrow <- max(nrow(ftpdirs),sapply(mtr,function(x)length(x)))
-			
-			basemtr <- matrix(NA,ncol=nrow(mtr), nrow = maxrow)
-			colnames(basemtr) <- names(mtr)
-	
-			for(u in 1:ncol(basemtr)) {
-				basemtr[1:length(mtr[[u]]),u] <- mtr[[u]]
-			}
-			
-			if (nrow(ftpdirs) < maxrow & nrow(ftpdirs) > 0) {
-				ftpdirs <- rbind(ftpdirs,as.data.frame(NA,nrow=(maxrow-nrow(ftpdirs)), ncol=ncol(ftpdirs)))
+				mtr  <- cbind(prod,coll)
+				mtr  <- tapply(INDEX=mtr[,1],X=mtr[,2],function(x){x})
+		
+				maxrow <- max(nrow(ftpdirs),sapply(mtr,function(x)length(x)))
+				
+				basemtr <- matrix(NA,ncol=nrow(mtr), nrow = maxrow)
+				colnames(basemtr) <- names(mtr)
+		
+				for(u in 1:ncol(basemtr)) {
+					basemtr[1:length(mtr[[u]]),u] <- mtr[[u]]
 				}
 				
-			if (ncol(ftpdirs)==0){ # relevant only for time
-				ftpdirs <- data.frame(basemtr) # create new
-			} else { # or update the available one
-				indX    <- colnames(ftpdirs) %in% colnames(basemtr) 
-				ftpdirs <- cbind(ftpdirs[,!indX],basemtr)
+				if (nrow(ftpdirs) < maxrow & nrow(ftpdirs) > 0) {
+					ftpdirs <- rbind(ftpdirs,as.data.frame(NA,nrow=(maxrow-nrow(ftpdirs)), ncol=ncol(ftpdirs)))
+				}
+					
+				if (ncol(ftpdirs)==0){ # relevant only for time
+					ftpdirs <- data.frame(basemtr) # create new
+				} else { # or update the available one
+					indX    <- colnames(ftpdirs) %in% colnames(basemtr) 
+					ftpdirs <- cbind(ftpdirs[,!indX],basemtr)
+				}
+		
+			write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
 			}
-	
-		write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
 		}
 	}
 }
@@ -109,6 +101,7 @@ if(length(ind)==1){
 } else {
 	stop("No data available, check product input?") # should not happen getProduct() should catch that before
 }
+
 res <- lapply(res, function(x){as.numeric(as.character(x[!is.na(x)]))})
 
 if (!is.null(collection)) { # if collection is provided...return formatted collection or 'FALSE'
@@ -149,9 +142,6 @@ if (as=="character") {
 		sprintf("%03d",x)
 	})	
 }
-
 return(res)
 }
-
-
 
