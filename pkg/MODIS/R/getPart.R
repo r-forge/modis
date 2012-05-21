@@ -5,7 +5,7 @@
 ################################
 # getPATH takes as argument ONLY a .defineName() or a getProduct() result, or basicaly a vector with named "nodes"
 ################################
-.getPart <- function(x , what = c('YYYY','DDD','DATE','SENSOR','PF1','PF2','PLATFORM','TILE','C','CCC','PRODUCT','FORMAT','COMPRESSION','DATE1DATE2','PROCESSINGDATE','REGION','TIME')){    
+.getPart <- function(x, what = c('YYYY', 'DDD', 'DATE', 'SENSOR', 'PF1', 'PF2', 'PLATFORM', 'TILE', 'TILEV', 'TILEH', 'C', 'CCC', 'PRODUCT', 'FORMAT', 'COMPRESSION', 'DATE1DATE2', 'PROCESSINGDATE', 'REGION', 'TIME')){    
       if (missing(x)){return(cat("Available 'placeholders' are:",what,"\n",sep=" "))}
       
       what <- match.arg(what)
@@ -31,6 +31,8 @@
               #REGION = getTile(x$TILE,system="MERIS") # TODO get REGION by Tile
               REGION = "EuropeAfrica", # the only supported for now!
               TIME = x$TIME
+              TILEV = if (sign(x$TILEV)==-1) {paste("s",sprintf("%03d",abs(x$TILEV))} else {paste("n",sprintf("%03d",x$TILEV)}
+              TILEH = x$TILEH
               )
 }
 

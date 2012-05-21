@@ -15,7 +15,7 @@
 
 	product <- getProduct(x=x,quiet=TRUE)
 	if(length(product$PRODUCT)>1){cat(".genString() does not support multiple products! Generating the string only for the first:",product$PRODUCT[1],"\n")}
-	product <- lapply(product,function(x){x[1]})
+	product <- lapply(product,function(x){x[1]}) # take only the first argument
 
 	if(length(product$CCC)==0){
 		product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
@@ -25,7 +25,7 @@
 		product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) # generates MODIS file date format "AYYYYDDD"
 	}
 	
-	if (length(product$DATE)==0){ # if x is a PRODUCT and date is not provided 
+	if (is.null(product$DATE)){ # if x is a PRODUCT and date is not provided 
 		
 		if (local) {
 			struc <- opts$arcStruc
