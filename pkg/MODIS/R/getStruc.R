@@ -90,7 +90,10 @@ for (i in 1:length(product$PRODUCT)){
 	
 			if (getIT | forceCheck) {
 
-				require(RCurl)	
+				if (! require(RCurl) ) {
+					stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+				}
+
 				cat("Getting structure on ",server," for: ",todo[u],"\n",sep="")
 		
 				if(exists("FtpDayDirs")) {

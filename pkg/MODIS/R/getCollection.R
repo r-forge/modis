@@ -37,7 +37,10 @@ if(productN$PRODUCT=="SRTM") { # TEMP! SRTM versions are added manually, no onli
 }	else {
 	
 	if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
-		require(RCurl)
+		if (! require(RCurl) ) {
+			stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+		}
+		
 		sturheit <- .stubborn(level=stubbornness)
 
 		for (i in 1:length(unique(productN$PF1))) {		

@@ -27,8 +27,12 @@ return(FileSize)
 .checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0){
 
 	# determine reference size
-	if (type=="MODIS"){ 
-		require(XML)
+	if (type=="MODIS"){
+	
+		if (! require(XML) ) {
+			stop("You need to install the 'XML' package: install.packages('XML')")
+		}
+
 		xmlfile  <- paste(file,".xml",sep="")
 		xmlfile  <- xmlParse(xmlfile)
 		MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )

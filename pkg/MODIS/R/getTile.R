@@ -15,7 +15,10 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 	}
 	
 	if (isTRUE(is.null(c(tileH,tileV,extent)))) {
-		require(mapdata)
+		if (! require(mapdata) ) {
+			stop("You need to install the 'mapdata' package: install.packages('mapdata')")
+		}
+		
 		x11(width=16,height=9)
 		map("worldHires")
 		box()
@@ -59,7 +62,6 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 			ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
 	
 		} else if (inherits(extent, "character")) { # if CHARACTER (country name of MAP)
-			require(mapdata)
 			try(test <- map("worldHires", extent, plot = FALSE),silent = TRUE)
 			if (!exists("test")) {
 				stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires',',",extent, "')", sep = ""))
@@ -67,11 +69,13 @@ getTile <- function(tileH = NULL, tileV = NULL, extent = NULL, buffer = NULL,sys
 			extent <- map("worldHires", extent, plot = FALSE)
 			extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
 	
-		} else if (class(extent) %in% c("Extent", "RasterLaer", "RasterStack","RasterBrick")) { # if RASTER* object
+		} else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) { # if RASTER* object
 			if (!inherits(extent,"Extent")) {
 				inproj <- projection(extent)
 				if (!inproj %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) { # TODO a more trustful check than %in%!
-					require(rgdal)
+					if (! require(rgdal) ) {
+						stop("You need to install the 'rgdal' package: install.packages('rgdal')")
+					}
 					ex <- extent(extent)
 					xy <- matrix(c(ex@xmin,ex@ymin,ex@xmin,ex@ymax,ex@xmax,ex@ymax,ex@xmax,ex@ymin),ncol=2,nrow=4,byrow=TRUE)
 					colnames(xy) <- c("x","y")

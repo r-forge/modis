@@ -114,7 +114,9 @@ return(invisible(unlist(dates)))
 			mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE)
 		}
 		if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/"))){
-			require(RCurl)
+			if (! require(RCurl) ) {
+				stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+			}
 			sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
 			sizes <- strsplit(sizes, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
 			sizes <- sapply(sizes,function(x){x <- strsplit(x," ")[[1]];paste(x[length(x)],x[length(x)-5],sep=" ")})
@@ -252,8 +254,10 @@ return(invisible(unlist(dates)))
 						if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessary to go on ftp
 
 							if(exists("ftpfiles")) {rm(ftpfiles)}
-							require(RCurl) # get the filenames
-							
+							if (! require(RCurl) ) {
+								stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+							}
+			
 							for (g in 1:sturheit){ # get list of files in remote dir
 								server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
 								try(ftpfiles <- getURL(paste(path$remotePath[[server]],"/",sep="")),silent=TRUE)
