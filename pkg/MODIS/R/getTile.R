@@ -32,6 +32,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		
 		x11(width=16,height=9)
 		map("worldHires")
+		map.axes() 
 		box()
 		grid(36,18,col="blue",lwd=0.5)
 		abline(h=0,col="yellow",lwd=1)
@@ -39,7 +40,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			title("ZOOM in by selecting UL and LR points with the mouse!")			
 			# code taken from function raster:::drawExtent
 			loc1 <- locator(n = 1, type = "p", pch = "+", col = "red")
-			loc2 <- locator(n = 1,col = "red")
+			loc2 <- locator(n = 1, type = "p", pch = "+", col = "red")
 			loc  <- rbind(unlist(loc1), unlist(loc2))
 			#
 			p    <- rbind(c(min(loc[, "x"]), min(loc[,"y"])), c(min(loc[, "x"]), max(loc[, "y"])),c(max(loc[, "x"]), max(loc[, "y"])), c(max(loc[, "x"]), min(loc[,"y"])), c(min(loc[, "x"]),min(loc[,"y"])))
@@ -47,13 +48,14 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 
 			Sys.sleep(0.5)
 			map("worldHires",xlim=c(min(loc[, "x"]),max(loc[, "x"])),ylim=c(min(loc[,"y"]),max(loc[, "y"])))
+			map.axes() 
 			box()
 			grid(36,18,col="blue",lwd=0.5)			
 		}
 		title("Set UL and LR points with the mouse!")
 		# code taken from function raster:::drawExtent
 		loc1 <- locator(n = 1, type = "p", pch = "+", col = "red")
-		loc2 <- locator(n = 1,col = "red")
+		loc2 <- locator(n = 1, type = "p", pch = "+", col = "red")
 		loc  <- rbind(unlist(loc1), unlist(loc2))
 		# 
 		extent <- list(xmin=min(loc[, "x"]), xmax=max(loc[, "x"]), ymax=max(loc[, "y"]), ymin=min(loc[, "y"]))
@@ -140,7 +142,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 
 		try(test <- map("worldHires", extent, plot = FALSE),silent = TRUE)
 		if (!exists("test")) {
-			stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires',',",extent, "')", sep = ""))
+			stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires,'",extent, "')", sep = ""))
 		}
 		extent <- map("worldHires", extent, plot = FALSE)
 		extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))

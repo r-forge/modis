@@ -53,3 +53,34 @@ return(res)
 }
 
 
+search4map <- function(pattern="",database='worldHires',plot=FALSE){
+
+	if (!require(mapdata)){
+	stop("This function requires 'mapdata', please install it first: install.packages('mapdata')")
+	}
+
+	areas <- grep(x=map(database,plot=FALSE)$names,pattern=pattern,value=TRUE,ignore.case=TRUE)
+
+	if (length(areas)==0){
+		cat("No country (region or island) found! please change your pattern!\n")
+		return(invisible(NULL))
+	} else {
+
+	if (plot){
+		map(database,areas)
+		map.axes() 
+		box()
+		grid(36,18,col="blue",lwd=0.5)
+	
+		if(length(areas)>4) {
+			subareas <- paste(areas[1:3],collapse=", ") 
+			title(c(paste(subareas,"and",(length(areas)-3),"other")))
+		} else {
+			title(areas)
+		}
+	}
+	return(areas=areas)
+	}
+}
+
+
