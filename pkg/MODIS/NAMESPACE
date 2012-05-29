@@ -1,4 +1,3 @@
-importFrom("RCurl",getURL)
 #importFrom("raster",Extent, BasicRaster, Raster, RasterLayer, RasterBrick, RasterStack, RasterStackBrick)
 #importFrom("mapdata",map)
 exportPattern("^[^\\.]")

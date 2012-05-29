@@ -30,8 +30,8 @@
               PROCESSINGDATE = x$PROCESSINGDATE,
               #REGION = getTile(x$TILE,system="MERIS") # TODO get REGION by Tile
               REGION = "EuropeAfrica", # the only supported for now!
-              TIME = x$TIME
-              TILEV = if (sign(x$TILEV)==-1) {paste("s",sprintf("%03d",abs(x$TILEV))} else {paste("n",sprintf("%03d",x$TILEV)}
+              TIME = x$TIME,
+              TILEV = if (sign(x$TILEV)==-1) {paste("s",sprintf("%03d",abs(x$TILEV)))} else {paste("n",sprintf("%03d",x$TILEV))},
               TILEH = x$TILEH
               )
 }

@@ -16,7 +16,7 @@
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent,collection,dlmethod="auto",stubbornness="veryhigh",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath"))}
+\usage{getHdf(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath"))}
 
 \arguments{
 
@@ -71,15 +71,16 @@ getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
 
 # DO NOT RUN THE NEXT EXAMPLE (unless you need this data)!!!
 # Get all MODIS TERRA and AQUA 11A1 beginning from 18. October 2011 up to today.
-# If run in a scheduled batch job it will update the data until the very last available
-getHdf(product="MxD11A1",begin="2011.10.18",tileH=18:19,tileV=4) 
+# (Can be ran in a sceduled job, for daily archive update)
+# getHdf(product="MxD11A1",begin="2011.10.18",tileH=18:19,tileV=4) 
 
 # or the same with an (list) Extent
 Austria <- list(xmax=17.47,xmin=9.2,ymin=46.12,ymax=49.3)
 getHdf(product="MxD11A1",begin="2009001",end="2009-01-02",extent=Austria)
 
 require(mapdata)
-getHdf(product="MxD11A1",begin="2009.01.01",end="2009003",extent="austria")
+getHdf(product="MxD11A1",begin="2009.01.01",end="2009002",extent="austria")
+getHdf(product="SRTM",extent="austria") # SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
 }
 }
 

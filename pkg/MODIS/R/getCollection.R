@@ -27,8 +27,8 @@ if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
 	ftpdirs <- data.frame()
 }
 
-if(productN$PRODUCT=="SRTM") { # TEMP! SRTM versions are added manually, no online chack is performad!
-	if (sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
+if(productN$PRODUCT[1]=="SRTM") { # TEMP! SRTM versions are added manually, no online check is performad for now!
+	if (sum(!productN$PRODUCT[1] %in% colnames(ftpdirs))>0) {
 		SRTM <- rep(NA,nrow(ftpdirs))
 		SRTM[1] <- 41	
 		ftpdirs <- cbind(ftpdirs,SRTM)
@@ -47,7 +47,7 @@ if(productN$PRODUCT=="SRTM") { # TEMP! SRTM versions are added manually, no onli
 		
 			ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
 			
-			cat("Updating collections from LP DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
+			cat("Updating collections from LP_DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
 
 			if(exists("dirs")) {rm(dirs)}
 				for (g in 1:sturheit){
@@ -56,7 +56,7 @@ if(productN$PRODUCT=="SRTM") { # TEMP! SRTM versions are added manually, no onli
 				} 
 
 			if (!exists("dirs")) {
-				cat("FTP is not available, using stored information from previous calls (this is mostly fine)\n")
+				cat("FTP is not available, using stored information from previous calls (this should be mostly fine)\n")
 			} else {
 			
 				dirs <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....

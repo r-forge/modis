@@ -9,7 +9,7 @@ if (is.numeric(level)) {
 }
 
 
-file.size <- function(file,units="b"){
+.file.size <- function(file,units="b"){
 	if (.Platform$OS.type == "unix") {
 		FileSize <- as.numeric(system(paste("stat -c %s ",file,sep=""), intern=TRUE))
 	} else if (.Platform$OS.type == "windows") {
@@ -41,7 +41,7 @@ return(FileSize)
 		MetaSize <- as.numeric(SizeInfo[which(SizeInfo[,1]==basename(file)),2])
 	}
 	
-	FileSize <- file.size(file)
+	FileSize <- .file.size(file)
 	if (flexB!=0){
 		isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB) 	
 	} else {

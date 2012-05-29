@@ -13,7 +13,7 @@ if(!exists("testDir")) {stop("'localArcPath' not set properly!")}
 
 auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
 
-sturheit <- .stubborn(level=stubbornness)
+sturheit <- MODIS:::.stubborn(level=stubbornness)
 
 # TODO HdfName as regex
 
@@ -81,7 +81,7 @@ return(invisible(unlist(dates)))
 	product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
 	#########
 	
-	if (product$SENSOR=="MODIS"){
+	if (product$SENSOR[1]=="MODIS"){
 	
 	if (is.null(begin)) {cat("No begin(-date) set, getting data from the beginning\n")} 
 	if (is.null(end))   {cat("No end(-date) set, getting data up to the most actual\n")} 
@@ -109,7 +109,7 @@ return(invisible(unlist(dates)))
 		dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
 		
 		if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) {
-			cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once, and the methadata is not used at the moment!\n")
+			cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once (the metadata is not used at the moment!)\n")
 			download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
 			mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE)
 		}
@@ -128,7 +128,7 @@ return(invisible(unlist(dates)))
 		startIND <- 1:length(path$remotePath) # for cycling better over the servers
 		startIND <- rep(startIND,length(files))
 		
-		cat("Be avare, that the data sources for SRTM data have limited the number of requests!\n")
+		cat("Be avare, that some sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
 		
 		for(d in seq(along=files)) {
 		
@@ -202,12 +202,7 @@ return(invisible(unlist(dates)))
  					 } else {stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")}
 					ntiles <- length(tileID)
 				}
-	
-				# us <- lapply(ftpdirs,function(x){
-				#		x <- as.Date(x,format="%Y.%m.%d")
-				#		x <- x >= tLimits$begin & x <= tLimits$end
-				# }) # convert to date
-				
+					
 				datedirs <- ftpdirs[[1]][,todo[u]]
 				datedirs <- datedirs[!is.na(datedirs)]			
 				sel <- as.Date(datedirs,format="%Y.%m.%d")
@@ -264,7 +259,7 @@ return(invisible(unlist(dates)))
 								if(exists("ftpfiles")){break}
 								Sys.sleep(as.numeric(wait))
 							}
-							if(!exists("ftpfiles")) {stop("Problems with FTP connections try a little later")} # This breaks the entire job! it schouldn't, better to jump to the next file...may it is local!
+							if(!exists("ftpfiles")) {stop("Problems with FTP connections try a little later")} # TODO This breaks the entire job! it schouldn't, better to jump to the next file...may it is local!
 			
 							ftpfiles <- strsplit(ftpfiles, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
 	

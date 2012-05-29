@@ -8,7 +8,7 @@
 
 \description{Get MODIS tile id(s) for a geographic area.}
 
-\usage{getTile(tileH=NULL,tileV=NULL,extent=NULL,buffer=NULL,system="MODIS",zoom=TRUE)}
+\usage{getTile(extent=NULL,tileH=NULL,tileV=NULL,buffer=NULL,system="MODIS",zoom=TRUE)}
 
 \arguments{
 
@@ -52,7 +52,6 @@ getTile()
 # draw extent without zoom, for large areas
 getTile(zoom=FALSE)
 
-}
 #############
 # with tileH and tileV
 getTile(tileH=18:19,tileV=4)
@@ -96,7 +95,7 @@ getTile(extent=ext)
 
 # or:
 getTile(extent=c('austria','germany','switzerland'))
-
+}
 }
 
 

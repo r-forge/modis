@@ -2,37 +2,38 @@
 # Date : August 2011
 # Licence GPL v3
 	
-getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor detection!!!! 
+getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sensor detection!!!! 
 	
 	data(MODIS_Products)
     
-	if (missing(x)){ # if x isn't provided, return table of supported files.
+	if (is.null(x)){ # if x isn't provided, return table of supported files.
 		return(MODIS_Products[order(MODIS_Products$PRODUCT),c(1:3,6:9)])
 	}
 
-	if (is.list(x) && names(x) %in% c("request","PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT","SENSOR","PLATFORM","PF1","PF2","TOPIC","TYPE","RES","TEMP_RES","INTERNALSEPARATOR"
-)) { # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS for it!
-		x <- x$request
+	if (is.list(x) && names(x) %in% c("request", "PRODUCT", "DATE", "TILE", "TILEV", "TILEH", "CCC", "PROCESSINGDATE", "FORMAT", "SENSOR", "PLATFORM", "PF1", "PF2", "TOPIC", "TYPE", "RES", "TEMP_RES", "INTERNALSEPARATOR")) {
+		# if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS for it!
+		return(x)
 	}
 	## moody but seams to work!!
-	inbase  <- basename(x) # if x is a filename(+path)
+	inbase  <- basename(x) # if x is a filename(+path) remove the path
 	if (substring(inbase,nchar(inbase)-2, nchar(inbase)) %in% c("hdf","xml","tif",".gz","tar","zip")) {
 		isFile <- TRUE
 		intSepTest <- c("\\.","_")[which(c(length(strsplit(inbase, "\\.")[[1]]),length(strsplit(inbase, "_")[[1]]))==max(c(length(strsplit(inbase, "\\.")[[1]]),length(strsplit(inbase, "_")[[1]]))))]
-		fname  <- strsplit(inbase,intSepTest)[[1]]
+		product  <- strsplit(inbase,intSepTest)[[1]]
 	} else {
 		isFile <- FALSE
-		fname  <- inbase
+		product  <- inbase
 	}
-	product <- toupper(fname[1])
-	pattern <- sub(pattern="MXD", replacement="M.D", x=product) # make a regEx out of "x" 	
-	info <- MODIS_Products[grep(pattern=pattern,x=MODIS_Products$PRODUCT),]
+	product <- product[1]
+	pattern <- sub(pattern="MXD", replacement="M.D", x=product,ignore.case=TRUE) # make a regEx out of "x" 	
+	info    <- MODIS_Products[grep(pattern=pattern,x=MODIS_Products$PRODUCT,ignore.case=TRUE),]
+	if (info$SENSOR[1]=="MODIS") {info$PRODUCT <- toupper(info$PRODUCT)}
 
 	if(length(info)==0){
 		stop("No product found with the name ",inbase," try 'getProduct()' to list available products.\n",sep = "")
 	}
 	
-	if (isFile){ # save split, in in case in the filename "_" is the separator 
+	if (isFile){ # save spliting, in case in the filename "_" is the separator 
 		if (intSepTest!=info$INTERNALSEPARATOR[1]) {
 		fname <- unlist(strsplit(inbase,info$INTERNALSEPARATOR[1]))
 		fname <- unlist(strsplit(fname,"\\."))
@@ -40,7 +41,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	}
 	
 	if (isFile){ # in this case it must be a filename
-		if (info$SENSOR == "MODIS") { # file TEST
+		if (info$SENSOR[1] == "MODIS") { # file TEST
 			
 			if (info$TYPE == "Tile") { # file check.
 				Tpat    <- "h[0-3][0-9]v[0-1][0-9]"
@@ -75,7 +76,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 
 			return(invisible(result))  
 		  
-    } else if (info$SENSOR %in% c("MERIS","C-Band RADAR")) {
+    } else if (info$SENSOR[1] %in% c("MERIS","C-Band RADAR")) {
     	return(invisible(list(request = as.character(info$PRODUCT), PF1 = NULL, PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = as.character(info$SENSOR))))
     } 		
 	} else { # if not a file
@@ -103,6 +104,7 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 	
 	warn <- options("warn")
 	options(warn=-1)
+	on.exit(options(warn=warn$warn))
 	
 	res <- sapply(fname,function(y) {
 	
@@ -112,29 +114,27 @@ getProduct <- function(x,quiet=FALSE) { # TODO improvement of automatic sensor d
 			return(FALSE)
 		} else {
 
-		secName <- MODIS:::.defineName(y)
+			secName <- MODIS:::.defineName(y)
 		
-		if (product$SENSOR == "MODIS") {
+			if (product$SENSOR[1] == "MODIS") {
 	
-			if (product$TYPE == "Tile") {
-				Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
-				return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
-	
-			} else if (product$TYPE == "CMG") {
-				return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
-	
-			} else if (product$TYPE == "Swath"){
-				return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+				if (product$TYPE[1] == "Tile") {
+					Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
+					return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+			
+				} else if (product$TYPE[1] == "CMG") {
+						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
+			
+				} else if (product$TYPE[1] == "Swath"){
+						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+				} else {
+						return(FALSE)
+				}
 			} else {
 				return(FALSE)
 			}
-		} else {
-			return(FALSE)
-		}
 		}
 	})
-	
-options(warn=warn$warn)
 return(unlist(res))
 }
 
