@@ -124,8 +124,10 @@ return(invisible(unlist(dates)))
 			write.table(sizes,paste(path$localPath,".SRTM_sizes",sep="/"),quote=FALSE,row.names=FALSE,col.names=FALSE)
 		}
 		sizes <- read.table(paste(path$localPath,".SRTM_sizes",sep="/"))
-
-		startIND <- 1:length(path$remotePath) # for cycling better over the servers
+		
+		files <- files[files %in% sizes[,1]] # remove Tiles that are not on the server
+		
+		startIND <- 1:length(path$remotePath) # for better cycling over the servers
 		startIND <- rep(startIND,length(files))
 		
 		cat("Be avare, that some sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
