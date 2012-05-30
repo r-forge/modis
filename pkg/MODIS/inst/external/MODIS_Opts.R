@@ -57,6 +57,6 @@ ftpstring2 <- list(name = "LAADS", SENSOR = "MODIS", basepath = "ftp://ladsftp.n
   
 ftpstring3 <- list(name = "Culture-MERIS", SENSOR = "MERIS", basepath = "ftp://culturemeris:culturemeris@ionia2.esrin.esa.int", variablepath = "/DATE1DATE2/REGION/", content = "images")
 
-ftpstring4 <- list(name = "CIAT-CSI", SENSOR = "C-Band RADAR", basepath = "ftp://xftp.jrc.it/pub/srtmV4/tiff", variablepath = "", content = "DEM")
+ftpstring4 <- list(name = "CIAT-CSI", SENSOR = "C-Band-RADAR", basepath = "ftp://xftp.jrc.it/pub/srtmV4/tiff", variablepath = "", content = "DEM")
 
   

@@ -76,7 +76,7 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 
 			return(invisible(result))  
 		  
-    } else if (info$SENSOR[1] %in% c("MERIS","C-Band RADAR")) {
+    } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR")) {
     	return(invisible(list(request = as.character(info$PRODUCT), PF1 = NULL, PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = as.character(info$SENSOR))))
     } 		
 	} else { # if not a file
@@ -91,7 +91,7 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 			PD <- substr(info$PRODUCT, 4, nchar(as.character(info$PRODUCT)))
 	    return(invisible(list(request = inbase, PF1 = as.character(info$PF1), PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = as.character(info$SENSOR))))
     
-  } else if (info$SENSOR[1] %in% c("MERIS","C-Band RADAR")) {
+  } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR")) {
   	return(invisible(list(request = as.character(info$PRODUCT), PF1 = NULL, PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = as.character(info$SENSOR))))
 	} 		
  }
@@ -155,7 +155,7 @@ return(unlist(res))
 	if (toupper(substring(secName[1],1,4))=="CULT") {
 		sensor="MERIS"
 	} else if (tolower(substring(secName[1],1,4))=="srtm"){
-		sensor = "C-Band RADAR"
+		sensor = "C-Band-RADAR"
 		secName <- strsplit(secName[1],"_")[[1]]
 	} else {
 		sensor="MODIS"
@@ -197,7 +197,7 @@ return(unlist(res))
     	}
 
 # XXX
-    } else if (sensor=="C-Band RADAR") {
+    } else if (sensor=="C-Band-RADAR") {
     		product  <- getProduct(x=secName[1],quiet=TRUE)
 				secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
 				lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]

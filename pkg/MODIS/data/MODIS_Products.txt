@@ -76,5 +76,5 @@
 "82" "MODIS" "MOD17A3" "Terra" "MOLT" "MOD" "Net Primary Production" "Tile" "1000m" "Yearly" "\."
 "83" "MODIS" "MYD17A3" "Aqua" "MOLA" "MYD" "Net Primary Production" "Tile" "1000m" "Yearly" "\."
 "100" "MERIS" "culture-MERIS" "ENVISAT" "" ""  "MERIS FR surface reflectance" "Tile" "300m" "7 Day" "_"
-"101" "C-Band RADAR" "SRTM" "Space Shuttle Endeavour" "" ""  "Digital Elevation Model (DEM)" "Tile" "0.000833333 deg" "" "_"
+"101" "C-Band-RADAR" "SRTM" "Space Shuttle Endeavour" "" ""  "Digital Elevation Model (DEM)" "Tile" "0.000833333 deg" "" "_"
 

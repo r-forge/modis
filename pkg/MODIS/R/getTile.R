@@ -30,10 +30,9 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			stop("For interactive TILE selection need to install the 'mapdata' package: install.packages('mapdata')")
 		}
 		
-		x11(width=16,height=9)
+		x11(width=9,height=7)
 		map("worldHires")
 		map.axes() 
-		box()
 		grid(36,18,col="blue",lwd=0.5)
 		abline(h=0,col="yellow",lwd=1)
 		if(zoom) {
@@ -49,7 +48,6 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			Sys.sleep(0.5)
 			map("worldHires",xlim=c(min(loc[, "x"]),max(loc[, "x"])),ylim=c(min(loc[,"y"]),max(loc[, "y"])))
 			map.axes() 
-			box()
 			grid(36,18,col="blue",lwd=0.5)			
 		}
 		title("Set UL and LR points with the mouse!")
@@ -103,7 +101,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			tileV <- unique(tt$iv)
 		}
 		extent=""
-
+# TODO: the problem is that this leads to many additional Tiles.
 # get extent for tileV+H setting
 #		if (!old) {
 #			sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)

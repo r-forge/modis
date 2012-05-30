@@ -96,7 +96,7 @@ return(invisible(unlist(dates)))
 	ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 	#ftpdirs[[2]] <- read.table(file.path(auxPATH,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
-	} else if (product$SENSOR=="C-Band RADAR") {
+	} else if (product$SENSOR=="C-Band-RADAR") {
 
 		if (!missing(tileH) & !missing(tileV)) {
     	tileID <- getTile(tileH=tileH,tileV=tileV,system="SRTM")$tile
