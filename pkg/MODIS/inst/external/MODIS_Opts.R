@@ -56,7 +56,11 @@ ftpstring1 <- list(name = "LPDAAC", SENSOR = "MODIS", basepath = "ftp://e4ftl01.
 ftpstring2 <- list(name = "LAADS", SENSOR = "MODIS", basepath = "ftp://ladsftp.nascom.nasa.gov/allData", variablepath = "/C/PRODUCT/YYYY/DDD/", content = "images")
   
 ftpstring3 <- list(name = "Culture-MERIS", SENSOR = "MERIS", basepath = "ftp://culturemeris:culturemeris@ionia2.esrin.esa.int", variablepath = "/DATE1DATE2/REGION/", content = "images")
-
-ftpstring4 <- list(name = "CIAT-CSI", SENSOR = "C-Band-RADAR", basepath = "ftp://xftp.jrc.it/pub/srtmV4/tiff", variablepath = "", content = "DEM")
+  
+ftpstring4 <- list(name = "JRC.it", SENSOR = "C-Band-RADAR", basepath = "ftp://xftp.jrc.it/pub/srtmV4/tiff", variablepath = NULL, content = "images")
+  
+ftpstring5 <- list(name = "Telescience", SENSOR = "C-Band-RADAR", basepath = "http://hypersphere.telascience.org/elevation/cgiar_srtm_v4/tiff/zip", variablepath = NULL, content = "images")
+  
+ftpstring6 <- list(name = "CGIAR", SENSOR = "C-Band-RADAR", basepath = "http://srtm.csi.cgiar.org/SRT-ZIP/SRTM_V41/SRTM_Data_GeoTiff", variablepath = NULL, content = "images")
 
   
