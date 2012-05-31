@@ -14,12 +14,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		old <- TRUE
 	} else {
 		if (! require(rgdal) ) {
-			cat("For using a precise subsetting method install the 'rgdal' package: install.packages('rgdal')")
+			cat("For using a precise subsetting method install the 'rgdal' package: install.packages('rgdal')\n")
 			old <- TRUE
 			data(tiletable)
 		}
 		if (! require(rgeos) ) {
-			cat("For using a precise subsetting method install the 'rgeos' package: install.packages('rgeos')")
+			cat("For using a precise subsetting method install the 'rgeos' package: install.packages('rgeos')\n")
 			old <- TRUE
 			data(tiletable)
 		}
