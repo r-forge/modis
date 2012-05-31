@@ -24,23 +24,26 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 		isFile <- FALSE
 		product  <- inbase
 	}
+	
 	product <- product[1]
 	pattern <- sub(pattern="MXD", replacement="M.D", x=product,ignore.case=TRUE) # make a regEx out of "x" 	
 	info    <- MODIS_Products[grep(pattern=pattern,x=MODIS_Products$PRODUCT,ignore.case=TRUE),]
-	if (info$SENSOR[1]=="MODIS") {info$PRODUCT <- toupper(info$PRODUCT)}
 
 	if(length(info)==0){
 		stop("No product found with the name ",inbase," try 'getProduct()' to list available products.\n",sep = "")
 	}
-	
-	if (isFile){ # save spliting, in case in the filename "_" is the separator 
-		if (intSepTest!=info$INTERNALSEPARATOR[1]) {
-		fname <- unlist(strsplit(inbase,info$INTERNALSEPARATOR[1]))
-		fname <- unlist(strsplit(fname,"\\."))
-		}
+	if (info$SENSOR[1]=="MODIS") {
+		info$PRODUCT <- toupper(info$PRODUCT)
 	}
 	
+	
 	if (isFile){ # in this case it must be a filename
+
+#		if (intSepTest!=info$INTERNALSEPARATOR[1]) {
+			fname <- unlist(strsplit(inbase,info$INTERNALSEPARATOR[1]))
+			fname <- unlist(strsplit(fname,"\\."))
+#		}
+
 		if (info$SENSOR[1] == "MODIS") { # file TEST
 			
 			if (info$TYPE == "Tile") { # file check.
