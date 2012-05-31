@@ -121,7 +121,7 @@ for (i in 1:length(product$PRODUCT)){
 					}
 
 				} else if (server=="LAADS"){
-					 
+
 					startPath <- strsplit(path$remotePath$LAADS,"YYYY")[[1]][1] # cut away everything behind YYYY
 					
 					opt <-options("warn")
@@ -131,6 +131,7 @@ for (i in 1:length(product$PRODUCT)){
 
 					once <- TRUE
 					for (g in 1:sturheit){
+					
 						cat("Getting Year(s) try:",g,"\r") #",todo[u],"
 						try(years <- getURL(startPath),silent=TRUE)
 						if(g < (sturheit/2)) {
@@ -182,7 +183,7 @@ for (i in 1:length(product$PRODUCT)){
 
 				if(!exists("FtpDayDirs")){
 
-					warning("Couldn't get structure from",server,"server using offline information!")
+					warning("Couldn't get structure from ",server," server working with offline information!")
 					return(invisible(NULL))		
 		
 				} else {

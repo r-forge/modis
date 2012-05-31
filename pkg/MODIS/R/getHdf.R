@@ -139,7 +139,7 @@ return(invisible(unlist(dates)))
 				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)$isOK # flexB!
 			}
 			if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK) {
-				timeout <- options("timeout") # TEST I'm not sure if it helps
+				timeout <- options("timeout") # TEST I'm not sure if it helps (timeout is used in ?download.file)
 				options(timeout=15)
 
 				for(g in 1:sturheit) {
@@ -250,12 +250,15 @@ return(invisible(unlist(dates)))
 
 						if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessary to go on ftp
 
-							if(exists("ftpfiles")) {rm(ftpfiles)}
-							if (! require(RCurl) ) {
+							if(exists("ftpfiles")) {
+								rm(ftpfiles)
+							}
+							
+							if (!require(RCurl)) {
 								stop("You need to install the 'RCurl' package: install.packages('RCurl')")
 							}
 			
-							for (g in 1:sturheit){ # get list of files in remote dir
+							for (g in 1:sturheit){ # get list of FILES in remote dir
 								server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
 								try(ftpfiles <- getURL(paste(path$remotePath[[server]],"/",sep="")),silent=TRUE)
 								if(exists("ftpfiles")){break}
