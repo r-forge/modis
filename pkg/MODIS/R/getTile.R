@@ -55,7 +55,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		loc1 <- locator(n = 1, type = "p", pch = "+", col = "red")
 		loc2 <- locator(n = 1, type = "p", pch = "+", col = "red")
 		loc  <- rbind(unlist(loc1), unlist(loc2))
-		# 
+		#
+		p    <- rbind(c(min(loc[, "x"]), min(loc[,"y"])), c(min(loc[, "x"]), max(loc[, "y"])),c(max(loc[, "x"]), max(loc[, "y"])), c(max(loc[, "x"]), min(loc[,"y"])), c(min(loc[, "x"]),min(loc[,"y"])))
+		lines(p, col = "red")
+		
 		extent <- list(xmin=min(loc[, "x"]), xmax=max(loc[, "x"]), ymax=max(loc[, "y"]), ymin=min(loc[, "y"]))
 		Sys.sleep(0.6)
 		if(zoom){
