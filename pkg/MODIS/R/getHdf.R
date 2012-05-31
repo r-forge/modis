@@ -136,7 +136,7 @@ return(invisible(unlist(dates)))
 		
 			isOK <- TRUE
 			if (file.exists(paste(path$localPath,"/",files[d],sep=""))){
-				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=10000)$isOK # flexB!
+				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)$isOK # flexB!
 			}
 			if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK) {
 				timeout <- options("timeout") # TEST I'm not sure if it helps
@@ -156,7 +156,7 @@ return(invisible(unlist(dates)))
 						silent=TRUE
 					)
 					if (hdf==0) {
-						SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",SizeInfo=sizes,flexB=5000)
+						SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)
 						if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
 					}
 					if(hdf==0 & !quiet) {
