@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 ################################
-# getPATH takes as argument ONLY a .defineName() or a getProduct() result, or basicaly a vector with named "nodes"
+# getPart() takes as argument ONLY a .defineName() or a getProduct() result, or basicaly a vector with named "nodes"
 ################################
 .getPart <- function(x, what = c('YYYY', 'DDD', 'DATE', 'SENSOR', 'PF1', 'PF2', 'PLATFORM', 'TILE', 'TILEV', 'TILEH', 'C', 'CCC', 'PRODUCT', 'FORMAT', 'COMPRESSION', 'DATE1DATE2', 'PROCESSINGDATE', 'REGION', 'TIME')){    
       if (missing(x)){return(cat("Available 'placeholders' are:",what,"\n",sep=" "))}

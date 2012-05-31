@@ -4,6 +4,11 @@
 
 runMrt <- function(ParaSource=NULL,...){ #, mosaic=TRUE, anonym=TRUE, MRTpath="check", quiet=FALSE, dlmethod="auto", stubbornness="low"
 
+######
+if (.checkTools(what="MRT",quiet=TRUE)$MRT!=1) {
+	stop("MRT path not set or MRT not installed on your system!")
+}
+
 # Collect parameters from any possible source
 if (!is.null(ParaSource)) {
 		fe  <- new.env()
@@ -33,7 +38,6 @@ if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"}
 if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
 if (is.null(pm$stubbornness)) {pm$stubbornness <- "extreme"} 
 if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
-if (is.null(pm$MRTpath))  {pm$MRTpath <- "check"} 
 
 if (is.null(pm$localArcPath)) {
 	pm$localArcPath <- MODIS:::.getDef('localArcPath')
@@ -101,13 +105,7 @@ if (is.null(pm$projPara)) {
 } else {
 	cat("Output projection parameters specified!\nUsing:",pm$projPara,"\n")
 }
-######
-if (pm$MRTpath=="check"){
-	pm$MRTpath <- getPath(quiet=TRUE)
-}
-if (!file.exists(pm$MRTpath)) {
-	stop("'MRTpath' is wrong. Provide a good path, leave empty or run 'getPATH()'")
-}
+
 
 for (z in 1:length(pm$product$PRODUCT)){
 		
@@ -150,7 +148,7 @@ for (z in 1:length(pm$product$PRODUCT)){
 
 			avDates <- avDates[us]
 
-######################### along begin->end date
+######################### along begin -> end date
 			for (l in 1:length(avDates)){ 
 
 				files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
@@ -182,10 +180,10 @@ for (z in 1:length(pm$product$PRODUCT)){
 						w <- options("warn")
 						options(warn=-1)
 						if (is.null(pm$SDSstring)) {
-							pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],MRTpath=pm$MRTpath,method="mrt")))
+							pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],method="mrt")))
 						}	
 			
-						SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,method="mrt",MRTpath=pm$MRTpath)
+						SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,method="mrt")
 						options(warn=w$warn)
 						
 						if (!pm$quiet && u == 1 && l == 1) {cat("\n#############################\nExtracing SDS:",SDSstringIntern$SDSnames,"#############################\n",sep="\n")}
@@ -200,9 +198,9 @@ for (z in 1:length(pm$product$PRODUCT)){
 						
 						# run mosaic
 							if (.Platform$OS=="unix") {
-									system(paste(pm$MRTpath,"/mrtmosaic -i ",paraname," -o ",pm$outDirPath,"/",TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
+									system(paste("mrtmosaic -i ",paraname," -o ",pm$outDirPath,"/",TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
 							} else {
-								shell(paste(pm$MRTpath,"\\\\","mrtmosaic -i ",paraname," -o ",pm$outDirPath,"\\\\",TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
+								shell(paste("mrtmosaic -i ",paraname," -o ",pm$outDirPath,"\\\\",TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
 							}
 							unlink(paraname)
 		
@@ -258,9 +256,9 @@ for (z in 1:length(pm$product$PRODUCT)){
 						close(filename)
 	
 						if (.Platform$OS=="unix") {
-							system(paste(pm$MRTpath,"/resample -p ",paraname,sep=""))
+							system(paste("resample -p ",paraname,sep=""))
 						} else {
-							shell(paste(pm$MRTpath,"/","resample -p ",paraname,sep=""))
+							shell(paste("resample -p ",paraname,sep=""))
 						}
 						unlink(paraname)
 	

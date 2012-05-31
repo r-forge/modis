@@ -9,21 +9,24 @@ method <- tolower(method)
 fsep <- .Platform$file.sep
 
 if (!file.exists(HdfName)) {
-	cat("Hm, I have to search for the file! Next time provide the full path and I'll be very fast!\n")
-	HdfName <- normalizePath(list.files(path="~/",pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
+		cat("Hm, I have to search for the file! Next time provide the full path and I'll be very fast!\n")
+		HdfName <- normalizePath(list.files(path=.getDef()$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
 	}
 	
 	HdfName <- HdfName[1]
+
+checkMethod <- unlist(MODIS:::.checkTools(quiet=TRUE))
+
+if (!toupper(method) %in% names(checkMethod[which(checkMethod==1)])) {
+	stop("in getSds! Method ",toupper(method), " does not work. Is ", toupper(method)," installed properly on your system? Run: 'MODIS:::.checkTools()' to check!")
+}
 
 if (method=="gdal"){
 
 	if (.Platform$OS=="unix"){
 		sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
-	
 	} else if (.Platform$OS=="windows"){
-		warning("In Windows 'gdal' the HDF4 support is not a default, installing 'FWTools' (with phath) the problem should be solved, or maybe use method='mrt' if you have 'MRTool' installed!") 
-		sdsRaw <- shell(paste("gdalinfo ", HdfName,sep=""),intern=TRUE)
-
+		sdsRaw <- shell(paste("gdalinfo", HdfName,sep=" "),intern=TRUE)
 	} else {
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
 	}
@@ -39,17 +42,11 @@ if (method=="gdal"){
 
 } else if (method=="mrt"){
 
-	if (!exists("MRTpath")) {
-		MRTpath <- getPath(quiet=TRUE)
-		}
-
-	if (!file.exists(MRTpath)) {stop("'MRTpath' is wrong or MRT not installed? Provide a good path, leave empty or run 'getPATH()' first!")}
-	
 	if (.Platform$OS=="unix"){
-		sdsRaw <- system(paste(file.path(MRTpath,"sdslist",fsep=fsep),HdfName,sep=" "),intern=TRUE)
+		sdsRaw <- system(paste("sdslist",HdfName,sep=" "),intern=TRUE)
 	
 	}else if (.Platform$OS=="windows"){
-		sdsRaw <- shell(gsub(fsep,"\\\\",paste(file.path(MRTpath,"sdslist",fsep=fsep),HdfName,sep=" ")),intern=TRUE)
+		sdsRaw <- shell(gsub(fsep,"\\\\",paste("sdslist",HdfName,sep=" ")),intern=TRUE)
 
 	} else {
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
@@ -65,9 +62,9 @@ if (method=="gdal"){
 
 if (!is.null(SDSstring)){
 	if (inherits(SDSstring,"list")) {
-		SDSstring <- paste(SDSstring$SDSstring,collapse="")
+			SDSstring <- paste(SDSstring$SDSstring,collapse="")
 		} else if (inherits(SDSstring,"numeric")) {
-		SDSstring <- paste(SDSstring,collapse="")
+			SDSstring <- paste(SDSstring,collapse="")
 		}
 
 SDSstring <- gsub(pattern=" ",replacement="",x=SDSstring) # collapse the spaces

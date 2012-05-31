@@ -26,15 +26,11 @@
   Matteo Mattiuzzi
 }
 
-\seealso{
-  \code{\link{getPath}}
-}
-
 \examples{
 \dontrun{
-getSds(HdfName="XXX")
-getSds(HdfName="/path/XXX") # require GDAL
-getSds(HdfName="/path/XXX",method="mrt") # require MRTool
+getSds(HdfName="XXX.hdf")
+getSds(HdfName="/path/XXX.hdf") # require GDAL (FWTools on Windows)
+getSds(HdfName="/path/XXX.hdf",method="mrt") # require MRTool
 }
 }
 

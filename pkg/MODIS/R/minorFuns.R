@@ -84,3 +84,80 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 }
 
 
+.checkTools <- function(what=c("MRT","GDAL"),quiet=FALSE){
+	
+	MRT  <- NULL
+	GDAL <- NULL
+		
+	if ("MRT" %in% what){
+	
+		MRT <- 0
+		
+		mrtH 	<- Sys.getenv("MRT_HOME")
+		mrtDD <- Sys.getenv("MRT_DATA_DIR")
+		
+		if (!quiet){
+			cat("Checking availabillity of MRT:\n")
+		}
+	
+		if(length(mrtH)==0) {
+			if (!quiet){
+				cat("  'MRT_HOME' not set/found\n")
+			}
+		} else {
+			if (!quiet){
+				cat("  'MRT_HOME' found:", mrtH,"\n")
+			}
+			if (length(mrtDD)==0) {
+				if (!quiet){
+					cat("  'MRT_DATA_DIR' not set/found\n")
+				}
+			} else {
+				if (!quiet){
+					cat("  'MRT_DATA_DIR' found:",mrtDD,"\n")
+					cat("   MRT enabled, settings are fine!\n")
+				}
+				MRT <- 1 
+			}
+		}
+
+	}
+
+	if ("GDAL" %in% what){
+
+		GDAL <- 0
+
+		if (.Platform$OS=="unix") {	
+			if (!quiet){
+				cat("Checking availabillity of GDAL:\n")
+			}
+			gdal <- try(system("gdalinfo --version",intern=TRUE),silent=TRUE)
+			if (inherits(gdal,"try-error")){
+				warning("   GDAL not found, install it or check path settings in order to use related functionalities!")
+			} else {
+				if (!quiet){
+					cat("   OK,",gdal,"found!\n")
+				}
+				GDAL <- 1
+			}	
+		} else {
+			if (!quiet){
+				cat("Checking availabillity of FWTools (GDAL with HDF4 support for Windows):\n")	
+			}
+			gdal <- try(shell("gdalinfo --version",intern=TRUE),silent=TRUE)
+			if (inherits(gdal,"try-error")|length(grep(x=gdal,pattern="FWTools"))==0){
+				warning("   In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools'! You can get it from 'http://fwtools.maptools.org/'")
+			} else {
+				if (!quiet){
+					cat("   OK,",gdal,"found!\n")
+				}
+				GDAL <- 1
+			}
+		}
+	}
+	return(invisible(list(GDAL=GDAL,MRT=MRT)))		
+}
+
+
+
+

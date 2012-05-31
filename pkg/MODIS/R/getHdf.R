@@ -136,7 +136,7 @@ return(invisible(unlist(dates)))
 		
 			isOK <- TRUE
 			if (file.exists(paste(path$localPath,"/",files[d],sep=""))){
-				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=5000)$isOK
+				isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=10000)$isOK # flexB!
 			}
 			if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK) {
 				timeout <- options("timeout") # TEST I'm not sure if it helps

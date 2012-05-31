@@ -2,6 +2,8 @@
 	pkg.info <- drop(read.dcf(file=system.file("DESCRIPTION", package=pkg), fields=c("Version","Date")))
 	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ")\n\nThe MODIS package is still in an early development status. Suggestions or bug reports are very welcome\nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
 	
+	.checkTools() # just an information to the user
+	
 	if (!file.exists("~/.MODIS_Opts.R")) {
 
 	packageStartupMessage("#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe file containing package defaults doesn't exist!\nOpen \'", file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"\'")
