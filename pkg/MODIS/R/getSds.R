@@ -18,7 +18,7 @@ if (!file.exists(HdfName)) {
 checkMethod <- unlist(MODIS:::.checkTools(quiet=TRUE))
 
 if (!toupper(method) %in% names(checkMethod[which(checkMethod==1)])) {
-	stop("in getSds! Method ",toupper(method), " does not work. Is ", toupper(method)," installed properly on your system? Run: 'MODIS:::.checkTools()' to check!")
+	stop("in getSds! Method ",method, " does not work. Is ", method," installed properly on your system? Run: 'MODIS:::.checkTools()' to check out which metods should work on your system!")
 }
 
 if (method=="gdal"){
@@ -26,7 +26,7 @@ if (method=="gdal"){
 	if (.Platform$OS=="unix"){
 		sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
 	} else if (.Platform$OS=="windows"){
-		sdsRaw <- shell(paste("gdalinfo", HdfName,sep=" "),intern=TRUE)
+		sdsRaw <- shell(gsub(fsep,"\\\\",paste('gdalinfo "', HdfName,'"',sep="")),intern=TRUE)
 	} else {
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
 	}
@@ -46,7 +46,7 @@ if (method=="gdal"){
 		sdsRaw <- system(paste("sdslist",HdfName,sep=" "),intern=TRUE)
 	
 	}else if (.Platform$OS=="windows"){
-		sdsRaw <- shell(gsub(fsep,"\\\\",paste("sdslist",HdfName,sep=" ")),intern=TRUE)
+		sdsRaw <- shell(gsub(fsep,"\\\\",paste('sdslist "',HdfName,'"',sep="")),intern=TRUE)
 
 	} else {
 		stop(cat("What OS have you? Please tell me so I can fix this.\n")) 

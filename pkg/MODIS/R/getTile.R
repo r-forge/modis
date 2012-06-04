@@ -104,6 +104,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			tileV <- unique(tt$iv)
 		}
 		extent=""
+		
 # TODO: the problem is that this leads to many additional Tiles.
 # get extent for tileV+H setting
 #		if (!old) {
@@ -120,11 +121,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 #				til[[i]] <- SpatialPolygons(list(til[[i]]))
 #				proj4string(til[[i]]) <- proj4string(sr)			
 #				selected = sr[til[[i]],]
-
 #				til[[i]] <- as.character(apply(selected@data,1,function(x) {paste("h",sprintf("%02d",x[2]),"v",sprintf("%02d",x[3]),sep="")}))
-
 #			}
-
 #			result <- list(tile = result, tileH = tileH, tileV = tileV,extent = extent, system = system)
 #			extent <- list(ymin=min(tt$ymin),ymax=max(tt$ymax),xmin=min(tt$xmin),xmax=max(tt$xmax))				
 #		}

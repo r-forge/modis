@@ -100,17 +100,17 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 			cat("Checking availabillity of MRT:\n")
 		}
 	
-		if(length(mrtH)==0) {
+		if(mrtH=="") {
 			if (!quiet){
-				cat("  'MRT_HOME' not set/found\n")
+				cat("  'MRT_HOME' not set/found! MRT is NOT enabled!\n")
 			}
 		} else {
 			if (!quiet){
 				cat("  'MRT_HOME' found:", mrtH,"\n")
 			}
-			if (length(mrtDD)==0) {
+			if (mrtDD=="") {
 				if (!quiet){
-					cat("  'MRT_DATA_DIR' not set/found\n")
+					cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled!\n")
 				}
 			} else {
 				if (!quiet){
