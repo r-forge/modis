@@ -183,7 +183,8 @@ return(invisible(unlist(dates)))
 	dates  <- list()
 	output <- list() # path info for the invisible output
 	l=0
-		
+	
+	
 	for(z in 1:length(product$PRODUCT)){ # Platforms MOD/MYD
 
 		if (product$TYPE[z]=="Swath") {
@@ -200,10 +201,11 @@ return(invisible(unlist(dates)))
 					ntiles=1 
 				} else {
 					if (!is.null(tileH) & !is.null(tileV)) {
-    				tileID <- getTile(tileH=tileH,tileV=tileV)$tile
+    				extent <- getTile(tileH=tileH,tileV=tileV)$tile
  					 } else {
- 					 	tileID <- getTile(extent=extent)$tile
+ 					 	extent <- getTile(extent=extent)
  					 }
+ 					tileID <- extent$tile
 					ntiles <- length(tileID)
 				}
 					
