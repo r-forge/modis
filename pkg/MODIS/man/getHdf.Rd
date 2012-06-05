@@ -22,7 +22,7 @@
 
   \item{HdfName}{Character (vector or list). Full HDF file name(s) to download. If just few single (AND known!) files should be downloaded use \code{HdfName}. If \code{HdfName} is provided the other file-related parameters are ignored: \code{begin,end,collection,tileV,...}. If many files have to be checked and downloaded it is simpler, safer and faster to use the following parameters.}
 
-  \item{product}{Character. (Ignored if \code{HdfName} is provided.) MODIS grid product to be downloaded. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: \code{MOD13Q1}. For vegetation indices from TERRA and AQUA use \code{MxD13Q1}. Run \code{getProduct()} for an overview of supported products.}   
+  \item{product}{Character. (Ignored if \code{HdfName} is provided.) MODIS grid product to be downloaded. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: \code{MOD13Q1}. For vegetation indices from TERRA and AQUA use \code{M.D13Q1}. Run \code{getProduct()} for an overview of supported products.}   
     
   \item{begin}{Character. (Ignored if \code{HdfName} is provided.) Subset begin date of MODIS time series. See: \code{?transDate} for formatting.}
 
@@ -67,20 +67,26 @@
 \examples{
 \dontrun{
 # one specific file (no regular erpression allowed here for now!)
+# ca 213 mB!!!
 getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
 
 # DO NOT RUN THE NEXT EXAMPLE (unless you need this data)!!!
 # Get all MODIS TERRA and AQUA 11A1 beginning from 18. October 2011 up to today.
 # (Can be ran in a sceduled job, for daily archive update)
-# getHdf(product="MxD11A1",begin="2011.10.18",tileH=18:19,tileV=4) 
+# getHdf(product="M.D11A1",begin="2011.10.18",tileH=18:19,tileV=4) 
 
-# or the same with an (list) Extent
+# same Tiles with a LIST extent.
 Austria <- list(xmax=17.47,xmin=9.2,ymin=46.12,ymax=49.3)
-getHdf(product="MxD11A1",begin="2009001",end="2009-01-02",extent=Austria)
+getHdf(product="M.D11A1",begin="2009001",end="2009-01-02",extent=Austria)
 
-require(mapdata)
+# require(mapdata)
 getHdf(product="MxD11A1",begin="2009.01.01",end="2009002",extent="austria")
+# without specification of the extent... interactive selection see: "getTile()"
+getHdf(product="M.D11A1",begin="2009.01.01",end="2009002")
+
+# SRTM data
 getHdf(product="SRTM",extent="austria") # SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
+
 }
 }
 

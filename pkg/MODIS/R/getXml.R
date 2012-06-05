@@ -32,11 +32,12 @@ avFiles <- unlist(avFiles)
 } else {
 avFiles <- list.files(localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under 'localArcPath'
 }
-
+avFiles <- normalizePath(avFiles,winslash="\\")
 data(MODIS_Products)
 # tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
 doit <- MODIS:::.isSupported(avFiles)
 avFiles <- avFiles[doit]
+
 
 	if(length(avFiles)==0) {
 		return(cat("No MODIS grid files found.\n"))
@@ -47,19 +48,15 @@ avFiles <- avFiles[doit]
 	for (u in seq(along=avFiles)){
 
 		product    <- getProduct(avFiles[u],quiet=TRUE)
-		fdate      <- .getPart(product,"DATE")
-		collection <- .getPart(product,"CCC")
-		path       <- .genString(product)
+		fdate      <- MODIS:::.getPart(product,"DATE")
+		collection <- MODIS:::.getPart(product,"CCC")
+		path       <- MODIS:::.genString(product)
 
 		if (
 			!file.exists(paste(avFiles[u],".xml",sep=""))
 			|
 			if (file.exists(paste(avFiles[u],".xml",sep=""))){ # check filesize of xml file! TODO  Needs improvement!!
-				if (.Platform$OS.type == "unix") {
-					as.numeric(system(paste("stat -c %s ",avFiles[u],".xml",sep=""), intern=TRUE)) < 2000	
-				} else { #.Platform$OS.type == "windows"
-					as.numeric(shell(paste("for %I in (",avFiles[u],".xml) do @echo %~zI",sep=""),intern=TRUE)) < 2000 # should work with win2000 and later...	
-				}
+				MODIS:::.file.size(paste(avFiles[u],".xml",sep="")) < 2000	
 			} else {
 				FALSE
 			}

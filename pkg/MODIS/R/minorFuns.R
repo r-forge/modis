@@ -13,7 +13,8 @@ if (is.numeric(level)) {
 	if (.Platform$OS.type == "unix") {
 		FileSize <- as.numeric(system(paste("stat -c %s ",file,sep=""), intern=TRUE))
 	} else if (.Platform$OS.type == "windows") {
-		FileSize <- as.numeric(shell(paste("for %I in (",file,") do @echo %~zI",sep=""),intern=TRUE))
+		file <- normalizePath(file,winslash="\\")
+		FileSize <- as.numeric(shell(paste('for %I in ("',file,'") do @echo %~zI',sep=""),intern=TRUE))
 	} else {
 		stop("Only Unix/Linux and Windows supported, please tell me which system you use!")
 	}
