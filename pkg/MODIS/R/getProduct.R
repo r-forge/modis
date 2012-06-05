@@ -29,8 +29,9 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 	pattern <- sub(pattern="MXD", replacement="M.D", x=product,ignore.case=TRUE) # make a regEx out of "x" 	
 	info    <- MODIS_Products[grep(pattern=pattern,x=MODIS_Products$PRODUCT,ignore.case=TRUE),]
 
-	if(length(info)==0){
-		stop("No product found with the name ",inbase," try 'getProduct()' to list available products.\n",sep = "")
+	if(dim(info)[1]==0){
+		cat("No product found with the name ",inbase," try 'getProduct()' to list available products.\n",sep = "")
+		return(NULL)
 	}
 	if (info$SENSOR[1]=="MODIS") {
 		info$PRODUCT <- toupper(info$PRODUCT)
@@ -101,116 +102,4 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 }
 ##################################
 
-.isSupported <- function(x) {
-
-	fname   <- basename(x)
-	
-	warn <- options("warn")
-	options(warn=-1)
-	on.exit(options(warn=warn$warn))
-	
-	res <- sapply(fname,function(y) {
-	
-		product <- getProduct(y,quiet=TRUE)
-	
-		if (is.null(product)){
-			return(FALSE)
-		} else {
-
-			secName <- MODIS:::.defineName(y)
-		
-			if (product$SENSOR[1] == "MODIS") {
-	
-				if (product$TYPE[1] == "Tile") {
-					Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
-					return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
-			
-				} else if (product$TYPE[1] == "CMG") {
-						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
-			
-				} else if (product$TYPE[1] == "Swath"){
-						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
-				} else {
-						return(FALSE)
-				}
-			} else {
-				return(FALSE)
-			}
-		}
-	})
-return(unlist(res))
-}
-
-# TODO enhancement of SENSOR/PRODUCT detection capabilities! 
-# the metods below are based on the results of the strsplit().
-
-.defineName <- function(x) { # "x" is a MODIS,SRTM or culture-MERIS filename
-	
-	if(missing(x)) {
-		stop("x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
-	} else {
-	
-	data(MODIS_Products)
-	
-	fname   <- basename(x)
-	secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"
-	
-	if (toupper(substring(secName[1],1,4))=="CULT") {
-		sensor="MERIS"
-	} else if (tolower(substring(secName[1],1,4))=="srtm"){
-		sensor = "C-Band-RADAR"
-		secName <- strsplit(secName[1],"_")[[1]]
-	} else {
-		sensor="MODIS"
-	}
-	 # PROVISORIC
-
-###################################
-###################################
-# date NAME definition (must be File-specific!)
-
-# MODIS
-	if (sensor=="MODIS"){
-
-		product <- getProduct(x=secName[1],quiet=TRUE)
-			if (product$TYPE=="Tile") {
-				names(secName) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
-			} else if (product$TYPE=="CMG") {
-				names(secName) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
-			} else if (product$TYPE=="Swath") { 
-				names(secName) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
-			} else {
-				stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
-			}
-#		}
-
-# MERIS
-    } else if (sensor=="MERIS") {
-		
-			product  <- getProduct(x="culture-MERIS",quiet=TRUE)
-			secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-			lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-			secName  <- secName[-length(secName)]
-    	secName  <- c(secName,lastpart)
-    
-    	if (length(secName)==6) {
-    		names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT","COMPRESSION")
-    	}else if (length(secName)==5) {
-		   	names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT")
-    	}
-
-# XXX
-    } else if (sensor=="C-Band-RADAR") {
-    		product  <- getProduct(x=secName[1],quiet=TRUE)
-				secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-				lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-				secName  <- secName[-length(secName)]
-    		secName  <- c(secName,lastpart)
-				names(secName) <- c("PRODUCT","tileH","tileV","COMPRESSION") 
-
-    } # XXX else if ....
-}
-##
-return(secName)
-}
 

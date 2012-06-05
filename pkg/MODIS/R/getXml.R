@@ -112,12 +112,12 @@ avFiles <- avFiles[doit]
 						}
 					} else {
 						if(!quiet){
-							cat("Filesize ok for: ",avFiles[u], "\n")
+							cat("Filesize ok for: ",avFiles[u], "\n\n")
 						}		
 					}
 				} else {
 					if(!quiet){
-						cat("Filesize ok for: ",avFiles[u], "\n")
+						cat("Filesize ok for: ",avFiles[u], "\n\n")
 					}
 				}
 			}
