@@ -98,13 +98,12 @@ return(invisible(unlist(dates)))
 
 	} else if (product$SENSOR=="C-Band-RADAR") {
 
-		if (!is.null(extent)) {
-  		tileID <- getTile(extent=extent)$tile
- 		} else if (!is.null(tileH) & !is.null(tileV)) {
+		if (!is.null(tileH) & !is.null(tileV)) {
     	tileID <- getTile(tileH=tileH,tileV=tileV)$tile
  		} else {
- 			stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")
+ 		 	tileID <- getTile(extent=extent)$tile
  		}
+		ntiles <- length(tileID)
  		
  		ntiles <- length(tileID)
 		path   <- MODIS:::.genString("SRTM")
@@ -200,11 +199,11 @@ return(invisible(unlist(dates)))
 					tileID="GLOBAL"
 					ntiles=1 
 				} else {
-					if (!is.null(extent)) {
-  						tileID <- getTile(extent=extent)$tile
- 					 } else if (!is.null(tileH) & !is.null(tileV)) {
-    					tileID <- getTile(tileH=tileH,tileV=tileV)$tile
- 					 } else {stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")}
+					if (!is.null(tileH) & !is.null(tileV)) {
+    				tileID <- getTile(tileH=tileH,tileV=tileV)$tile
+ 					 } else {
+ 					 	tileID <- getTile(extent=extent)$tile
+ 					 }
 					ntiles <- length(tileID)
 				}
 					
