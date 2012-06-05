@@ -3,7 +3,7 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
+getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
 
 localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
 dir.create(localArcPath,showWarnings=FALSE)
@@ -98,11 +98,14 @@ return(invisible(unlist(dates)))
 
 	} else if (product$SENSOR=="C-Band-RADAR") {
 
-		if (!missing(tileH) & !missing(tileV)) {
-    	tileID <- getTile(tileH=tileH,tileV=tileV,system="SRTM")$tile
-		} else {
-			tileID <- getTile(extent=extent,system="SRTM")$tile
+		if (!is.null(extent)) {
+  		tileID <- getTile(extent=extent)$tile
+ 		} else if (!is.null(tileH) & !is.null(tileV)) {
+    	tileID <- getTile(tileH=tileH,tileV=tileV)$tile
+ 		} else {
+ 			stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")
  		}
+ 		
  		ntiles <- length(tileID)
 		path   <- MODIS:::.genString("SRTM")
 		files  <- paste("srtm",tileID,".zip",sep="")
@@ -197,9 +200,9 @@ return(invisible(unlist(dates)))
 					tileID="GLOBAL"
 					ntiles=1 
 				} else {
-					if (!missing(extent)) {
+					if (!is.null(extent)) {
   						tileID <- getTile(extent=extent)$tile
- 					 } else if (!missing(tileH) & !missing(tileV)) {
+ 					 } else if (!is.null(tileH) & !is.null(tileV)) {
     					tileID <- getTile(tileH=tileH,tileV=tileV)$tile
  					 } else {stop("Please provide eighter a 'tileH' plus 'tileV' or an 'extent'")}
 					ntiles <- length(tileID)

@@ -16,7 +16,7 @@
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(HdfName,product,begin=NULL,end=NULL,tileH,tileV,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath"))}
+\usage{getHdf(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath"))}
 
 \arguments{
 
