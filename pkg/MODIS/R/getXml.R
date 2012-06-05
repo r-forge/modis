@@ -2,7 +2,7 @@
 # Date : July 2011
 # Licence GPL v3
 
-getXml <- function(HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="extreme",localArcPath=.getDef('localArcPath')){
+getXml <- function(HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="high",localArcPath=.getDef('localArcPath')){
 
 localArcPath <- paste(strsplit(localArcPath,"/")[[1]],collapse="/")# removes "/" or "\" on last position (if present)
 dir.create(localArcPath,showWarnings=FALSE)
@@ -12,7 +12,6 @@ if(!exists("testDir")) {stop("'localArcPath' not set properly!")}
 #################
 
 sturheit <- .stubborn(level=stubbornness)
-
 
 if(!missing(HdfName)) {
 	

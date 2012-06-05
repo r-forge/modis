@@ -187,9 +187,9 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 				} else if (product$TYPE[1] == "CMG") {
 						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
 			
-				} else if (product$TYPE[1] == "Swath"){
-						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
-				} else {
+				} else if (product$TYPE[1] == "Swath"){ # actually no support for Swath data!
+#						return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+#				} else {
 						return(FALSE)
 				}
 			} else {
