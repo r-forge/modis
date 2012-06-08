@@ -45,6 +45,6 @@ getProduct("MOD14") # regular expression style
 internal_info <- getProduct("MOD11C3",quiet=TRUE) # regular expression style
 internal_info
 
-getProduct("culture-MERIS") # not fully supported yet
+getProduct("SRTM") # Only download
 
 }

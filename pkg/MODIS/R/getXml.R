@@ -32,7 +32,7 @@ avFiles <- unlist(avFiles)
 avFiles <- list.files(localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under 'localArcPath'
 }
 avFiles <- normalizePath(avFiles,winslash="\\")
-data(MODIS_Products)
+# data(MODIS_Products)
 # tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
 doit <- MODIS:::.isSupported(avFiles)
 avFiles <- avFiles[doit]

@@ -321,12 +321,12 @@ return(invisible(unlist(dates)))
 											mtr[j] <- hdf
 											Sys.sleep(as.numeric(wait))
 										} else { 
-											dates[[l]][i,j+1] <- "No tile for location" 
+											dates[[l]][i,j+1] <- "NULL" 
 										}
 									}
 								}
 							} else {
-								dates[[l]][i,(j+1):ncol(dates[[l]])] <- "No files for that date on FTP"
+								dates[[l]][i,(j+1):ncol(dates[[l]])] <- "NULL"
 							} # on ftp is possible to find empty folders!
 						}
 						if(checkSize){ # after each 'i' do the sizeCheck

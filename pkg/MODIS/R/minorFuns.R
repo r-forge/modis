@@ -1,3 +1,6 @@
+tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"), header=TRUE)
+MODIS_Products <- read.table(system.file("external", "MODIS_Products.txt", package="MODIS"), header=TRUE)
+
 
 # central setting for stubbornness 
 .stubborn <- function(level="high"){
@@ -209,7 +212,7 @@ return(unlist(res))
 		stop("x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
 	} else {
 	
-	data(MODIS_Products)
+#	data(MODIS_Products)
 	
 	fname   <- basename(x)
 	secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"

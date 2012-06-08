@@ -40,7 +40,7 @@
 }
 
 \seealso{
-  \code{\link{MODIS_Products}, \link{getProduct}}
+  \code{\link{getProduct}}
 }
 
 \examples{

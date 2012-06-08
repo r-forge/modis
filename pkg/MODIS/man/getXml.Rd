@@ -14,7 +14,7 @@
 }
 
 \usage{
-getXml(HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="extreme",localArcPath=.getDef('localArcPath'))
+getXml(HdfName,checkSize=TRUE,wait=1,dlmethod="auto",quiet=FALSE,stubbornness="high",localArcPath=.getDef('localArcPath'))
 }
 
 \arguments{

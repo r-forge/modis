@@ -4,7 +4,7 @@
 	
 getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sensor detection!!!! 
 	
-	data(MODIS_Products)
+	# data(MODIS_Products)
     
 	if (is.null(x)){ # if x isn't provided, return table of supported files.
 		return(MODIS_Products[order(MODIS_Products$PRODUCT),c(1:3,6:9)])

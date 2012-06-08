@@ -7,21 +7,21 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 	old <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
 
 	if (toupper(system) == "MERIS") {
-		tiletable <- genTile(tileSize = 5)
+		tiltab <- genTile(tileSize = 5)
 		old <- TRUE
 	} else if (toupper(system) == "SRTM") {
-		tiletable <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
+		tiltab <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
 		old <- TRUE
 	} else {
 		if (! require(rgdal) ) {
 			cat("For using a precise subsetting method install the 'rgdal' package: install.packages('rgdal')\n")
 			old <- TRUE
-			data(tiletable)
+			tiltab <- tiletable
 		}
 		if (! require(rgeos) ) {
 			cat("For using a precise subsetting method install the 'rgeos' package: install.packages('rgeos')\n")
 			old <- TRUE
-			data(tiletable)
+			tiltab <- tiletable
 		}
 	}
 		
@@ -77,10 +77,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		tileV <- as.numeric(tileV)
 
 		if (toupper(system) == "MODIS"){
-			data(tiletable)
+			tiltab <- tiletable
 		}
 
-		tt 			<- subset(tiletable,(tiletable$ih %in% tileH) & (tiletable$iv %in% tileV) & tiletable$xmin>-999)
+		tt 			<- subset(tiltab,(tiltab$ih %in% tileH) & (tiltab$iv %in% tileV) & tiltab$xmin>-999)
 		extent 	<- list(ymin=min(tt$ymin),ymax=max(tt$ymax),xmin=min(tt$xmin),xmax=max(tt$xmax))
 		
 		if (toupper(system) == "SRTM"){
@@ -110,12 +110,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 #		if (!old) {
 #			sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
 #			
-#			tt <- matrix(NA,ncol=ncol(tiletable),nrow=length(tiles))
+#			tt <- matrix(NA,ncol=ncol(tiltab),nrow=length(tiles))
 #			
 #			til <- list()			
 #			for(i in 1:length(tiles)){
 # 
-#				til[[i]] <- subset(tiletable,tiletable$ih %in% as.numeric(substring(tiles[i],2,3)) & tiletable$iv %in% as.numeric(substring(tiles[i],5,6)))
+#				til[[i]] <- subset(tiltab,tiltab$ih %in% as.numeric(substring(tiles[i],2,3)) & tiltab$iv %in% as.numeric(substring(tiles[i],5,6)))
 #				til[[i]] <- Polygon(cbind(c(til[[i]]$xmin,til[[i]]$xmax,til[[i]]$xmax,til[[i]]$xmin,til[[i]]$xmin),c(til[[i]]$ymax,til[[i]]$ymax,til[[i]]$ymin,til[[i]]$ymin,til[[i]]$ymax)),hole=FALSE)
 #				til[[i]] <- Polygons(list(til[[i]]),"selection")
 #				til[[i]] <- SpatialPolygons(list(til[[i]]))
@@ -195,14 +195,16 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 				if (extent$ymax >  60){extent$ymax <- 60;  warning("Maximum Latitude is out of SRTM coverage, extent is trimmed to max LAT 60\n")}
 			}
 			
-			minTile <- subset(tiletable, (tiletable$xmin <= extent$xmin & tiletable$xmax >= extent$xmin) & (tiletable$ymin <= extent$ymin & tiletable$ymax >= extent$ymin), select = c(iv, ih))
+			minTile <- subset(tiltab, (tiltab$xmin <= extent$xmin & tiltab$xmax >= extent$xmin) & (tiltab$ymin <= extent$ymin & tiltab$ymax >= extent$ymin))[,c("iv","ih")]
 			minTile <- c(min(minTile$iv), min(minTile$ih))
-			maxTile <- subset(tiletable, (tiletable$xmin <= extent$xmax & tiletable$xmax >= extent$xmax) & (tiletable$ymin <= extent$ymax & tiletable$ymax >= extent$ymax), select = c(iv, ih))
+			
+			maxTile <- subset(tiltab, (tiltab$xmin <= extent$xmax & tiltab$xmax >= extent$xmax) & (tiltab$ymin <= extent$ymax & tiltab$ymax >= extent$ymax))[,c("iv","ih")]
 			maxTile <- c(max(maxTile$iv), max(maxTile$ih))
+			
 			tileV <- as.vector(minTile[1]:maxTile[1])
 			tileH <- as.vector(minTile[2]:maxTile[2])
-			vmax  <- max(tiletable$iv)
-			hmax  <- max(tiletable$ih)
+			vmax  <- max(tiltab$iv)
+			hmax  <- max(tiltab$ih)
 			if (min(tileH) < 0 || max(tileH) > hmax) {
 				stop(paste("'tileH' number(s) must be between 0 and",hmax, sep = ""))
 			}
