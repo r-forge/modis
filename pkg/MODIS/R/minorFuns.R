@@ -106,7 +106,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 	
 		if(mrtH=="") {
 			if (!quiet){
-				cat("  'MRT_HOME' not set/found! MRT is NOT enabled!\n")
+				cat("  'MRT_HOME' not set/found! MRT is NOT enabled! See: 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
 			}
 		} else {
 			if (!quiet){
@@ -114,7 +114,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 			}
 			if (mrtDD=="") {
 				if (!quiet){
-					cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled!\n")
+					cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled! You need to set the path, read in the MRT manual! 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
 				}
 			} else {
 				if (!quiet){
