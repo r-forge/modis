@@ -1,3 +1,13 @@
 #importFrom("raster",Extent, BasicRaster, Raster, RasterLayer, RasterBrick, RasterStack, RasterStackBrick)
 #importFrom("mapdata",map)
-exportPattern("^[^\\.]")
+#exportPattern("^[^\\.]")
+
+exportPattern("^get.+")
+exportPattern("^run.+")
+exportPattern(".+WS$")
+export("genTile")
+export("transDate")
+export("search4map")
+export("checkAv")
+export("orgStruc")
+
