@@ -6,7 +6,7 @@ Depends: R (>= 2.10), sp
 Suggests: RCurl, rgeos, XMLSchema, rgdal, mapdata, SSOAP, XML, raster 
 Author: Matteo Mattiuzzi, Jan Verbesselt, Tomislav Hengl, Anja Klisch, Bradley Evans and Agustin Lobo
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at>
-Description: MODIS download and processing Package. Downloading, re-projecting, re-sampling, mosaicking, format conversion, SDS-extraction, bit-enconding and filtering/smoothing capabilities. Download data from FTP (local processing) or using SSOAP (online processing) via the MODIS web-service. Pre-processing data with MRT, GDAL, FWT, SSOAP. Starting from version 0.3-14 also SRTMv41 is downloadad. Manual: http://www.wuala.com/IVFL/R_MODIS/
+Description: MODIS download and processing Package. Downloading, re-projecting, re-sampling, mosaicking, format conversion, SDS-extraction, bit-enconding and filtering/smoothing capabilities. Download data from FTP (local processing) or using SSOAP (online processing) via the MODIS web-service. Pre-processing data with MRT, GDAL, FWT, SSOAP. Starting from version 0.3-14 also SRTMv41 can be downloadad. Manual: http://www.wuala.com/IVFL/R_MODIS/
 URL: http://modis.r-forge.r-project.org/
 License: GPL (>=3)
 LazyLoad: yes
