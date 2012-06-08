@@ -24,7 +24,7 @@ getProduct <- function(x=NULL,quiet=FALSE) { # TODO improvement of automatic sen
 	}
 	
 	product <- product[1]
-	pattern <- sub(pattern="MXD", replacement="M.D", x=product,ignore.case=TRUE) # make a regEx out of "x" 	
+	pattern <- sub(pattern="MXD", replacement="M.D", x=product, ignore.case=TRUE) # make a regEx out of "x" 	
 	info    <- MODIS_Products[grep(pattern=pattern,x=MODIS_Products$PRODUCT,ignore.case=TRUE),]
 
 	if(dim(info)[1]==0){

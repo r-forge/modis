@@ -99,9 +99,9 @@ return(invisible(unlist(dates)))
 	} else if (product$SENSOR=="C-Band-RADAR") {
 
 		if (!is.null(tileH) & !is.null(tileV)) {
-    	tileID <- getTile(tileH=tileH,tileV=tileV)$tile
+    	tileID <- getTile(tileH=tileH,tileV=tileV,system="SRTM")$tile
  		} else {
- 		 	tileID <- getTile(extent=extent)$tile
+ 		 	tileID <- getTile(extent=extent,system="SRTM")$tile
  		}
 		ntiles <- length(tileID)
  		

@@ -20,7 +20,7 @@
   
   \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(x,y)}. }
 
-  \item{system}{Character. Default is \code{MODIS}. Alternative is the \code{MERIS} tiling system, (implemented but not tested!!) from culture-MERIS dataset. See \code{?genTile}!}
+  \item{system}{Character. Default is \code{MODIS}. Alternative is the \code{SRTM} tiling system!}
   \item{zoom}{Logical, default \code{TRUE}. The interactive mode is only activated if no other extent arguments ("extent","tileH", "tileV") are specified. If \code{zoom==TRUE} the first 2 clicks on the map are defining the zoom-in area, and the next 2 clicks the download area. For large areas you can set to \code{FALSE}.}  
 
 }
@@ -95,6 +95,10 @@ getTile(extent=ext)
 
 # or:
 getTile(extent=c('austria','germany','switzerland'))
+# SRTM data
+getTile(extent=c('austria','germany','switzerland'),system="SRTM")
+
+
 }
 }
 

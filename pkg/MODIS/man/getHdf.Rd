@@ -68,7 +68,8 @@
 \dontrun{
 # one specific file (no regular erpression allowed here for now!)
 # ca 213 mB!!!
-getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
+a <- getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
+a
 
 # DO NOT RUN THE NEXT EXAMPLE (unless you need this data)!!!
 # Get all MODIS TERRA and AQUA 11A1 beginning from 18. October 2011 up to today.
@@ -77,16 +78,18 @@ getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
 
 # same Tiles with a LIST extent.
 Austria <- list(xmax=17.47,xmin=9.2,ymin=46.12,ymax=49.3)
-getHdf(product="M.D11A1",begin="2009001",end="2009-01-02",extent=Austria)
+b <- getHdf(product="M.D11A1",begin="2009001",end="2009-01-02",extent=Austria)
+b
 
 # require(mapdata)
 getHdf(product="MxD11A1",begin="2009.01.01",end="2009002",extent="austria")
 # without specification of the extent... interactive selection see: "getTile()"
-getHdf(product="M.D11A1",begin="2009.01.01",end="2009002")
+c <- getHdf(product="M.D11A1",begin="2009.01.01",end="2009002")
+c
 
 # SRTM data
-getHdf(product="SRTM",extent="austria") # SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
-
+d <- getHdf(product="SRTM",extent="austria") # SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
+d
 }
 }
 
