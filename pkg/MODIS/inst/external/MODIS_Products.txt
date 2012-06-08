@@ -4,7 +4,7 @@
 "3" "MODIS" "MOD14A1" "Terra" "MOLT" "MOD" "Thermal Anomalies & Fire" "Tile" "1000m" "Daily" "\."
 "4" "MODIS" "MYD14A1" "Aqua" "MOLA" "MYD" "Thermal Anomalies & Fire" "Tile" "1000m" "Daily" "\."
 "5" "MODIS" "MOD14A2" "Terra" "MOLT" "MOD" "Thermal Anomalies & Fire" "Tile" "1000m" "8 Day" "\."
-"6" "MODIS" "MYD14A2" "Aqua" "MOLA" "MYD" "Thermal Anomalies & Fire " "Tile" "1000m" "8 Day" "\."
+"6" "MODIS" "MYD14A2" "Aqua" "MOLA" "MYD" "Thermal Anomalies & Fire" "Tile" "1000m" "8 Day" "\."
 "7" "MODIS" "MOD12Q1" "Terra" "MOLT" "MOD" "Land Cover Type" "Tile" "1000m" "Yearly" "\."
 "8" "MODIS" "MCD12Q1" "Combined" "MOTA" "MCD" "Land Cover Type" "Tile" "500m" "Yearly" "\."
 "10" "MODIS" "MCD12Q2" "Combined" "MOTA" "MCD" "Land Cover Dynamics" "Tile" "500m" "Yearly" "\."

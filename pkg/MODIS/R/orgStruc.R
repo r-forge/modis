@@ -21,8 +21,6 @@ if(missing(pattern)) {
 
 if (length(avFiles)==0) {stop("No HDF nor HDF.XML files found!\n")}
  
-# data("MODIS_Products")
-
 doit <- MODIS:::.isSupported(avFiles)
 if (sum(doit)==0) {stop("No supported files Found")}
 avFiles <- avFiles[doit]

@@ -3,7 +3,6 @@
 \docType{methods}
 
 \alias{getProduct}
-\alias{product,quiet}
 
 \title{Check the avalability of a given product, create file related information}
 

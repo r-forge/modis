@@ -212,8 +212,6 @@ return(unlist(res))
 		stop("x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
 	} else {
 	
-#	data(MODIS_Products)
-	
 	fname   <- basename(x)
 	secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"
 	
