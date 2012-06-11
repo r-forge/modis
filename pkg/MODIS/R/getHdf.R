@@ -201,7 +201,7 @@ return(invisible(unlist(dates)))
 					ntiles=1 
 				} else {
 					if (!is.null(tileH) & !is.null(tileV)) {
-    				extent <- getTile(tileH=tileH,tileV=tileV)$tile
+    					extent <- getTile(tileH=tileH,tileV=tileV)
  					 } else {
  					 	extent <- getTile(extent=extent)
  					 }
