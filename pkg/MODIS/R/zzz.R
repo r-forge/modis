@@ -1,8 +1,8 @@
 .onLoad <- function(lib, pkg)  {
 	pkg.info <- drop(read.dcf(file=system.file("DESCRIPTION", package=pkg), fields=c("Version","Date")))
-	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ")\n\nThe MODIS package is still in an early development status. Suggestions or bug reports are very welcome\nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
+	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ")", sep=""))
 	
-	.checkTools() # just an information to the user
+	#.checkTools() # just an information to the user
 	
 	if (!file.exists("~/.MODIS_Opts.R")) {
 

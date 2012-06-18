@@ -7,7 +7,7 @@
 \title{Function for 'mapdata' dearch}
 
 \description{
-  This function should simplify the search or a 'mapdata'-based extent}
+  This function should simplify the search of a 'mapdata'-based extent}
 
 \usage{search4map(pattern="",database='worldHires',plot=FALSE)}
 
