@@ -5,8 +5,7 @@
 getProductsWS <- function() {
 
 	if (! require(SSOAP) ) {
-		stop("You need to install the 'SSOAP' package: install.packages('SSOAP', repos = 'http://www.omegahat.org/R', dependencies=TRUE, type='source')
-		")
+		stop("You need to install the 'SSOAP' package: install.packages('SSOAP', repos = 'http://www.omegahat.org/R', dependencies=TRUE, type='source')")
 	}
 
 	## get the SOAP service
