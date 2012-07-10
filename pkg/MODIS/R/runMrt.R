@@ -87,8 +87,8 @@ if (is.null(pm$outProj)) {
 } else {
 	cat("Output projection:", pm$outProj,"\n")
 	if (pm$outProj=="UTM"){
-		if (!exists("ZONE")) {
-			cat("No UTM zone spezified used MRT autodetection.\n")			
+		if (!is.null(pm$zone)) {
+			cat("No UTM zone specified used MRT autodetection.\n")			
 		} else {
 			cat("Using UTM zone:", pm$zone,"\n")
 		}
