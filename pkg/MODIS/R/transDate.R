@@ -9,7 +9,7 @@ if(is.null(begin)) {
 	}
 
 if (is.null(end)) {
-	end="2025.12.31" # we have to remember or change it when the time has come ;)
+	end=format(Sys.time(),"%Y.%m.%d") # always today
 } 
 
 if (nchar(begin)==7) {
@@ -26,10 +26,10 @@ if (nchar(end)==7) {
 divisor <- substr(begin,5,5)
 begin   <- as.Date(begin,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
 
-if (is.na(begin)) {stop("\n'begin=",begin,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
+if (is.na(begin)) {stop("\n'begin=",begin,"' is eighter wrong format or a invalid date")}
 	divisor <- substr(end,5,5)
 	end     <- as.Date(end,format=paste("%Y",divisor,"%m",divisor,"%d",sep=""))
-if (is.na(end)) {stop("\n'end=",end,"' is eighter wrong format (not:'YYYY.MM.DD') or a invalid date")}
+if (is.na(end)) {stop("\n'end=",end,"' is eighter wrong format or a invalid date")}
 
 if(end<begin){
 	t     <- begin
