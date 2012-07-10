@@ -1,9 +1,28 @@
 .onLoad <- function(lib, pkg)  {
 	pkg.info <- drop(read.dcf(file=system.file("DESCRIPTION", package=pkg), fields=c("Version","Date")))
-	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
 	
-	if (!file.exists("~/.MODIS_Opts.R")) {
-
+	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
+    
+    oin <- options()$warn
+    options(warn=-1)
+    if (!all(
+        try(require(RCurl),silent=TRUE),
+        try(require(raster),silent=TRUE),
+        try(require(rgeos),silent=TRUE),
+        try(require(rgdal),silent=TRUE),
+        try(require(maps),silent=TRUE),
+        try(require(mapdata),silent=TRUE),
+        try(require(XMLSchema),silent=TRUE),
+        try(require(XML),silent=TRUE),
+        try(require(SSOAP),silent=TRUE)
+    ))
+    {
+	    packageStartupMessage("To install all suggested and required packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat\ninstall.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster'))")
+    }
+    options(warn=oin)
+	
+	if (!file.exists("~/.MODIS_Opts.R"))
+	{
         packageStartupMessage(
             "#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe file containing package defaults doesn't exist!\nOpen \'",file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"\'\nIf settings are fine as they are just copy the file with:\n\'file.copy('",file.path(find.package('MODIS'), 'external','MODIS_Opts.R'),"','",normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"')",sep="")
 
