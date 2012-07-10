@@ -50,9 +50,12 @@ for (i in 1:length(product$PRODUCT)){
 	
 	for(u in 1:length(todo)){
 		
-		path <- .genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
+		path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
 		
-		if (server =="LAADS") { # test if the product is available on "LAADS", may it is better to first check "getIT=T/F" and than to make this test 
+		if (server =="LAADS") { # test if the product is available on "LAADS" (default is LPDAAC!)
+    		if (! require(RCurl) ) {
+    			stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+    		}
 			for (g in 1:sturheit){
 				hm <- url.exists(strsplit(path$remotePath$LAADS,"YYYY")[[1]][1])
 				if(hm) {break}
@@ -64,18 +67,20 @@ for (i in 1:length(product$PRODUCT)){
 			if (todo[u] %in% colnames(ftpdirs)) {
 	
 					avDates <- as.Date(as.character(ftpdirs[,which(colnames(ftpdirs)==todo[u])]),format="%Y.%m.%d")
-			
-					if (!is.null(begin)){
-						if (dates$begin < min(avDates,na.rm=TRUE)) {
-							getIT <- TRUE
-						} else {
-							getIT <- FALSE
-						}
-					} else {
-						getIT <- TRUE
-					}
+
+# removed check on begin=NULL if todo[u] exists, since the begin date doesn't change once downloaded			
+#					if (!is.null(begin)){
+#						if (dates$begin < min(avDates,na.rm=TRUE)) {
+#							getIT <- TRUE
+#						} else {
+#							getIT <- FALSE
+#						}
+#					} else {
+#						getIT <- TRUE
+#					}
+					getIT <- FALSE
 		
-					if (!is.null(end) & !getIT) {
+					if (!is.null(end)) {
 						if (dates$end > max(avDates,na.rm=TRUE)) {
 							getIT <- TRUE
 						} else {
