@@ -3,24 +3,11 @@
 	
 	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
     
-    oin <- options()$warn
-    options(warn=-1)
-    if (!all(
-        try(require(RCurl),silent=TRUE),
-        try(require(raster),silent=TRUE),
-        try(require(rgeos),silent=TRUE),
-        try(require(rgdal),silent=TRUE),
-        try(require(maps),silent=TRUE),
-        try(require(mapdata),silent=TRUE),
-        try(require(XMLSchema),silent=TRUE),
-        try(require(XML),silent=TRUE),
-        try(require(SSOAP),silent=TRUE)
-    ))
+    if (!all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster') %in% installed.packages()[,1]))
     {
 	    packageStartupMessage("To install all suggested and required packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat\ninstall.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster'))")
     }
-    options(warn=oin)
-	
+ 	
 	if (!file.exists("~/.MODIS_Opts.R"))
 	{
         packageStartupMessage(
