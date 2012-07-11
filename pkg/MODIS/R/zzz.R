@@ -1,13 +1,9 @@
-.onLoad <- function(lib, pkg)  {
+.onLoad <- function(lib, pkg)
+{
 	pkg.info <- drop(read.dcf(file=system.file("DESCRIPTION", package=pkg), fields=c("Version","Date")))
 	
-	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\n", sep=""))
-    
-    if (!all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster') %in% installed.packages()[,1]))
-    {
-	    packageStartupMessage("To install all suggested and required packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat\ninstall.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster'))")
-    }
- 	
+	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: http://www.wuala.com/IVFL/R_MODIS/\nTo install the complete set of suggested packages run: MODIS:::checkDeps()", sep=""))
+
 	if (!file.exists("~/.MODIS_Opts.R"))
 	{
         packageStartupMessage(
@@ -45,6 +41,11 @@
     	write('  ', filename)
     	write(paste('resamplingType <- \'',opt$resamplingType,'\'',sep=''), filename)
     	write(paste('outProj        <- \'',opt$outProj,'\'',sep=''),filename)
+    	write('  ', filename)	
+    	write('#########################', filename)
+    	write('# Windows specific (run: "MODIS:::.checkTools()" for inputs)', filename)
+    	write('  ', filename)
+    	write('# FWToolsPath <- "C:/Programms/FWTools2.4.7/bin"', filename)
     	write('  ', filename)	
     	write('#########################', filename)
     	write('# PLEASE DON\'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.\n# Example ftpstring\n# 3.) If you have a personal MODIS datapool within your LAN and you face  problems in the creation of an additional \'ftpstring\' please contact one of us.\n# Use \'placeholders\' only in \'variablepath\'\n# Additional \'placeholders\':\n# DATE1DATE2 period start/end (MERIS specific)\n# REGION (MERIS specific) MERIS date is stores in regions\n\n# ftpstring0 <- list(name=\'sitename\',SENSOR=\'sensorname\', basepath=\'/base/path\',variablepath=\'/variable/path/\',content=c(\'what data is awailable? \'images\', \'metadata\'!',filename)	
