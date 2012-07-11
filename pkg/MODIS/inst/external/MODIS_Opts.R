@@ -32,14 +32,19 @@ localArcPath <- '~/MODIS_ARC' # Don't forget to call the function 'orgStruc()' a
 outDirPath   <- '~/MODIS_ARC/PROCESSED'
   
 # define, local archive structure. USE 'placeholdes'!!
-arcStructure <- '/PRODUCT.CCC/DATE' # Don't forget to call the function 'orgStruc()' after changing here!!
+arcStructure <- '/SENSOR/PRODUCT.CCC/DATE' # Don't forget to call the function 'orgStruc()' after changing here!!
   
 #########################
 # 2.) Processing defaults:
   
 resamplingType <- 'NN'
 outProj        <- 'GEOGRAPHIC'
-  
+
+#########################
+# Windows Specific (run: 'MODIS:::.checkTools()' for inputs)
+
+# FWToolsPath <- "C:/Programms/FWTools2.4.7/bin"  
+
 #########################
 # PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.
 # Example ftpstring
