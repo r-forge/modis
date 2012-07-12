@@ -80,7 +80,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 			tiltab <- tiletable
 		}
 
-		tt 			<- subset(tiltab,(tiltab$ih %in% tileH) & (tiltab$iv %in% tileV) & tiltab$xmin>-999)
+		tt      <- subset(tiltab,(tiltab$ih %in% tileH) & (tiltab$iv %in% tileV) & tiltab$xmin>-999)
 		extent 	<- list(ymin=min(tt$ymin),ymax=max(tt$ymax),xmin=min(tt$xmin),xmax=max(tt$xmax))
 		
 		if (toupper(system) == "SRTM"){
@@ -146,8 +146,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		extent <- map("worldHires", extent, plot = FALSE)
 		extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
 	#
-	} else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick")) { # if RASTER* object
-		if (!inherits(extent,"Extent")) {
+	} else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick"))
+	{ # if RASTER* object
+		if (!inherits(extent,"Extent"))
+		{
 			inproj <- projection(extent)
 			if (!inproj %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) { # TODO a more trustful check than %in%!
 				if (! require(rgdal) ) {
