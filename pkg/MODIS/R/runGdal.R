@@ -141,7 +141,11 @@ runGdal <- function(ParaSource=NULL,...)
         pm$outProj <- outProj
     }
     
-
+    if (pm$product$SENSOR=="MODIS")
+    {
+        s_srs <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+    }
+     
     for (z in 1:length(pm$product$PRODUCT))
     {
         
@@ -209,29 +213,6 @@ runGdal <- function(ParaSource=NULL,...)
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files(SDS)
     
-                        for(p in seq_along(gdalSDS))
-                        {
-                            if (length(seq_along(gdalSDS))==1)
-                            {
-                                random <- sample.int(10000000,length(gdalSDS))
-                                mosaic <- paste(outtemp,"mosaic_",random,".tif",sep="")
-    
-                                invisible(system(paste("gdal_translate -a_nodata none -of GTiff \"",gdalSDS[p],"\" ",mosaic[p],sep=""),intern=TRUE))
-                            } else {
-                                random <- sample.int(10000000,length(gdalSDS)+1)
-                                mosaic <- paste(outtemp,"mosaic_",random,".tif",sep="")
-                                
-                                for (p in seq_along(gdalSDS))
-                                {
-                                    invisible(system(paste("gdal_translate -a_nodata none -of GTiff \"",gdalSDS[p],"\" ",mosaic[p+1],sep=""),intern=TRUE))                      
-                                }
-                                invisible(system(paste("gdal_merge.py -of GTiff -o",paste(mosaic,collapse=" ")),intern=TRUE))
-                            }
-                            require(raster)
-                            require(rgdal) 
-                            timg  <- raster(mosaic[1])
-                            s_srs <- proj4string(timg)
-                        
                             if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
                             {
                                 xy <- matrix(c(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmin,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymin),ncol=2,nrow=4,byrow=TRUE)
@@ -247,13 +228,13 @@ runGdal <- function(ParaSource=NULL,...)
                             
                             if (pm$pixelsize=="asIn")
                             {
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -r ",pm$resamplingType," -overwrite -multi ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
+                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
                             } else {
                                 tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
+                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
                             }
                             unlink(c(mosaic,paste(mosaic,"aux.xml",sep=".")))
-                        }
+                       # }
                     }
                 }
                 unlink(outtemp,recursive=TRUE)
