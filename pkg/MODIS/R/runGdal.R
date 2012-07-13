@@ -233,7 +233,7 @@ runGdal <- function(ParaSource=NULL,...)
                                 tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
                                 invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
                             }
-                            unlink(c(mosaic,paste(mosaic,"aux.xml",sep=".")))
+                            #unlink(c(mosaic,paste(mosaic,"aux.xml",sep=".")))
                        # }
                     }
                 }
