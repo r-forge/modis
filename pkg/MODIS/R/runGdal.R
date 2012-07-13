@@ -123,15 +123,24 @@ runGdal <- function(ParaSource=NULL,...)
         }
     }
     
-    if (pm$outProj=="UTM")
+    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | !is.na(as.numeric(pm$outProj)))
     {
-        if (is.null(pm$zone))
+        require(rgdal)
+        epsg <- make_EPSG()
+        
+        outProj <- strsplit(as.character(pm$outProj),":")[[1]]
+        outProj <- as.numeric(outProj[length(outProj)])
+        
+        outProj <- epsg[grep(pattern=outProj, epsg$code),3]
+        
+        if (length(outProj)==0)
         {
-            cat("No UTM zone specified, autodetecting.\n")            
-        } else {
-            cat("Using UTM zone:", pm$zone,"\n")
-        }
+            stop("Unknown EPSG code. Please check!")
+        } 
+           
+        pm$outProj <- outProj
     }
+    
 
     for (z in 1:length(pm$product$PRODUCT))
     {
@@ -218,17 +227,30 @@ runGdal <- function(ParaSource=NULL,...)
                                 }
                                 invisible(system(paste("gdal_merge.py -of GTiff -o",paste(mosaic,collapse=" ")),intern=TRUE))
                             }
-                            require(raster) 
+                            require(raster)
+                            require(rgdal) 
                             timg  <- raster(mosaic[1])
-                            s_srs <- projection(timg)
-                            te <- paste(c(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax),collapse=" ")                            
+                            s_srs <- proj4string(timg)
+                        
+                            if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
+                            {
+                                xy <- matrix(c(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmin,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymin),ncol=2,nrow=4,byrow=TRUE)
+                                colnames(xy) <- c("x","y")
+				                xy <- as.data.frame(xy)
+				                coordinates(xy) <- c("x","y")
+				                proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+                                outBB <- spTransform(xy,CRS(pm$outProj))@bbox
+				                te    <- paste(outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
+                            } else {
+                                te <- paste(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
+                            }
                             
                             if (pm$pixelsize=="asIn")
                             {
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -overwrite ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
+                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -r ",pm$resamplingType," -overwrite -multi ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
                             } else {
                                 tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -overwrite ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
+                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi ",mosaic[1]," ",outDir,"/", outname,sep=""),intern=TRUE))
                             }
                             unlink(c(mosaic,paste(mosaic,"aux.xml",sep=".")))
                         }
