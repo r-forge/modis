@@ -100,7 +100,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
     
         MRT <- 0
         
-        mrtH     <- Sys.getenv("MRT_HOME")
+        mrtH  <- Sys.getenv("MRT_HOME")
         mrtDD <- Sys.getenv("MRT_DATA_DIR")
         
         if (!quiet){
