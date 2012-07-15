@@ -90,6 +90,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 
 .checkTools <- function(what=c("MRT","GDAL"),quiet=FALSE)
 {
+    what<-toupper(what)
     iw <- options()$warn 
     options(warn=-1)
     

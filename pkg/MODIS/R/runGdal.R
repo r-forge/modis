@@ -19,7 +19,7 @@ runGdal <- function(ParaSource=NULL,...)
         eval(parse(ParaSource),envir=fe)
         sp <- as.list(fe)
         dp <- list(...)
-         pm <- c(sp, dp[(!names(dp) %in% names(sp))])
+        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
     } else {
       pm <- list(...)
     } 
@@ -149,17 +149,13 @@ runGdal <- function(ParaSource=NULL,...)
     for (z in 1:length(pm$product$PRODUCT))
     {
         
-        if (pm$product$TYPE[z]=="CMG") {
+        if (pm$product$TYPE[z]=="CMG") 
+        {
             tileID="GLOBAL"
             ntiles=1 
         } else {
-            if(!is.null(pm$extent)) {
-                extentCall <- pm$extent
-                pm$extent  <- getTile(extent=pm$extent,buffer=pm$buffer)
-            } else {
-                pm$extent <- getTile(tileH=pm$tileH,tileV=pm$tileV)
-            }
-            ntiles <- length(pm$extent$tile)
+            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
+            ntiles    <- length(pm$extent$tile)
         }
     
         todo <- paste(pm$product$PRODUCT[z],".",pm$product$CCC[[pm$product$PRODUCT[z]]],sep="")    
@@ -171,8 +167,7 @@ runGdal <- function(ParaSource=NULL,...)
             ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
             
             prodname <- strsplit(todo[u],"\\.")[[1]][1] 
-    		coll     <- strsplit(todo[u],"\\.")[[1]][2]
-
+            coll     <- strsplit(todo[u],"\\.")[[1]][2]
     
             avDates <- ftpdirs[[1]][,todo[u]]
             avDates <- avDates[!is.na(avDates)]            
@@ -186,13 +181,10 @@ runGdal <- function(ParaSource=NULL,...)
                 if (is.null(pm$job))
                 {
                     pm$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
-                    cat("No 'job' name specified, generated (date/time based)):",pm$job,"\n")
+                    cat("No 'job' name specified, generated (date/time based)):",paste(pm$outDirPath,pm$job,sep="/"),"\n")
                 }
                 outDir <- file.path(pm$outDirPath,pm$job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
-    
-                outtemp <- paste(outDir, "/.temp/",sep="")
-                dir.create(outtemp,recursive=TRUE,showWarnings=FALSE)
     
                 for (l in 1:length(avDates))
                 { 
@@ -217,30 +209,41 @@ runGdal <- function(ParaSource=NULL,...)
                             {
                                 xy <- matrix(c(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmin,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymin),ncol=2,nrow=4,byrow=TRUE)
                                 colnames(xy) <- c("x","y")
-				                xy <- as.data.frame(xy)
-				                coordinates(xy) <- c("x","y")
-				                proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+				                        xy <- as.data.frame(xy)
+				                        coordinates(xy) <- c("x","y")
+				                        proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
                                 outBB <- spTransform(xy,CRS(pm$outProj))@bbox
-				                te    <- paste(outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
+				                        te    <- paste(outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
                             } else {
                                 te <- paste(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
                             }
                             
-                            if (pm$pixelsize=="asIn")
+                          if (.Platform$OS=="unix")
+                          {
+                            if (pm$pixelsize=="asIn")                              
                             {
                                 invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
                             } else {
                                 tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
                                 invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
                             }
-                            #unlink(c(mosaic,paste(mosaic,"aux.xml",sep=".")))
-                       # }
+                          } else {
+                              
+                            gdalPath <- MODIS:::.getDef()$FWToolsPath
+                                                          
+                            if (pm$pixelsize=="asIn")
+                            {
+                              invisible(
+                                (shell(paste(gdalPath,"gdalwarp -s_srs ",s_srs," -t_srs ",pm$outProj," -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir,winslash="/"),"/", outname,sep=""),intern=TRUE))
+                            } else {
+                              tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
+                              invisible(shell(paste(gdalPath,"gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir),"\\", outname,sep=""),intern=TRUE))
+                            }
+                        }
                     }
                 }
-                unlink(outtemp,recursive=TRUE)
             }
         }
     }
 }
-
 
