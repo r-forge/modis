@@ -77,6 +77,7 @@ a
 # getHdf(product="M.D11A1",begin="2011.10.18",tileH=18:19,tileV=4) 
 
 # same Tiles with a LIST extent.
+# approximatley 21 mB!
 Austria <- list(xmax=17.47,xmin=9.2,ymin=46.12,ymax=49.3)
 b <- getHdf(product="M.D11A1",begin="2009001",end="2009-01-02",extent=Austria)
 b
@@ -88,7 +89,8 @@ c <- getHdf(product="M.D11A1",begin="2009.01.01",end="2009002")
 c
 
 # SRTM data
-d <- getHdf(product="SRTM",extent="austria") # SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
+# SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
+d <- getHdf(product="SRTM",extent="austria")  
 d
 }
 }
