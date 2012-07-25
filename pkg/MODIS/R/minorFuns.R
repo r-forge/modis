@@ -311,11 +311,11 @@ return(secName)
 
 checkDeps <- function()
 {
-    if (all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster') %in% installed.packages()[,1]))
+    if (all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster') %in% installed.packages()[,1]))
     {
         cat("Ok all suggested packages are installed!\n")
     } else {
-	    cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster'))\n")
+	    cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster', 'maptools'))\n")
     }
 }
 
