@@ -178,6 +178,18 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL,sys
 		if (length(extent$extent) == 4) {
 			extent <- extent$extent
 		}
+		
+		# if min/max is inverted
+		Txmax <- max(extent$xmin,extent$xmax)
+		Txmin <- min(extent$xmin,extent$xmax)
+		Tymax <- max(extent$ymin,extent$ymax)
+		Tymin <- min(extent$ymin,extent$ymax)
+		
+        extent$ymin <- Tymin		
+        extent$ymax <- Tymax
+        extent$xmin <- Txmin
+        extent$xmax <- Txmax		
+		
 		if (!is.null(buffer)) {
 			if (length(buffer) == 1) {
 				buffer <- c(buffer, buffer)
