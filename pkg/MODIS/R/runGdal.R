@@ -189,7 +189,8 @@ runGdal <- function(ParaSource=NULL,...)
                 for (l in 1:length(avDates))
                 { 
                     files <- unlist(getHdf(product=prodname,collection=coll,begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
-
+                    files <- files[basename(files)!="NULL"]
+                    
         			w <- options()$warn
         			options("warn"= -1)
         			SDS <- list()
@@ -233,8 +234,7 @@ runGdal <- function(ParaSource=NULL,...)
                                                           
                             if (pm$pixelsize=="asIn")
                             {
-                              invisible(
-                                (shell(paste(gdalPath,"gdalwarp -s_srs ",s_srs," -t_srs ",pm$outProj," -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir,winslash="/"),"/", outname,sep=""),intern=TRUE))
+                              invisible(shell(paste(gdalPath,"gdalwarp -s_srs ",s_srs," -t_srs ",pm$outProj," -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir,winslash="/"),"/", outname,sep=""),intern=TRUE))
                             } else {
                               tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
                               invisible(shell(paste(gdalPath,"gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir),"\\", outname,sep=""),intern=TRUE))
