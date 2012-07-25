@@ -8,6 +8,5 @@ exportPattern(".+WS$")
 export("genTile")
 export("transDate")
 export("search4map")
-export("checkAv")
 export("orgStruc")
-
+export("arcStats")
