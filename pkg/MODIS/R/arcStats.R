@@ -131,9 +131,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
                 #require(scales)
                 #colors <- c("#00000000",colorRampPalette(c("red","blue","green"))(100))
                 colors <- c("#00000000", "#FF0000", "#F90005", "#F4000A", "#EF000F", "#EA0014", "#E50019", "#E0001E", "#DA0024", "#D50029", "#D0002E", "#CB0033", "#C60038", "#C1003D", "#BC0042", "#B60048", "#B1004D", "#AC0052", "#A70057", "#A2005C", "#9D0061", "#970067", "#92006C", "#8D0071", "#880076", "#83007B", "#7E0080", "#790085", "#73008B", "#6E0090", "#690095", "#64009A", "#5F009F", "#5A00A4", "#5400AA", "#4F00AF", "#4A00B4", "#4500B9", "#4000BE", "#3B00C3", "#3600C8", "#3000CE", "#2B00D3", "#2600D8", "#2100DD", "#1C00E2", "#1700E7", "#1200EC", "#0C00F2", "#0700F7", "#0200FC", "#0002FC", "#0007F7", "#000CF2", "#0012EC", "#0017E7", "#001CE2", "#0021DD", "#0026D8", "#002BD3", "#0030CE", "#0036C8", "#003BC3", "#0040BE", "#0045B9", "#004AB4", "#004FAF", "#0055A9", "#005AA4", "#005F9F", "#00649A", "#006995", "#006E90", "#00738B", "#007985", "#007E80", "#00837B", "#008876", "#008D71", "#00926C", "#009767", "#009D61", "#00A25C", "#00A757", "#00AC52", "#00B14D", "#00B648", "#00BC42", "#00C13D", "#00C638", "#00CB33", "#00D02E", "#00D529", "#00DA24", "#00E01E", "#00E519", "#00EA14", "#00EF0F", "#00F40A", "#00F905", "#00FF00")
-                
-                dime <- 400
-                
+             
                 if (extent[1]!="global")
                 {
                     png(paste(outDir,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
@@ -146,11 +144,12 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
                     proj4string(globe) <- proj4string(sr)
                     
                     spl <- list("sp.lines", as(globe, "SpatialLines"), lwd=0.8)
-                    spplot(sr,zcol="percent",col.regions=colors,xlim=xlim,ylim=ylim,at=0:100, sp.layout=spl,scales=list(draw = TRUE),main=paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""))
+                    spplot(sr, zcol="percent", col.regions=colors, xlim=xlim, ylim=ylim, at=0:100, sp.layout=spl,scales=list(draw = TRUE),main=paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""))
                     dev.off()
                     
                 } else {
-
+                
+                    dime <- 400
                     width  <- (2*dime)
                     height <- (1*dime) + dime * 0.5 
                     
@@ -168,7 +167,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
                     inxpd <- par()$xpd
                     par(xpd=NA)
                     text(0,-148,"[%]",cex=1)
-               # }
+               }
                 #add a title
                 par(xpd=inxpd)
                 title(paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""),line=-2,cex.main=2)
@@ -190,64 +189,3 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
     }
 return(invisible(NULL))
 }
-
-
-# arcStat(product="MOD13Q1",begin="2010001",end="2011001",asMap=T)
-# product="MOD13Q1";collection=NULL;extent="global";begin=NULL;end=NULL;asMap=TRUE;outName=NULL;outDir=MODIS:::.getDef("outDirPath");localArcPath=MODIS:::.getDef("localArcPath")
-
-
-
-library(raster)
-getData('ISO3')  # Canada's code is "CAN"
-can1<-getData('GADM', country="CAN", level=1)
-can2<-getData('GADM', country="CAN", level=2)
-
-c1<- can1
-c2 <- can2
-### B. Creating Map2- with borders between colored counties:
-# Creating an (artificial) grouping of Canadian admin units:
-nrofunits<-length(can2$NAME_2)
-groups<-c(rep(1:6,(nrofunits %/% 6)),rep(1,5))[order(c(rep(1:6,(nrofunits %/% 6)),rep(1,5)))]
-
-# adding values (grouping values) to "data":
-can2@data[["groups"]]<-groups
-can2@data$groups<-as.factor(can2@data$groups)
-classcolors <- rainbow(6)
-
-spl <- list("sp.lines", as(can1, "SpatialLines"), lwd=0.6)
-spplot(can2,zcol="groups",col.regions=classcolors,colorkey = FALSE,lwd=.4,col='white', par.settings = list(axis.line = list(col='transparent')),sp.layout=spl)
-
-
-spplot(can2,zcol="groups",col.regions=classcolors,colorkey = FALSE,lwd=.4,col='white', par.settings = list(axis.line = list(col='transparent')),sp.layout=spl)
-
-
-
-globe <- map("worldHires",plot=FALSE,xlim=xlim,ylim=ylim)
-globe <- map2SpatialLines(globe)
-proj4string(globe) <- proj4string(sr)
-
-spplot(globe)
-
-
-
-[(round(sr@data$percent,0)+1)]
-,lwd=.4
-,col='white'
-par.settings = list(axis.line = list(col='transparent'))
-,colorkey = FALSE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
