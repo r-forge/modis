@@ -208,37 +208,48 @@ runGdal <- function(ParaSource=NULL,...)
     
                             if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
                             {
-                                xy <- matrix(c(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmin,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymax,pm$extent$extent$xmax,pm$extent$extent$ymin),ncol=2,nrow=4,byrow=TRUE)
+                                xy <- matrix(c(pm$extent$extent$xmin, pm$extent$extent$ymin, pm$extent$extent$xmin, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymin), ncol=2, nrow=4, byrow=TRUE)
                                 colnames(xy) <- c("x","y")
-				                        xy <- as.data.frame(xy)
-				                        coordinates(xy) <- c("x","y")
-				                        proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+				                xy <- as.data.frame(xy)
+				                coordinates(xy) <- c("x","y")
+				                proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
                                 outBB <- spTransform(xy,CRS(pm$outProj))@bbox
-				                        te    <- paste(outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
+				                te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
                             } else {
-                                te <- paste(pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
+                                te <- paste(" -te",pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
                             }
-                            
-                          if (.Platform$OS=="unix")
+                          
+                          # generate non-obligate GDAL arguments
+                          if(pm$pixelsize=="asIn")
                           {
-                            if (pm$pixelsize=="asIn")                              
-                            {
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
-                            } else {
-                                tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
-                                invisible(system(paste("gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",outDir,"/", outname,sep=""),intern=TRUE))
-                            }
+                            tr <- NULL
                           } else {
-                              
+                            tr <- paste(" -tr", pm$pixelsize,pm$pixelsize,collapse=" ")                      
+                          }
+                          
+                          # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
+                          if(is.null(pm$blockSize))
+                          {
+                            bs <- NULL
+                          } else {
+                            pm$blockSize <- as.integer(pm$blockSize)
+                            bs <- paste(" -co BLOCKYSIZE=",pm$blockSize,sep="")
+                          }
+
+                          if(isTRUE(pm$compression))
+                          {
+                            cp <- " -co compress=lzw -co predictor=2"
+                          } else {
+                            cp <- NULL
+                          }
+                          ###
+
+                        if (.Platform$OS=="unix")
+                        {
+                            invisible(system(paste("gdalwarp -s_srs '", s_srs, "' -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", outDir, "/", outname,sep=""), intern=TRUE))
+                        } else {
                             gdalPath <- MODIS:::.getDef()$FWToolsPath
-                                                          
-                            if (pm$pixelsize=="asIn")
-                            {
-                              invisible(shell(paste(gdalPath,"gdalwarp -s_srs ",s_srs," -t_srs ",pm$outProj," -te ",te," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir,winslash="/"),"/", outname,sep=""),intern=TRUE))
-                            } else {
-                              tr <- paste(pm$pixelsize,pm$pixelsize,collapse=" ")                   
-                              invisible(shell(paste(gdalPath,"gdalwarp -s_srs '",s_srs,"' -t_srs '",pm$outProj,"' -te ",te," -tr ",tr," -r ",pm$resamplingType," -overwrite -multi '",paste(gdalSDS,collapse="' '"),"' ",normalizePath(outDir),"\\", outname,sep=""),intern=TRUE))
-                            }
+                            invisible(shell(paste(gdalPath, "gdalwarp -s_srs '", s_srs, "' -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", normalizePath(outDir), "\\", outname, sep=""), intern=TRUE))
                         }
                     }
                 }
