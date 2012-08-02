@@ -22,6 +22,7 @@ file.size <- function(file,units="b"){
     FileSize <- list()
     
     ind <- file.exists(file)
+    
     if (sum(ind)==0)
     {   
         cat("No file(s) found!\n")
@@ -39,10 +40,11 @@ file.size <- function(file,units="b"){
         
     } else if (.Platform$OS.type == "windows") {
         
+        file <- normalizePath(file,winslash="\\")
+        
         for (i in seq_along(file))
         {                
-            file[i] <- normalizePath(file[i],winslash="\\")
-            FileSize[[i]] <- as.numeric(shell(paste('for %I in ("',file,'") do @echo %~zI',sep=""),intern=TRUE))
+            FileSize[[i]] <- as.numeric(shell(paste('for %I in ("',file[i],'") do @echo %~zI',sep=""),intern=TRUE))
         }
     
     } else {
