@@ -2,7 +2,7 @@
 # Date : July 2012
 # Licence GPL v3
 
-# todo: "inOne"
+# todo: "inOne" for T+A in one png
 
 arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL,asMap=TRUE,outName=NULL,outDir=MODIS:::.getDef("outDirPath"),localArcPath=MODIS:::.getDef("localArcPath"))
 {  
@@ -93,7 +93,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
             for ( i in seq_along(tileinfo))
             {
                 n <- grep(allLocal,pattern=tileinfo[i],value=TRUE)
-                meanSize <- mean(sapply(n,function(x)MODIS:::.file.size(x,units="Mb"))) 
+                meanSize <- mean(file.size(n,units="Mb")) 
                 
                 if (length(n)!=0)
                 {

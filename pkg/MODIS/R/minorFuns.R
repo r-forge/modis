@@ -1,6 +1,6 @@
+
 tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"), header=TRUE)
 MODIS_Products <- read.table(system.file("external", "MODIS_Products.txt", package="MODIS"), header=TRUE)
-
 
 # central setting for stubbornness 
 .stubborn <- function(level="high"){
@@ -12,18 +12,48 @@ if (is.numeric(level)) {
 }
 
 
-.file.size <- function(file,units="b"){
+file.size <- function(file,units="b"){
+    
+    iw <- options()$warn 
+    options(warn=-2)
+    on.exit(options(warn=iw))
+    
+    file <- unlist(file)    
+    FileSize <- list()
+    
+    ind <- file.exists(file)
+    if (sum(ind)==0)
+    {   
+        cat("No file(s) found!\n")
+        return(NULL)
+    }
+    
+    file <- file[ind]
+    
     if (.Platform$OS.type == "unix") {
-        FileSize <- as.numeric(system(paste("stat -c %s ",file,sep=""), intern=TRUE))
+        
+        for (i in seq_along(file))
+        {
+            FileSize[[i]] <- as.numeric(system(paste("stat -c %s ",file[i],sep=""), intern=TRUE))
+        }
+        
     } else if (.Platform$OS.type == "windows") {
-        file <- normalizePath(file,winslash="\\")
-        FileSize <- as.numeric(shell(paste('for %I in ("',file,'") do @echo %~zI',sep=""),intern=TRUE))
+        
+        for (i in seq_along(file))
+        {                
+            file[i] <- normalizePath(file[i],winslash="\\")
+            FileSize[[i]] <- as.numeric(shell(paste('for %I in ("',file,'") do @echo %~zI',sep=""),intern=TRUE))
+        }
+    
     } else {
         stop("Only Unix/Linux and Windows supported, please tell me which system you use!")
     }
+    
     uni <- c(1,1024,1024*1024,1024*1024*1024) 
     names(uni) <- toupper(c("b","Kb", "Mb", "Gb"))
-    FileSize <- as.numeric(FileSize/uni[toupper(units)])
+
+    FileSize <- as.numeric(unlist(FileSize))/uni[toupper(units)]
+
 return(FileSize)
 }
 
@@ -45,7 +75,7 @@ return(FileSize)
         MetaSize <- as.numeric(SizeInfo[which(SizeInfo[,1]==basename(file)),2])
     }
     
-    FileSize <- .file.size(file)
+    FileSize <- file.size(file)
     if (flexB!=0){
         isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB)     
     } else {
@@ -162,7 +192,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
   #              gdal <- shell("gdalinfo --version",intern=TRUE)
    #         } else {
                 #localArcPath <- normalizePath(gdalPath,"/gdalinfo",mustWork=FALSE)
-                gdal <- shell(paste('"',gdalPath,'/gdalinfo" --version',sep=""),intern=TRUE)
+                gdal <- shell(paste(gdalPath,'gdalinfo --version',sep="",collapse="/"),intern=TRUE)
     #        }
             
             if (length(grep(x=gdal,pattern="FWTools"))==0)
@@ -311,11 +341,14 @@ return(secName)
 
 checkDeps <- function()
 {
-    if (all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster') %in% installed.packages()[,1]))
+    if (all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix') %in% installed.packages()[,1]))
     {
         cat("Ok all suggested packages are installed!\n")
     } else {
-	    cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'SSOAP', 'XML', 'raster', 'maptools'))\n")
+        missingP <- !c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix') %in% installed.packages()[,1]
+        missingP <- paste(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix')[missingP],sep="",collapse="', '")
+
+        cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('",missingP,"'))\n",sep="")
     }
 }
 

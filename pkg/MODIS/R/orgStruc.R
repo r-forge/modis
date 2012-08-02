@@ -71,7 +71,7 @@ if (!file.exists(file.path(path,fname,fsep="/"))) { # if file doesn't exist in d
 			try(xxx <- invisible(system(paste("rmdir -p --ignore-fail-on-non-empty ", orpath,sep=""),intern=TRUE)),silent=TRUE)
 			options(warn=warn$warn)
 		} else { # work arount for rmdir -p on windows/MAC(?)
-			unlink(orpath,recursive=T)
+			unlink(orpath,recursive=TRUE)
 			secPath <- strsplit(orpath,"/")[[1]]
 			
 			for (o in length(secPath):1){
@@ -79,7 +79,7 @@ if (!file.exists(file.path(path,fname,fsep="/"))) { # if file doesn't exist in d
 				delpath <- paste(secPath[-o:-length(secPath)],sep="",collapse="/")
 
 				if (length(list.files(delpath))==0){
-					unlink(delpath,recursive=T)
+					unlink(delpath,recursive=TRUE)
 				} else {break}
 
 			}

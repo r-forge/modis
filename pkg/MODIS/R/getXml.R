@@ -54,7 +54,7 @@ avFiles <- avFiles[doit]
 			!file.exists(paste(avFiles[u],".xml",sep=""))
 			|
 			if (file.exists(paste(avFiles[u],".xml",sep=""))){ # check filesize of xml file! TODO  Needs improvement!!
-				MODIS:::.file.size(paste(avFiles[u],".xml",sep="")) < 2000	
+				file.size(paste(avFiles[u],".xml",sep="")) < 2000	
 			} else {
 				FALSE
 			}

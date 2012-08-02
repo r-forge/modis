@@ -19,7 +19,7 @@ This function generates a matrix with bounding box information for a global tili
 
   \item{offset}{Numeric. Shift the tiling system in upper-left direction.}
 
-  \item{StartNameFrom}{Numeric. "c(Lat-Direction,Lon-Direction)" start number in the name of the tiles.}
+  \item{StartNameFrom}{Numeric. "c(Lat-Direction,Lon-Direction)" start number in the naming of the tiles.}
 
   \item{extent}{list. Tile system Extent information (basically the coverage of the data on server).}  
 
