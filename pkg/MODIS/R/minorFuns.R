@@ -157,13 +157,13 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
                 cat("Checking availabillity of 'FWTools' (GDAL with HDF4 support for Windows):\n")    
             }
             gdalPath <- MODIS:::.getDef()$FWToolsPath
-            if (is.null(gdalPath))
-            {
-                gdal <- shell("gdalinfo --version",intern=TRUE)
-            } else {
+#            if (is.null(gdalPath))
+ #           {
+  #              gdal <- shell("gdalinfo --version",intern=TRUE)
+   #         } else {
                 #localArcPath <- normalizePath(gdalPath,"/gdalinfo",mustWork=FALSE)
-                gdal <- shell(paste(gdalPath,"gdalinfo --version",sep=""),intern=TRUE)
-            }
+                gdal <- shell(paste('"',gdalPath,'/gdalinfo" --version',sep=""),intern=TRUE)
+    #        }
             
             if (length(grep(x=gdal,pattern="FWTools"))==0)
             {
