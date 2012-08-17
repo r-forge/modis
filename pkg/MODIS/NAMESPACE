@@ -15,6 +15,10 @@ export("search4map")
 export("orgStruc")
 export("delHdf")
 export("file.size")
+export("preStack")
+export("repDoy")
+export("extractDate")
+
 
 exportPattern(".+WS$")
 
