@@ -5,7 +5,7 @@
 transDate <- function(begin=NULL,end=NULL){
 #########
 if(is.null(begin)) {
-	begin="1975.01.01" # maybe once MODIS package retrieves other data too!
+	begin="1972.01.01" # Start with Landsat 1 
 	}
 
 if (is.null(end)) {
