@@ -1,5 +1,5 @@
 
-runGdal <- function(ParaSource=NULL,...)
+runGdal <- function(...)
 {
 
     if (MODIS:::.checkTools(what="GDAL",quiet=TRUE)$GDAL!=1)
@@ -13,24 +13,27 @@ runGdal <- function(ParaSource=NULL,...)
     }
 
     # Collect parameters from any possible source
-    if (!is.null(ParaSource))
-    {
-        fe  <- new.env()
-        eval(parse(ParaSource),envir=fe)
-        sp <- as.list(fe)
-        dp <- list(...)
-        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
-    } else {
+#    if (!is.null(ParaSource))
+#    {
+#        fe  <- new.env()
+#        eval(parse(ParaSource),envir=fe)
+#        sp <- as.list(fe)
+#        dp <- list(...)
+#        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
+#     } else {
       pm <- list(...)
-    } 
+#     } 
 
-    if(length(pm)==0)
-    {
-        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
-    }
-
+#    if(length(pm)==0)
+#    {
+#        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
+#        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
+#    }
+    
+    # absolutly needed
     pm$product     <- getProduct(pm$product,quiet=TRUE)
+    
+    # optional
     pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
 
@@ -68,7 +71,8 @@ runGdal <- function(ParaSource=NULL,...)
     try(testDir <- list.dirs(pm$outDirPath),silent=TRUE)
     if(!exists("testDir")) {stop("'outDirPath' not set properly!")} 
     ##############
-
+    
+    # settings with messages
     if (is.null(pm$pixelsize))
     {
         cat("No output 'pixelsize' specified, input size used!\n")
@@ -90,7 +94,7 @@ runGdal <- function(ParaSource=NULL,...)
             stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
         }
         
-        cat("No resampling method specified, using ",pm$resamplingType,"!\n",sep="")
+        cat("No resampling method specified, using default: ",pm$resamplingType,"!\n",sep="")
     } else {    
 
         if (toupper(pm$resamplingType) == "NN"){
@@ -101,7 +105,7 @@ runGdal <- function(ParaSource=NULL,...)
         {
             stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
         }
-        cat("Resampling method:", pm$resamplingType,"\n")
+        cat("Resampling method: ", pm$resamplingType,"\n")
     }
 
     if (is.null(pm$outProj))
@@ -119,10 +123,10 @@ runGdal <- function(ParaSource=NULL,...)
     {
         if (pm$product$SENSOR=="MODIS")
         {
-            pm$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
-        }
+            pm$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
+        } 
     }
-    
+        
     if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | !is.na(as.numeric(pm$outProj)))
     {
         require(rgdal)
@@ -143,7 +147,10 @@ runGdal <- function(ParaSource=NULL,...)
     
     if (pm$product$SENSOR=="MODIS")
     {
-        s_srs <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+        s_srs <- " -s_srs '-s_srs +proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'"
+    } else 
+    {
+        s_srs <- NULL
     }
      
     for (z in 1:length(pm$product$PRODUCT))
@@ -206,50 +213,54 @@ runGdal <- function(ParaSource=NULL,...)
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files(SDS)
     
-                            if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
-                            {
-                                xy <- matrix(c(pm$extent$extent$xmin, pm$extent$extent$ymin, pm$extent$extent$xmin, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymin), ncol=2, nrow=4, byrow=TRUE)
-                                colnames(xy) <- c("x","y")
-				                xy <- as.data.frame(xy)
-				                coordinates(xy) <- c("x","y")
-				                proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-                                outBB <- spTransform(xy,CRS(pm$outProj))@bbox
-				                te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
-                            } else {
-                                te <- paste(" -te",pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
-                            }
+                        if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
+                        {
+                            xy <- matrix(c(pm$extent$extent$xmin, pm$extent$extent$ymin, pm$extent$extent$xmin, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymin), ncol=2, nrow=4, byrow=TRUE)
+                            colnames(xy) <- c("x","y")
+				            xy <- as.data.frame(xy)
+				            coordinates(xy) <- c("x","y")
+				            proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+                            outBB <- spTransform(xy,CRS(pm$outProj))@bbox
+				            te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
+                        } else
+                        {
+                            te <- paste(" -te",pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
+                        }
                           
-                          # generate non-obligate GDAL arguments
-                          if(pm$pixelsize=="asIn")
-                          {
+                        # generate non-obligate GDAL arguments
+                        if(pm$pixelsize=="asIn")
+                        {
                             tr <- NULL
-                          } else {
-                            tr <- paste(" -tr", pm$pixelsize,pm$pixelsize,collapse=" ")                      
-                          }
-                          
-                          # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
-                          if(is.null(pm$blockSize))
-                          {
+                        } else
+                        {
+                            tr <- paste(" -tr", pm$pixelsize, pm$pixelsize,collapse=" ")                      
+                        }
+                        
+                        # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
+                        if(is.null(pm$blockSize))
+                        {
                             bs <- NULL
-                          } else {
+                        } else
+                        {
                             pm$blockSize <- as.integer(pm$blockSize)
                             bs <- paste(" -co BLOCKYSIZE=",pm$blockSize,sep="")
-                          }
+                        }
 
-                          if(isTRUE(pm$compression))
-                          {
+                        if(isTRUE(pm$compression))
+                        {
                             cp <- " -co compress=lzw -co predictor=2"
-                          } else {
+                        } else
+                        {
                             cp <- NULL
-                          }
+                        }
                           ###
 
                         if (.Platform$OS=="unix")
                         {
-                            invisible(system(paste("gdalwarp -s_srs '", s_srs, "' -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", outDir, "/", outname,sep=""), intern=TRUE))
+                            invisible(system(paste("gdalwarp",s_srs," -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", outDir, "/", outname,sep=""), intern=TRUE))
                         } else {
                             gdalPath <- MODIS:::.getDef()$FWToolsPath
-                            invisible(shell(paste(gdalPath, "gdalwarp -s_srs '", s_srs, "' -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", normalizePath(outDir), "\\", outname, sep=""), intern=TRUE))
+                            invisible(shell(paste(gdalPath, "gdalwarp", s_srs," -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", normalizePath(outDir), "\\", outname, sep=""), intern=TRUE))
                         }
                     }
                 }
