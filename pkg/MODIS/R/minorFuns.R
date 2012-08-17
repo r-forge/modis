@@ -11,54 +11,23 @@ if (is.numeric(level)) {
     }
 }
 
-
-file.size <- function(file,units="b"){
+file.size <- function(file,units="B"){
     
-    iw <- options()$warn 
-    options(warn=-2)
-    on.exit(options(warn=iw))
-    
-    file <- unlist(file)    
-    FileSize <- list()
-    
-    ind <- file.exists(file)
-    
-    if (sum(ind)==0)
-    {   
-        cat("No file(s) found!\n")
-        return(NULL)
-    }
-    
-    file <- file[ind]
-    
-    if (.Platform$OS.type == "unix") {
+    units <- toupper(units)
+    unit <- c(1,1024,1048576,1073741824,1073741824*1024) 
+    names(unit) <- c("B","KB", "MB", "GB","TB")
         
-        for (i in seq_along(file))
-        {
-            FileSize[[i]] <- as.numeric(system(paste("stat -c %s ",file[i],sep=""), intern=TRUE))
-        }
-        
-    } else if (.Platform$OS.type == "windows") {
-        
-        file <- normalizePath(file,winslash="\\")
-        
-        for (i in seq_along(file))
-        {                
-            FileSize[[i]] <- as.numeric(shell(paste('for %I in ("',file[i],'") do @echo %~zI',sep=""),intern=TRUE))
-        }
+    if (!units %in% names(unit))
+    {
+        stop('unit must be one of: "B", "KB", "MB", "GB" or "TB"')
+    } 
     
-    } else {
-        stop("Only Unix/Linux and Windows supported, please tell me which system you use!")
-    }
+    file <- file.info(file)
+    file <- file[!file$isdir,"size"]
     
-    uni <- c(1,1024,1024*1024,1024*1024*1024) 
-    names(uni) <- toupper(c("b","Kb", "Mb", "Gb"))
-
-    FileSize <- as.numeric(unlist(FileSize))/uni[toupper(units)]
-
-return(FileSize)
+    res <- file/unit[toupper(units)]
+    return(res)
 }
-
 
 .checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0){
 
