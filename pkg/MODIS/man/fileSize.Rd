@@ -8,14 +8,14 @@
 
 \description{Function for getting size of any files.}
   
-\usage{file.size(file,units="b")}
+\usage{file.size(file,units="B")}
 
 \arguments{
   \item{file}{Character vector of file(s) with path.}
-  \item{units}{Character, default "b" bytes or alternative: "Kb", "Mb", "Gb" for kilo Bytes, mega Bytes and giga Bytes.}} 
+  \item{units}{Character, default "B" bytes or alternative: "KB", "MB", "GB" or "TB" for kilo Bytes, mega Bytes, giga Bytes and tera Bytes.}} 
 
 \value{
-  numeric Vector with the same length of available input files and the unit specified by argument 
+  numeric Vector with the same length of available input files in the unit specified by argument. Directories are excluded! 
 }
 
 \author{
