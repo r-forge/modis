@@ -1,8 +1,8 @@
-\name{timeOrg}
+\name{orgTime}
 
 \docType{methods}
 
-\alias{timeOrg}
+\alias{orgTime}
 
 \title{Creat. an output date information based on the input date information.}
 
@@ -11,7 +11,7 @@ This function checks the date information in an input file (ie. from MODIS filen
 }
 
 \usage{
-  timeOrg(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="\%Y\%j")
+  orgTime(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="\%Y\%j")
 }
 
 \arguments{
@@ -37,8 +37,8 @@ This function checks the date information in an input file (ie. from MODIS filen
 # note, this function can be applied to any files that have a date information in the _filename_!
 files <- c("MOD13A2.A2010353.1_km_16_days_composite_day_of_the_year.tif", "MOD13A2.A2011001.1_km_16_days_composite_day_of_the_year.tif", "MYD13A2.A2010361.1_km_16_days_composite_day_of_the_year.tif", "MYD13A2.A2011009.1_km_16_days_composite_day_of_the_year.tif")
 
-timeOrg(files)
-timeOrg(files,nDays=2,begin="2010350",end="2011015")
+orgTime(files)
+orgTime(files,nDays=2,begin="2010350",end="2011015")
 }
 }
 

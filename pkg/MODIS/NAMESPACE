@@ -18,6 +18,7 @@ export("file.size")
 export("preStack")
 export("repDoy")
 export("extractDate")
+export("orgTime")
 
 
 exportPattern(".+WS$")

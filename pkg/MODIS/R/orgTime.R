@@ -1,4 +1,4 @@
-timeOrg <- function(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="%Y%j")
+orgTime <- function(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="%Y%j")
 {
 
     if (inherits(files,"Raster"))
