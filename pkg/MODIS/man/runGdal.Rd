@@ -63,12 +63,18 @@ runGdal( product="MOD11A1", begin="2010001", end="2010005", SDSstring="101")
 ### outProj examples
 # LST of Austria warped to UTM 34N (the three different possibilites to specify "outProj")
 # to find am EPSG or prj4 you may use: prj <- make_EPSG() See  
-runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005", SDSstring="101", outProj="EPSG:32634")
-runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005", SDSstring="101", outProj="32634")
-runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005", SDSstring="101", outProj="+proj=utm +zone=34 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005",
+ SDSstring="101", outProj="EPSG:32634")
+ 
+runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005",
+ SDSstring="101", outProj="32634")
+ 
+runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005",
+ SDSstring="101", outProj="+proj=utm +zone=34 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
 
 ### resamplingType examples
-runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005", SDSstring="1", resamplingType="lanczos", outProj="32634", pixelsize=100)
+runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005",
+ SDSstring="1", resamplingType="lanczos", outProj="32634", pixelsize=100)
 
 }
 }
