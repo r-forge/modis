@@ -32,7 +32,7 @@ orgTime <- function(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="%
     }
     if (end > max(dates))
     {
-        warning("'end' is later by, ",as.numeric(end - max(dates)) ," days, than the available dates dates!")
+        warning("'end' is later by, ",as.numeric(end - max(dates)) ," days, than the available input dates!")
     }
 
     # egualise the in and out "doys"
