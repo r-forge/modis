@@ -9,7 +9,10 @@ extractDate <- function(files,pos1=10,pos2=16,asDate=FALSE,format="%Y%j")
     if(asDate)
     {
         date <- as.Date(date, format=format)
+        return( list(dates = date, pos1=pos1, pos2=pos2, asDate = asDate, format=format) )
+    } else 
+    {
+        return( list(dates = date, pos1 = pos1, pos2 = pos2))
     }
-    return(date)
 }
 

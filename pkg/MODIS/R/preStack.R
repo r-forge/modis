@@ -2,25 +2,38 @@
 # Date : August 2012
 # Licence GPL v3
 
-
-preStack <- function(path="./",pattern,begin=NULL,end=NULL,pos1=10,pos2=16)
+preStack <- function( path = "./", pattern = "*", files = NULL, timeInfo = NULL)
 {
-    fnames <- list.files(path=path,pattern=pattern,full.names=TRUE)
-
-    if (length(fnames)==0)
+    if (is.null(files))
     {
-        cat("No files found!\n");return(NULL)
+        fnames <- list.files( path = path, pattern = pattern, full.names = TRUE)
+    } else 
+    {
+        fnames <- files
+    }
+    
+    if (length(fnames) == 0)
+    {
+        cat("No files found!\n") ; return(NULL)
+    }
+    
+    if (!is.null(timeInfo))
+    {
+        avDates  <- extractDate( basename(fnames), pos1 = timeInfo$pos1, pos2 = timeInfo$pos2, format = timeInfo$format, asDate = TRUE)
+        fnames   <- fnames[ order(avDates$dates) ]
+        avDates  <- sort(avDates$dates)
+        begin    <- min(timeInfo$inputLayerDates) 
+        end      <- max(timeInfo$inputLayerDates)
+        fnames   <- fnames[avDates >= begin & avDates <= end]        
     }
 
-    dates   <- extractDate(basename(fnames),pos1=pos1,pos2=pos2)
-    timings <- transDate(begin=begin,end=end)
-    
-    fnames <- fnames[timings$beginDOY <= dates & timings$endDOY >= dates]
-    dates  <- dates[timings$beginDOY <= dates & timings$endDOY >= dates]
-    fnames <- fnames[order(dates)]
-
-    cat("Found",length(fnames),"files!\n")
-    if (length(fnames)==0) (return(NULL))
+    cat("Found", length(fnames), "files!\n")
+    if ( length(fnames) == 0 ) ( return(NULL) )
     
     return(fnames)
 }
+
+
+
+
+

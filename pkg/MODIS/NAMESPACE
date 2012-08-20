@@ -19,7 +19,7 @@ export("preStack")
 export("repDoy")
 export("extractDate")
 export("orgTime")
-
+export("smooth.spline.raster")
 
 exportPattern(".+WS$")
 

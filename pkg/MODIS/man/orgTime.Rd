@@ -11,7 +11,7 @@ This function checks the date information in an input file (ie. from MODIS filen
 }
 
 \usage{
-  orgTime(files,nDays=10,begin=NULL,end=NULL,pos1=10,pos2=16,format="\%Y\%j")
+  orgTime(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16,format="\%Y\%j")
 }
 
 \arguments{
@@ -19,6 +19,7 @@ This function checks the date information in an input file (ie. from MODIS filen
   \item{nDays}{Integer. Time interval for the output layers. Default is 10 days. Can also be nDays="1 month" or "1 week" see: \link{http://statistics.berkeley.edu/classes/s133/dates.html} example of seq(from,to,by) at the bottom.}
   \item{begin}{Default is from earliest input dataset. Here you can supply the begin date of the output files} 
   \item{end}{Default to the end of the input dataset. Here you can specify the end date of the output file (note, the exact value depends also in "nDays" argument.} 
+  \item{pillow}{Number of days added on the beginning and on the en of a time serie} 
   \item{pos1}{Start position of date in the filename. You have to count, sorry!} 
   \item{pos2}{End position of date in the filename. You have to count, sorry!} 
   \item{format}{Default is all dates, if set the function subsets by date the files in path and pattern} 

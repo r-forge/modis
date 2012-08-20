@@ -11,16 +11,14 @@
 }
 
 \usage{
-  preStack(path="./",pattern,begin=NULL,end=NULL,pos1=10,pos2=16)
+  preStack(path = "./", pattern = "*", files = NULL, timeInfo = NULL)
 }
 
 \arguments{
   \item{path}{Location of MODIS files to create the stack: \code{?list.files}}
   \item{pattern}{Pattern to search for MODIS files see: \code{?list.files}}
-  \item{begin}{Default is all dates, if set the function subsets by date the files in path and pattern} 
-  \item{end}{Default is all dates, if set the function subsets by date the files in path and pattern} 
-  \item{pos1}{Start position of date in the filename. You have to count, sorry!} 
-  \item{pos2}{End position of date in the filename. You have to count, sorry!} 
+  \item{files}{character vector of filenames. If used it overrooles 'path' and 'pattern'} 
+  \item{timeInfo}{result of \code{?orgTime}} 
 } 
 
 \value{
@@ -33,7 +31,7 @@
 
 \examples{
 \dontrun{
-# no applicable example here
+# see the example in \code{?smooth.spline.raster}
 }
 }
 
