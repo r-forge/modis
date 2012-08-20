@@ -38,7 +38,7 @@ the filtered data and a text file with the dates of the output layers
 # !! The function is very now, distrust to the result is for sure not the worst behavior !!
 
 # You need to extract the: 'vegetation index', 'VI_Quality layer', and 'composite day of the year' layer.
-# runGdal(product="M.D13A2",begin="2004340",extent="sicily",end="2006070",job="fullCapa",SDSstring="101000000010")
+# runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",job="fullCapa",SDSstring="101000000010")
 # You can download this already processed dataset from: http://www.wuala.com/IVFL/R_MODIS/ 
 # Afterward copy it to \code{MODIS:::.getDef()$outDirPath}
 
