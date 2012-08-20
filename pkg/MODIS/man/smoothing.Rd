@@ -35,6 +35,7 @@ the filtered data and a text file with the dates of the output layers
 \examples{
 \dontrun{
 # The full capacity of the following functions is currently avaliable only with M*D13 data.
+# !! The function is very now, distrust to the result is for sure not the worst behavior !!
 
 # You need to extract the: 'vegetation index', 'VI_Quality layer', and 'composite day of the year' layer.
 # runGdal(product="M.D13A2",begin="2004340",extent="sicily",end="2006070",job="fullCapa",SDSstring="101000000010")
