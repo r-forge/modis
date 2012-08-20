@@ -51,7 +51,7 @@ vi   <- preStack(path=path, pattern="*_NDVI.tif$")
 # is always problematic. So there is the argument "pillow" (default 75 days) that adds
 # (if available) some more layers on the two endings.
   
-timeInfo <- orgTime(vi,nDays="1 week",begin="2005020",end="2005100")
+timeInfo <- orgTime(vi,nDays=16,begin="2005001",end="2005365",pillow=40)
 
 # now re-run "preStack" with two diferences, 'files' (output of the first 'preStack' call. and the 'timeInfo'
 # Here only the data needed for the filtering is extractet:
@@ -59,14 +59,14 @@ vi <- preStack(files=vi,timeInfo=timeInfo)
 
 # For speedup try (Sometimes problematic on Win7): 
 beginCluster(type="SOCK") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
-system.time(smooth.spline.raster(vi,timeInfo=timeInfo,df=25))
+system.time(smooth.spline.raster(vi,timeInfo=timeInfo,df=10))
 
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 wt  <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
 beginCluster(type="SOCK") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
-system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,df=25))
+system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,df=10))
 }
 }
 
