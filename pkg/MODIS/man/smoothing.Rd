@@ -61,12 +61,14 @@ vi <- preStack(files=vi,timeInfo=timeInfo)
 beginCluster(type="SOCK") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
 system.time(smooth.spline.raster(vi,timeInfo=timeInfo,df=10))
 
+# Doesn't works in version 0.5-0!
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
-wt  <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
-inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
+#wt  <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
+#inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
-beginCluster(type="SOCK") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
-system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,df=10))
+#beginCluster(type="SOCK") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
+#system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,df=10))
+
 }
 }
 
