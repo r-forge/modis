@@ -12,28 +12,12 @@ runGdal <- function(...)
         }
     }
 
-    # Collect parameters from any possible source
-#    if (!is.null(ParaSource))
-#    {
-#        fe  <- new.env()
-#        eval(parse(ParaSource),envir=fe)
-#        sp <- as.list(fe)
-#        dp <- list(...)
-#        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
-#     } else {
-      pm <- list(...)
-#     } 
-
-#    if(length(pm)==0)
-#    {
-#        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-#        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
-#    }
+    pm <- list(...)
     
     # absolutly needed
     pm$product     <- getProduct(pm$product,quiet=TRUE)
     
-    # optional
+    # optional and if missing it is added here:
     pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
 
@@ -71,14 +55,39 @@ runGdal <- function(...)
     try(testDir <- list.dirs(pm$outDirPath),silent=TRUE)
     if(!exists("testDir")) {stop("'outDirPath' not set properly!")} 
     ##############
+
+    #### settings with messages
+
+    # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    # settings with messages
-    if (is.null(pm$pixelsize))
+    pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
+    
+    tr <- NULL
+    
+    # was wrong in doc and code!
+    if (!is.null(pm$pixelsize)) 
     {
-        cat("No output 'pixelsize' specified, input size used!\n")
-        pm$pixelsize <- "asIn"
-    } else {
-        cat("Output pixelsize:", pm$pixelsize,"\n")
+        pm$pixelSize <- pm$pixelsize
+        warning("Please, next time use 'pixelSize' instead of 'pixelsize'")
+    }
+    
+    if (is.null(pm$pixelSize))
+    {
+        if (!is.null(pm$extent$target$resolution[[1]]))
+        {
+            tr <- paste(" -tr", paste(pm$extent$target$resolution, collapse=" "))
+            cat("Output pixelSize specified by raster* object:", paste(pm$extent$target$resolution,collapse=" "),"\n")            
+        } else
+        {
+            cat("No output 'pixelSize' specified, input size used!\n")
+        }
+    
+    } else 
+    {
+    
+        cat("Output 'pixelSize' specified:",pm$pixelSize,"\n")
+        tr <- paste(" -tr", pm$pixelSize, pm$pixelSize,collapse=" ")                      
+    
     }
 
     if (is.null(pm$resamplingType))
@@ -110,8 +119,17 @@ runGdal <- function(...)
 
     if (is.null(pm$outProj))
     {
-        pm$outProj <- MODIS:::.getDef("outProj")
-        cat("No output projection specified, using ", pm$outProj,"!\n",sep="")
+
+        if (!is.null(pm$extent$target$t_srs))
+        {
+            pm$outProj <- pm$extent$target$t_srs
+            cat("Output projection specified by raster* object: '", pm$outProj,"'\n",sep="")
+        } else 
+        {
+            pm$outProj <- MODIS:::.getDef("outProj")
+            cat("No output projection specified, using ", pm$outProj,"\n",sep="")
+        }
+
     }
     
     if (pm$outProj=="GEOGRAPHIC")
@@ -156,14 +174,14 @@ runGdal <- function(...)
     for (z in 1:length(pm$product$PRODUCT))
     {
         
-        if (pm$product$TYPE[z]=="CMG") 
-        {
-            tileID="GLOBAL"
-            ntiles=1 
-        } else {
-            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
-            ntiles    <- length(pm$extent$tile)
-        }
+#        if (pm$product$TYPE[z]=="CMG") 
+#        {
+#            tileID <- "GLOBAL"
+#            ntiles <- 1 
+#        } else {
+#            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
+#            ntiles    <- length(pm$extent$tile)
+#        }
     
         todo <- paste(pm$product$PRODUCT[z],".",pm$product$CCC[[pm$product$PRODUCT[z]]],sep="")    
     
@@ -195,7 +213,7 @@ runGdal <- function(...)
     
                 for (l in 1:length(avDates))
                 { 
-                    files <- unlist(getHdf(product=prodname,collection=coll,begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
+                    files <- unlist(getHdf(product=prodname,collection=coll,begin=avDates[l],end=avDates[l],extent=pm$extent$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
                     files <- files[basename(files)!="NULL"]
                     
         			w <- options()$warn
@@ -212,29 +230,34 @@ runGdal <- function(...)
                         outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),".",gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"),".tif",sep="")
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files(SDS)
-    
+                        
+                        te <- NULL
                         if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
                         {
-                            xy <- matrix(c(pm$extent$extent$xmin, pm$extent$extent$ymin, pm$extent$extent$xmin, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymin), ncol=2, nrow=4, byrow=TRUE)
+                            if (!is.null(pm$extent$target$extent[[1]]))
+                            {
+                                te <- paste(" -te", pm$extent$target$extent$xmin, pm$extent$target$extent$ymin, pm$extent$target$extent$xmax, pm$extent$target$extent$ymax, collapse=" ") 
+                       
+                            } else 
+                            {
+                            
+                            xy <- matrix(c(pm$extent$extent$xmin, pm$extent$extent$ymin, pm$extent$extent$xmin, pm$extent$extent$ymax, pm$extent$extent$xmax,
+                                pm$extent$extent$ymax, pm$extent$extent$xmax, pm$extent$extent$ymin), ncol=2, nrow=4, byrow=TRUE)
                             colnames(xy) <- c("x","y")
 				            xy <- as.data.frame(xy)
 				            coordinates(xy) <- c("x","y")
 				            proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
                             outBB <- spTransform(xy,CRS(pm$outProj))@bbox
 				            te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
+                            }
+                            
                         } else
                         {
-                            te <- paste(" -te",pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
+                            te <- paste(" -te", pm$extent$extent$xmin,pm$extent$extent$ymin,pm$extent$extent$xmax,pm$extent$extent$ymax,collapse=" ")  
                         }
-                          
-                        # generate non-obligate GDAL arguments
-                        if(pm$pixelsize=="asIn")
-                        {
-                            tr <- NULL
-                        } else
-                        {
-                            tr <- paste(" -tr", pm$pixelsize, pm$pixelsize,collapse=" ")                      
-                        }
+
+                        #### generate non-obligate GDAL arguments
+                        
                         
                         # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
                         if(is.null(pm$blockSize))
@@ -245,7 +268,8 @@ runGdal <- function(...)
                             pm$blockSize <- as.integer(pm$blockSize)
                             bs <- paste(" -co BLOCKYSIZE=",pm$blockSize,sep="")
                         }
-
+                        
+                        # compress output data
                         if(isTRUE(pm$compression))
                         {
                             cp <- " -co compress=lzw -co predictor=2"

@@ -2,11 +2,16 @@
 # Date : August 2012
 # Licence GPL v3
 
-smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), df = 6,outPath = "./")
+whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500,nIter= 5, outPath = "./")
 {
     
     dir.create(outPath,showWarnings=FALSE)
     outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
+
+    if(!require(ptw))
+    {
+        stop("For using the whittaker filter please install the package: install.package('ptw')") 
+    }
     
     if(!inherits(vi,"Raster")) 
     {
@@ -25,22 +30,24 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
    
     tsLength <- as.numeric(max(timeInfo$inputLayerDates) - (min(timeInfo$inputLayerDates)-1)) 
     tsLayers <- length(unique(timeInfo$inputLayerDates))
-
-    indf <- df    
-    if (is.character(df))
-    {
-        cat("Using fixed 'df':",df,"\n")
-        nameDf <- "FixedDf"
-    } else
-    {
-        df   <- df*(tsLength/365)
-        cat("Yearly 'df' is:",indf,"\nNow changed with df*('length of input data period in days'/365) to:",df,"\n")
-        nameDf <- "YearlyDf"
-    }
-    df <- as.numeric(df)
     
-    # TEMP
+    inlam  <- lambda
+    if (is.character(lambda))
+    {
+        cat("Using fixed 'lambda':",lambda,"\n")
+        nameL <- "fixedLambda"
+    } else 
+    {
+        lambda <- lambda*(tsLength/365)
+        cat("Yearly 'lambda' is:",inlam,"\nNow changed with lambda*('length of input data period in days'/365) to:",lambda,"\n")
+        nameL <- "YearlyLambda"
+    }
+    
+    lambda <- as.numeric(lambda)
+    
+    #TEMP
     NAflag=-10000
+    
     b <- list()
     if (groupYears)
     {
@@ -48,12 +55,12 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             b[[a]] <- brick(raster(vi),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_year",y,".tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
         }
     
     } else {
         b[[1]] <- brick(raster(vi),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_fullPeriod.tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_fullPeriod.tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
     }
         
     tr <- blockSize(vi)
@@ -77,7 +84,7 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
         clusterEvalQ(cl,require(bitops))
         clusterEvalQ(cl,require(rgdal))
         clusterEvalQ(cl,require(raster))
-        
+        clusterEvalQ(cl,require(ptw))
         tr <- MODIS:::blockSizeCluster(vi)
     }    
 
@@ -134,13 +141,13 @@ clFun <- function(l)
 
     wtu[set0] <- 0
     val[set0] <- 0    
-     
-    r <- smooth.splineMtr(vali=val,wti=wtu,inTi=inTu,outTi=timeInfo$outSeq,df=df)
-    r[rowSums(abs(r))==0,] <- NAflag
 
+    r <- whittakerMtr(vali=val,wti=wtu,inTi=inTu,outTi=timeInfo$outSeq,lambda=lambda, minVal=5)
+    r[rowSums(abs(r))==0,] <- NAflag
 return(r)
 }
-# vali=val;wti=wtu;inTi=inTu;outTi=timeInfo$outSeq;df=df
+
+# vali=val;wti=wtu;inTi=inTu;outTi=timeInfo$outSeq;lambda=lambda
     if (!cluster)
     {    
         for ( i in seq_along(tr$row) )
@@ -152,7 +159,7 @@ return(r)
             {
                 for (a in seq_along(unique(format(timeInfo$outputLayerDates,"%Y"))))
                 {
-                    y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
+                    y      <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
                     b[[a]] <- writeValues(b[[a]], res[,format(timeInfo$outputLayerDates,"%Y")==y], tr$row[i])
                 }   
             } else 
@@ -175,14 +182,16 @@ return(r)
             {
                 stop("cluster error in Row:", tr$row[d$value$tag],"\n")
             }
+            
             ind <- d$value$tag
             d$value$value <- round(d$value$value)
+            
             #####
             if (groupYears)
             {
                 for (a in seq_along(unique(format(timeInfo$outputLayerDates,"%Y"))))
                 {
-                    y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
+                    y      <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
                     b[[a]] <- writeValues(b[[a]], d$value$value[,format(timeInfo$outputLayerDates,"%Y")==y], tr$row[ind])
                 }   
             } else 
@@ -207,10 +216,10 @@ return(r)
         if (groupYears)
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
-            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y], file=paste(outPath,"/LayerDates_NDVI_",nameDf,indf,"_year",y,sep=""), row.names=FALSE, col.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y],file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"_year",y,sep=""),row.names=FALSE,col.names=FALSE)
         } else
         {
-            write.table(x=timeInfo$outputLayerDates, file=paste(outPath,"/LayerDates_NDVI_",nameDf,indf,"fullPeriod",sep=""), col.names=FALSE, row.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates,file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"fullPeriod",sep=""),col.names=FALSE,row.names=FALSE)
         }
     }
 
@@ -218,9 +227,9 @@ return(NULL)
 }
 
 
-smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
+whittakerMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,lambda=NULL, nIter= 5, minVal=5)
 {
-    # check/clean-up x      
+    
     vali <- t(vali)
     
     yRow <- nrow(vali)
@@ -237,10 +246,9 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
     if(is.null(inTi))
     {
         inTi <- matrix(1:yRow,ncol=yCol,nrow=yRow)
-    } else 
-    {
+    } else {
         inTi <- as.matrix(inTi)
-
+        # if inT is a fixed vector (i.e.: from filename of Landsat of length nrow(x) (==nlayer) create a matrix with 1:nlayer for each col.
         if(ncol(inTi)==1)
         {
             inTi <- matrix(inTi[,1],ncol=yCol,nrow=yRow)            
@@ -248,28 +256,41 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
             inTi <- t(inTi)
         }
     }
-
+    
     # generate output matrix    
     if (is.null(outTi))
     {
         outTi <- inTi
         out   <- matrix(NA, nrow=nrow(inTi), ncol=yCol)
-    } else 
-    {
+    } else {
         outTi <- as.matrix(outTi)
-        outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
-        out   <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
+        if (ncol(outTi)==1)
+        {
+            outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
+        }
+        out <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
     }
+    
+    if (is.null(lambda))
+    {
+        lambda <- 500*((max(outTi[,1])-min(outTi[,1]))/365)
+    }    
         
-    Cvec <- (colSums(wti!=0) >= df)
+    # minimum "minVal" input values for filtering 
+    Cvec <- (colSums(wti!=0) > minVal)
     Cvec <- (1:yCol)[Cvec]
 
     for (u in Cvec)
     {
-        s       <- smooth.spline(y=vali[,u], x=inTi[,u], w=wti[,u], df=df, tol=1)
-        out[,u] <- predict(s, outTi[,u])$y
+        inTiVec <- inTi[,u]
+        valVec  <- rep(NA,max(inTiVec,na.rm=TRUE))
+        valVec[inTiVec] <- vali[,u]
+        wtVec <- rep(0,max(inTiVec,na.rm=TRUE))
+        wtVec[inTiVec]  <- wti[,u]
+        s <- miwhitatzb1(orgTS=valVec, w=wtVec,l=lambda,maxiter=nIter)
+        out[,u] <- s[outTi[,u]]
     }
 
 return(t(out))
 }
-   
+    

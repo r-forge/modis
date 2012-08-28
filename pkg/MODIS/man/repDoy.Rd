@@ -10,11 +10,12 @@
 Currently works only for MODIS 16 days composites!
 In MODIS composites the Julian dates inside SDS/layer 'composite_day_of_the_year' are refereing always to the year they are effectively in. The problem is, that the Layer/SDS name from the last files from AQUA and TERRA within a year can include dates from the following year and so starting again with 1. The problem comes if you want to sort values of a timeserie by date (e.g. for precise time series functions). This function generates a sequential vector beginning always with the earielst SDS/layer date and ending with the total sum of days of the time serie length.}
 
-\usage{repDoy(pixX,layerDate)}
+\usage{repDoy(pixX,layerDate=NULL,bias=0)}
 
 \arguments{
-  \item{pixX}{Matrix, normally result of raster:::getValues()}
-  \item{layerDate}{result of \code{extracDate(asDate=FALSE)}} 
+  \item{pixX}{Matrix, normally output of \code{raster:::getValues()}}
+  \item{layerDate}{Default \code{NULL}, for autodetection, if you wnat to be sure use the result of \code{extracDate(...,asDate=TRUE)} or \code{orgTime}} 
+  \item{bias}{Interger. Bias applied to all values in pixX} 
 } 
 
 \value{

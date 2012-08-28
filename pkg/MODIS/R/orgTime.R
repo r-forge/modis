@@ -1,3 +1,7 @@
+# Author: Matteo Mattiuzzi, matteo.mattiuzzi@boku.ac.at
+# Date : August 2012
+# Licence GPL v3
+
 orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16,format="%Y%j")
 {
 
@@ -7,7 +11,7 @@ orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16
     }
     files <- basename(files)
     
-    allDates <- sort(extractDate(files,asDate=TRUE,pos1=pos1,pos2=pos2,format=format)$dates)
+    allDates <- sort(extractDate(files,asDate=TRUE,pos1=pos1,pos2=pos2,format=format)$inputLayerDates)
 
     datLim   <- transDate(begin=begin,end=end)
     
@@ -18,7 +22,7 @@ orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16
         minData <- max(allDates[allDates <= minTheo])
     } else 
     {
-        minCalc <- minData <- min(allDates)
+        minTheo <- minCalc <- minData <- min(allDates)
     }
 
     if (!is.null(end))
@@ -28,7 +32,7 @@ orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16
         maxData <- min(allDates[allDates >= maxTheo])
     } else 
     {
-        maxCalc <- maxData <- max(allDates)
+        maxTheo <- maxCalc <- maxData <- max(allDates)
     }
     
     inputLayerDates <- allDates[allDates >= minData & allDates <= maxData]
@@ -55,7 +59,7 @@ orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16
     inSeq  <- as.numeric(inputLayerDates - t0+1)
     outSeq <- as.numeric(outputLayerDates - t0+1)
 
-    return(list(inSeq=inSeq,outSeq=outSeq,inputLayerDates=inputLayerDates,outputLayerDates=outputLayerDates,pos1=pos1,pos2=pos2,format=format))        
+    return(list(inSeq=inSeq,outSeq=outSeq,inputLayerDates=inputLayerDates,outputLayerDates=outputLayerDates,pos1=pos1,pos2=pos2,format=format,asDate=TRUE))        
 }
 
 

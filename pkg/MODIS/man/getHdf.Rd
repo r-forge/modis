@@ -2,7 +2,6 @@
 
 \docType{methods}
 \alias{getHdf}
-\alias{getHdf,HdfName,product,begin,end,tileH,tileV,extent,collection,dlmethod,stubbornness,quiet,wait,checkSize,log,localArcPath}
 
 \title{Create or update a local, user-defined subset of the global online
   MODIS grid data pool.}

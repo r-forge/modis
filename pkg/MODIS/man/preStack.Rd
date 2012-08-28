@@ -11,12 +11,12 @@
 }
 
 \usage{
-  preStack(path = "./", pattern = "*", files = NULL, timeInfo = NULL)
+  preStack(pattern = "*", path = "./", files = NULL, timeInfo = NULL)
 }
 
 \arguments{
-  \item{path}{Location of MODIS files to create the stack: \code{?list.files}}
   \item{pattern}{Pattern to search for MODIS files see: \code{?list.files}}
+  \item{path}{Location of MODIS files to create the stack: \code{?list.files}}
   \item{files}{character vector of filenames. If used it overrooles 'path' and 'pattern'} 
   \item{timeInfo}{result of \code{?orgTime}} 
 } 

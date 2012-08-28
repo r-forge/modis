@@ -2,7 +2,7 @@
 # Date : August 2012
 # Licence GPL v3
 
-preStack <- function( path = "./", pattern = "*", files = NULL, timeInfo = NULL)
+preStack <- function(pattern = "*", path = "./", files = NULL, timeInfo = NULL)
 {
     if (is.null(files))
     {
@@ -20,8 +20,8 @@ preStack <- function( path = "./", pattern = "*", files = NULL, timeInfo = NULL)
     if (!is.null(timeInfo))
     {
         avDates  <- extractDate( basename(fnames), pos1 = timeInfo$pos1, pos2 = timeInfo$pos2, format = timeInfo$format, asDate = TRUE)
-        fnames   <- fnames[ order(avDates$dates) ]
-        avDates  <- sort(avDates$dates)
+        fnames   <- fnames[ order(avDates$inputLayerDates) ]
+        avDates  <- sort(avDates$inputLayerDates)
         begin    <- min(timeInfo$inputLayerDates) 
         end      <- max(timeInfo$inputLayerDates)
         fnames   <- fnames[avDates >= begin & avDates <= end]        

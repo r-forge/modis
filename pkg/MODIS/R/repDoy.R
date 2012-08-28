@@ -2,29 +2,61 @@
 # Date : August 2012
 # Licence GPL v3
 
-repDoy <- function(pixX,layerDate)
+ 
+repDoy <- function(pixX, layerDate = NULL, bias = 0)
 {	
-	inX <- which(substr(layerDate,5,7)==361)
-	msk <- (pixX[,inX] < 361)*365
-	msk <-  pixX[,inX] + msk
-	pixX[,inX] <- msk
-	
-	inX <- which(substr(layerDate,5,7)==353)
-	msk <- (pixX[,inX] < 353)*365
-	msk <-  pixX[,inX] + msk
-	pixX[,inX] <- msk
 
-	period <- as.numeric(unique(substring(layerDate,1,4)))
-	zz <- 0
-	for(h in period){ # adjust year offset
-		inX <- which(substr(layerDate,1,4)==h)
-		pixX[,inX] <- pixX[,inX] + (zz*365)
-		zz <- zz+1
+    if (is.null(layerDate))
+    {
+        layerDate <- extractDate(colnames(pixX),asDate=TRUE)    
+    }	
+	if (layerDate$asDate)
+	{
+	    layerDoy  <- format(layerDate$inputLayerDates,"%j")
+        layerYear <- format(layerDate$inputLayerDates,"%Y")
+	} else 
+	{
+	    layerDoy  <- substr(layerDate$inputLayerDates,5,7)
+	    layerYear <- substr(layerDate$inputLayerDates,1,4)
 	}
 
-	pixX <- (pixX + 1)- as.numeric(substr(min(layerDate),5,7)) 
-
-	pixX[pixX<=0] <- NA
-    return(pixX)
+	if (is.matrix(pixX))
+	{
+    	pixX <- t(pixX)
+	} else
+	{
+    	pixX <- as.matrix(pixX)
+	}
+	
+	m1 <- pixX[ pixX <= 0 ]
+	#layerDoy  <- matrix(layerDoy, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
+	mask <- pixX - as.numeric(layerDoy)
+    mask <- sign(mask)==-1
+	
+	ndays <- as.numeric(format(as.Date(paste(layerYear,"-12-31",sep="")),"%j"))
+	bias1  <- matrix(ndays, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
+	
+	pixX[mask] <- pixX[mask] + bias1[mask]  
+	
+	ndays <- as.numeric(format(as.Date(paste(unique(layerYear),"-12-31",sep="")),"%j"))
+    bias1  <- cumsum(ndays) - min(ndays)
+	
+	counter <- as.numeric(table(layerYear))
+	
+	biasN <- list()
+	for(i in seq_along(counter))
+	{
+	    biasN[[i]] <- rep(bias1[i],counter[i])
+	}
+    bias1 <- unlist(biasN) - (as.numeric(format(min(layerDate$inputLayerDates),"%j"))-1)	
+    bias1 <- matrix(bias1, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
+		
+	pixX <- pixX + bias1 + bias
+	pixX[m1] <- NA
+	return(t(pixX))
 }
+  
+  
+  
+  
   

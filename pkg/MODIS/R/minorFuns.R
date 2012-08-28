@@ -312,12 +312,13 @@ return(secName)
 
 checkDeps <- function()
 {
-    if (all(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix') %in% installed.packages()[,1]))
+    needed <- c('RCurl', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'snow', 'ptw', 'SSOAP', 'XML','plotrix')
+    if (all(needed %in% installed.packages()[,1]))
     {
         cat("Ok all suggested packages are installed!\n")
     } else {
-        missingP <- !c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix') %in% installed.packages()[,1]
-        missingP <- paste(c('RCurl', 'sp', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'SSOAP', 'XML', 'raster','plotrix')[missingP],sep="",collapse="', '")
+        missingP <- !needed %in% installed.packages()[,1]
+        missingP <- paste(needed[missingP],sep="",collapse="', '")
 
         cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('",missingP,"'))\n",sep="")
     }
