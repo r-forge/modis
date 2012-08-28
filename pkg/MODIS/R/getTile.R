@@ -5,7 +5,15 @@
 getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom=TRUE){
 
     old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
-    target <- NULL # if extent is a raster* and has a different proj it is changed
+    target <- NULL  # if extent is a raster* and has a different proj it is changed
+    
+    if (!is.null(extent))
+    {
+        if (file.exists(extent))
+        {
+            extent <- raster(extent) 
+        }
+    }
     
     if (toupper(system) == "MERIS") {
         tiltab <- genTile(tileSize = 5)
@@ -104,51 +112,32 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             tileH <- unique(tt$ih)
             tileV <- unique(tt$iv)
         }
-        extent=""
-        
-# TODO: the problem is that this leads to many additional Tiles.
-# get extent for tileV+H setting
-#        if (!old) {
-#            sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
-#            
-#            tt <- matrix(NA,ncol=ncol(tiltab),nrow=length(tiles))
-#            
-#            til <- list()            
-#            for(i in 1:length(tiles)){
-# 
-#                til[[i]] <- subset(tiltab,tiltab$ih %in% as.numeric(substring(tiles[i],2,3)) & tiltab$iv %in% as.numeric(substring(tiles[i],5,6)))
-#                til[[i]] <- Polygon(cbind(c(til[[i]]$xmin,til[[i]]$xmax,til[[i]]$xmax,til[[i]]$xmin,til[[i]]$xmin),c(til[[i]]$ymax,til[[i]]$ymax,til[[i]]$ymin,til[[i]]$ymin,til[[i]]$ymax)),hole=FALSE)
-#                til[[i]] <- Polygons(list(til[[i]]),"selection")
-#                til[[i]] <- SpatialPolygons(list(til[[i]]))
-#                proj4string(til[[i]]) <- proj4string(sr)            
-#                selected = sr[til[[i]],]
-#                til[[i]] <- as.character(apply(selected@data,1,function(x) {paste("h",sprintf("%02d",x[2]),"v",sprintf("%02d",x[3]),sep="")}))
-#            }
-#            result <- list(tile = result, tileH = tileH, tileV = tileV,extent = extent, system = system)
-#            extent <- list(ymin=min(tt$ymin),ymax=max(tt$ymax),xmin=min(tt$xmin),xmax=max(tt$xmax))                
-#        }
-    
-        return(list(tile=tiles,tileH=tileH,tileV=tileV,extent=extent,system=system))
+        return(list(tile=tiles,tileH=tileH,tileV=tileV,extent=NULL,system=system))
     }
 
     #
     if (inherits(extent, "map")) { # if MAP
+
         extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]), ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
-    #
-    } else if (inherits(extent, "character")) { # if CHARACTER (country name of MAP)
-        if (! require(mapdata) ) {
+
+    } else if (inherits(extent, "character")) 
+        { # if CHARACTER (country name of MAP)
+
+        if (! require(mapdata) ){
             stop("For interactive TILE selection need to install the 'mapdata' package: install.packages('mapdata')")
         }
 
         try(test <- map("worldHires", extent, plot = FALSE),silent = TRUE)
-        if (!exists("test")) {
+        if (!exists("test"))
+        {
             stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires,'",extent, "')", sep = ""))
         }
         extent <- map("worldHires", extent, plot = FALSE)
         extent <- list(xmin = min(extent$range[1:2]), xmax = max(extent$range[1:2]),ymin = min(extent$range[3:4]), ymax = max(extent$range[3:4]))
-    #
+       
     } else if (class(extent) %in% c("Extent", "RasterLayer", "RasterStack","RasterBrick"))
     { # if RASTER* object
+        
         if (!inherits(extent,"Extent"))
         {
 
