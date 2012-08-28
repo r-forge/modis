@@ -140,7 +140,7 @@ clFun <- function(l)
 
 return(r)
 }
-# vali=val;wti=wtu;inTi=inTu;outTi=timeInfo$outSeq;df=df
+# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;df=df
     if (!cluster)
     {    
         for ( i in seq_along(tr$row) )
@@ -218,7 +218,7 @@ return(NULL)
 }
 
 
-smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
+smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,df=NULL)
 {
     vali <- t(vali)
     
