@@ -115,7 +115,7 @@ clFun <- function(l)
         
         # turn upsidedown wtu values
         wtu <- ((-1) * (wtu - bitMask))/bitMask # bitMask is the maximum possible value in the VI Qual Mask in MODIS: "1111" 
-
+        wtu <- matrix(wtu,nrow=mtrdim[1],ncol=mtrdim[2])
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
@@ -135,7 +135,7 @@ clFun <- function(l)
     wtu[set0] <- 0
     val[set0] <- 0    
      
-    r <- smooth.splineMtr(vali=val,wti=wtu,inTi=inTu,outTi=timeInfo$outSeq,df=df)
+    r <- smooth.splineMtr(vali=val,wti=wtu,inTi=inTu,timeInfo=timeInfo,df=df)
     r[rowSums(abs(r))==0,] <- NAflag
 
 return(r)
@@ -220,7 +220,6 @@ return(NULL)
 
 smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
 {
-    # check/clean-up x      
     vali <- t(vali)
     
     yRow <- nrow(vali)
@@ -237,10 +236,9 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
     if(is.null(inTi))
     {
         inTi <- matrix(1:yRow,ncol=yCol,nrow=yRow)
-    } else 
-    {
+    } else {
         inTi <- as.matrix(inTi)
-
+        # if inT is a fixed vector (i.e.: from filename of Landsat of length nrow(x) (==nlayer) create a matrix with 1:nlayer for each col.
         if(ncol(inTi)==1)
         {
             inTi <- matrix(inTi[,1],ncol=yCol,nrow=yRow)            
@@ -248,20 +246,23 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,df=NULL)
             inTi <- t(inTi)
         }
     }
-
+    
     # generate output matrix    
-    if (is.null(outTi))
+    if (is.null(timeInfo))
     {
         outTi <- inTi
         out   <- matrix(NA, nrow=nrow(inTi), ncol=yCol)
-    } else 
-    {
-        outTi <- as.matrix(outTi)
-        outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
-        out   <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
+    } else {
+        outTi <- as.matrix(timeInfo$outSeq)
+        if (ncol(outTi)==1)
+        {
+            outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
+        }
+        out <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
     }
         
-    Cvec <- (colSums(wti!=0) >= df)
+    # minimum "minVal" input values for filtering 
+    Cvec <- (colSums(wti!=0) > df)
     Cvec <- (1:yCol)[Cvec]
 
     for (u in Cvec)

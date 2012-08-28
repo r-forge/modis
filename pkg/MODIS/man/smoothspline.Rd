@@ -15,9 +15,9 @@ smooth.spline.raster(vi,wt=NULL,inT=NULL,groupYears=TRUE,timeInfo=orgTime(vi),df
 }
 
 \arguments{
-  \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames.}
-  \item{wt}{In case of MODIS composite the 'VI_Quality' raster-Brick, Stack or filenames.}
-  \item{inT}{In case of MODIS composite the 'composite_day_of_the_year' raster-Brick, Stack or filenames.} 
+  \item{vi}{Sorted 'Vegetation index' raster-Brick or -Stack or filenames.}
+  \item{wt}{In case of MODIS composite the 'VI_Quality' raster-Brick or -Stack or filenames.}
+  \item{inT}{In case of MODIS composite the 'composite_day_of_the_year' raster-Brick or -Stack or filenames.} 
   \item{groupYears}{Default \code{TRUE}, raster-Brick files separated by years. If \code{FALSE} a overall raster-Brick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{df}{Numeric: _Yearly_ degree of freedom value passed to \code{?smooth.spline}. If set as character (i.e. df="6"), it is not adapted to the time serie length but used as a fixed value (see deteils).} 
@@ -79,7 +79,8 @@ system.time(smooth.spline.raster(vi,timeInfo=timeInfo))
 # Doesn't works in version 0.5-0!
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
-inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
+# you can also stack/brick it
+inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo))
 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo))

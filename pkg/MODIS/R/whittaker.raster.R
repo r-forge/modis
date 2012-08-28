@@ -2,7 +2,7 @@
 # Date : August 2012
 # Licence GPL v3
 
-whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500,nIter= 5, outPath = "./")
+whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./")
 {
     
     dir.create(outPath,showWarnings=FALSE)
@@ -95,6 +95,7 @@ whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = 
 
 clFun <- function(l)
 {
+    # TODO
     minval      <- -2000
     bitShift    <-  2 
     bitMask     <- 15
@@ -102,7 +103,7 @@ clFun <- function(l)
     
     val    <- getValues(vi, row=tr$row[l], nrows=tr$nrows[l])
     mtrdim <- dim(val)
-    set0   <- val <= minval # M.D13 specific!
+    set0   <- val <= minval
     set0[is.na(val)] <- TRUE
 
     
@@ -112,7 +113,6 @@ clFun <- function(l)
         require(bitops)
         wtu <- getValues(wt, row=tr$row[l], nrows=tr$nrows[l])
         set0[wtu==0] <- TRUE
-
         wtu <- bitAnd(bitShiftR(wtu, bitShift ), bitMask)
         
         if(!is.null(bitTreshold))
@@ -122,7 +122,8 @@ clFun <- function(l)
         
         # turn upsidedown wtu values
         wtu <- ((-1) * (wtu - bitMask))/bitMask # bitMask is the maximum possible value in the VI Qual Mask in MODIS: "1111" 
-
+        wtu <- matrix(wtu,nrow=mtrdim[1],ncol=mtrdim[2])
+        
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
@@ -142,12 +143,11 @@ clFun <- function(l)
     wtu[set0] <- 0
     val[set0] <- 0    
 
-    r <- whittakerMtr(vali=val,wti=wtu,inTi=inTu,outTi=timeInfo$outSeq,lambda=lambda, minVal=5)
+    r <- whittakerMtr(vali=val, wti=wtu, inTi=inTu, timeInfo=timeInfo, lambda=lambda, nIter=nIter, minVal=5)
     r[rowSums(abs(r))==0,] <- NAflag
 return(r)
 }
 
-# vali=val;wti=wtu;inTi=inTu;outTi=timeInfo$outSeq;lambda=lambda
     if (!cluster)
     {    
         for ( i in seq_along(tr$row) )
@@ -226,8 +226,8 @@ return(r)
 return(NULL)
 }
 
-
-whittakerMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,lambda=NULL, nIter= 5, minVal=5)
+# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda
+whittakerMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,lambda=NULL, nIter= 5, minVal=5)
 {
     
     vali <- t(vali)
@@ -258,23 +258,18 @@ whittakerMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,lambda=NULL, nIter= 
     }
     
     # generate output matrix    
-    if (is.null(outTi))
+    if (is.null(timeInfo))
     {
         outTi <- inTi
         out   <- matrix(NA, nrow=nrow(inTi), ncol=yCol)
     } else {
-        outTi <- as.matrix(outTi)
+        outTi <- as.matrix(timeInfo$outSeq)
         if (ncol(outTi)==1)
         {
             outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
         }
         out <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
     }
-    
-    if (is.null(lambda))
-    {
-        lambda <- 500*((max(outTi[,1])-min(outTi[,1]))/365)
-    }    
         
     # minimum "minVal" input values for filtering 
     Cvec <- (colSums(wti!=0) > minVal)
@@ -282,12 +277,14 @@ whittakerMtr <- function(vali,wti=NULL,inTi=NULL,outTi=NULL,lambda=NULL, nIter= 
 
     for (u in Cvec)
     {
-        inTiVec <- inTi[,u]
-        valVec  <- rep(NA,max(inTiVec,na.rm=TRUE))
-        valVec[inTiVec] <- vali[,u]
-        wtVec <- rep(0,max(inTiVec,na.rm=TRUE))
-        wtVec[inTiVec]  <- wti[,u]
-        s <- miwhitatzb1(orgTS=valVec, w=wtVec,l=lambda,maxiter=nIter)
+        inTo    <- inTi[,u]
+        msk     <- inTo > 0
+        inTiVec <- inTo[msk]
+        valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
+        valVec[inTiVec] <- vali[msk,u]
+        wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
+        wtVec[inTiVec]  <- wti[msk,u]
+        s <- MODIS:::miwhitatzb1(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
         out[,u] <- s[outTi[,u]]
     }
 

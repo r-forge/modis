@@ -49,7 +49,7 @@ Currently tested on MODIS and Landsat data. Using M*D13 it is also possible to u
 }
 
 \author{
-  Matteo Mattiuzzi and Augustin Lobo
+  Matteo Mattiuzzi and Agustin Lobo
 }
 
 \examples{
@@ -86,7 +86,8 @@ system.time(whittaker.raster(vi,timeInfo=timeInfo,lambda=1000))
 # Doesn't works in version 0.5-0!
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
-inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
+# can also be already stacked:
+inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)) 
 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(whittaker.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,lambda=1000))
