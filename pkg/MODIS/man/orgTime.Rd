@@ -26,7 +26,7 @@ This function checks the date information in an input file (ie. from MODIS filen
 } 
 
 \value{
-  Character vector of filenames sorted and subsetted by date. The result should be used for: \code{s <- stack(prepStack("xxx"))}
+  Character vector of filenames sorted and subsetted by date. The result should in: \link{preStack}
 }
 
 \author{
@@ -36,7 +36,10 @@ This function checks the date information in an input file (ie. from MODIS filen
 \examples{
 \dontrun{
 # note, this function can be applied to any files that have a date information in the _filename_!
-files <- c("MOD13A2.A2010353.1_km_16_days_composite_day_of_the_year.tif", "MOD13A2.A2011001.1_km_16_days_composite_day_of_the_year.tif", "MYD13A2.A2010361.1_km_16_days_composite_day_of_the_year.tif", "MYD13A2.A2011009.1_km_16_days_composite_day_of_the_year.tif")
+files <- c("MOD13A2.A2010353.1_km_16_days_composite_day_of_the_year.tif",
+ "MOD13A2.A2011001.1_km_16_days_composite_day_of_the_year.tif",
+ "MYD13A2.A2010361.1_km_16_days_composite_day_of_the_year.tif",
+ "MYD13A2.A2011009.1_km_16_days_composite_day_of_the_year.tif")
 
 orgTime(files)
 orgTime(files,nDays=2,begin="2010350",end="2011015")

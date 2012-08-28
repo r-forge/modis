@@ -9,7 +9,8 @@
 
 \description{Handles the input of a MODIS product collection.}
 
-\usage{getCollection(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)}
+\usage{getCollection(product, collection=NULL, newest=TRUE, localArcPath=.getDef("localArcPath"), 
+forceCheck=FALSE, as="character", stubbornness="high", quiet=TRUE)}
 
 \arguments{
   \item{product}{Character. MODIS grid product to check for existing collections. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: 'MOD13Q1'. For vegetation indices from TERRA and AQUA use 'MxD13Q1'. See \code{getProduct()} for supported products.}   

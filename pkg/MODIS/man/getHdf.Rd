@@ -8,14 +8,16 @@
 
 \description{
   Create or update a local user-defined subset of the global MODIS grid
-  data archive (starting from version MODIS 0.2.4: \url{ftp://e4ftl01.cr.usgs.gov/},until version MODIS 0.2-3: \url{ftp://e4ftl01u.ecs.nasa.gov/}). Based on
+  data archive (starting from version MODIS 0.2.4: \url{ftp://e4ftl01.cr.usgs.gov/}, until version MODIS 0.2-3: \url{ftp://e4ftl01u.ecs.nasa.gov/}). Based on
   user-specific parameters the function checks in the local archive for
   available data and downloads missing data from the online MODIS data
   pool. When run in a schedule job, the function manage the continuous
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath"))}
+\usage{getHdf(HdfName, product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL,
+ dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE, 
+ log=TRUE, localArcPath=.getDef("localArcPath"))}
 
 \arguments{
 
@@ -55,6 +57,15 @@
   An invisible vector of downloaded data+path, if \code{log=TRUE}, a CSV file with reports
 }
 
+\references{
+MODIS data is obtained through the online Data Pool at the NASA Land Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls, South Dakota \url{https://lpdaac.usgs.gov/get_data}.
+
+SRTM data is obtained through CGIAR-CSI and mirror servers. For the use this data please read \url{http://srtm.csi.cgiar.org/SELECTION/SRT_disclaimer.htm}.
+Jarvis A., H.I. Reuter, A.  Nelson, E. Guevara, 2008, Hole-filled  seamless SRTM data V4, International Centre for Tropical Agriculture (CIAT), available  from
+\url{http://srtm.csi.cgiar.org}
+ 
+}
+
 \author{
   Matteo Mattiuzzi
 }
@@ -82,13 +93,15 @@ b <- getHdf(product="M.D11A1",begin="2009001",end="2009-01-02",extent=Austria)
 b
 
 # require(mapdata)
-getHdf(product="MxD11A1",begin="2009.01.01",end="2009002",extent="austria")
+getHdf(product="M.D11A1",begin="2009.01.01",end="2009002",extent="austria")
 # without specification of the extent... interactive selection see: "getTile()"
 c <- getHdf(product="M.D11A1",begin="2009.01.01",end="2009002")
 c
 
 # SRTM data
-# SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while, you have to be patient!)
+# SRTM server limits downloads! (It seams to be blocked, but (normally) it continues after a while,
+# you have to be patient!).
+# The files are zips, this function only performs the download! (runGdal does not run on this files!) 
 d <- getHdf(product="SRTM",extent="austria")  
 d
 }

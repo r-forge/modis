@@ -28,14 +28,19 @@ Matrix with sequentialised julian dates
 \examples{
 # total 112 MB!
 \dontrun{
-runGdal(product="M.D13A2",begin="2010350",end="2011016",extent="Luxembourg",job="deleteme",SDSstring="100000000010")
+runGdal(product="M.D13A2", begin="2010350", end="2011016", extent="Luxembourg",
+job="deleteme", SDSstring="100000000010")
 
 require(raster)
 
-ndviFiles <- preStack(path=paste(MODIS:::.getDef()$outDirPath,"deleteme",sep="/"),pattern="*_NDVI.tif$")
+ndviFiles <- preStack(path=paste(MODIS:::.getDef()$outDirPath,"deleteme",sep="/")
+,pattern="*_NDVI.tif$")
+
 ndvi <- stack(ndviFiles)
 
-doyFiles <- preStack(path=paste(MODIS:::.getDef()$outDirPath,"deleteme",sep="/"),pattern="*_composite_day_of_the_year.tif$")
+doyFiles <- preStack(path=paste(MODIS:::.getDef()$outDirPath,"deleteme",sep="/")
+,pattern="*_composite_day_of_the_year.tif$")
+
 doy <- stack(doyFiles)
 layerDates <- extractDate(names(doy))
 
@@ -47,7 +52,8 @@ x2 <- repDoy(doy[pixX],layerDates)
 
 x1
 x2
-# the plotting example is not really good. Since to create a figurative example it would be necessary to dolwnload to much data! 
+# the plotting example is not really good. 
+# To create a figurative example it would be necessary to dolwnload to much data! 
 plot("",xlim=c(1,max(x1,x2)),ylim=c(0,2000),xlab="time",ylab="NDVI*10000")
 lines(y=y,x=x1,col="red",lwd=3)
 lines(y=y,x=x2,col="green",lwd=2)

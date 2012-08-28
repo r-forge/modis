@@ -9,7 +9,8 @@
 In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview of locally available hdf files. 
 }
 
-\usage{arcStats(product,collection=NULL,extent="global",begin=NULL,end=NULL,asMap=TRUE,outName=NULL,outDir=MODIS:::.getDef("outDirPath"),localArcPath=MODIS:::.getDef("localArcPath"))}
+\usage{arcStats(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE,
+outName=NULL, outDir=MODIS:::.getDef("outDirPath"), localArcPath=MODIS:::.getDef("localArcPath"))}
 
 \arguments{
 

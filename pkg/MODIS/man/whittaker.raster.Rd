@@ -11,7 +11,8 @@ This function uses a modified whittaker filter function (see references) from pa
 }
 
 \usage{
-whittaker.raster(vi,wt=NULL,inT=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5, outPath ="./")
+whittaker.raster(vi,wt=NULL,inT=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5,
+ outPath ="./")
 }
 
 \arguments{
@@ -79,7 +80,7 @@ timeInfo <- orgTime(vi,nDays=16,begin="2005001",end="2005365",pillow=40)
 vi <- preStack(files=vi,timeInfo=timeInfo)
 
 # For speedup try (Sometimes problematic on Win7): 
-beginCluster(type="SOCK",exclude="MODIS") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
+beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(whittaker.raster(vi,timeInfo=timeInfo,lambda=1000))
 
 # Doesn't works in version 0.5-0!
@@ -87,7 +88,7 @@ system.time(whittaker.raster(vi,timeInfo=timeInfo,lambda=1000))
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
-beginCluster(type="SOCK",exclude="MODIS") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
+beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(whittaker.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,lambda=1000))
 
 }

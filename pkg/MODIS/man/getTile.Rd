@@ -78,18 +78,22 @@ CRS <- "+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
 rasterObject <- projectExtent(rasterObject,CRS)
 extent(rasterObject)
 projection(rasterObject)
-getTile(extent=rasterObject) # Check, is not exacly the same! As with the LatLon input!
+getTile(extent=rasterObject) 
 
 ##################
 # require(mapdata)
 # If you pass a character name to extent a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
 # Use with caution! The following example includes much more areas than the main USA. 
-# Look at \code{map('worldHires','usa')} result.
-# Maybe before using this option run a test \code{map('worldHires',yourCharacterExtent)}.
-# Check awailability of maps with: \code{map('worldHires',plot=FALSE)$names}.
+# map('worldHires','usa')
+# Maybe before using this option run a test map('worldHires',yourCharacterExtent).
+# Check awailability of maps with: 
+map('worldHires',plot=FALSE)$names
+# or 
+search4map("Gua")
 
 getTile(extent='usa')
-getTile(extent=map('usa',plot=FALSE)) # it is also possible to put an map object. in this specific example the low resolution map is used!
+# it is also possible to put an map object. In this specific example the low resolution map is used!
+getTile(extent=map('usa',plot=FALSE)) 
 
 # also possible: 
 ext <-  map('state', region = c('new york', 'new jersey', 'penn'))

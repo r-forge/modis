@@ -22,7 +22,8 @@
 } 
 
 \value{
-  Character vector of filenames sorted and subsetted by date. The result should be used for: \code{s <- stack(prepStack("xxx"))}
+  Character vector of filenames whitin the query. 
+  If timeInfo is provided filenames are sorted and subsetted by date.
 }
 
 \author{

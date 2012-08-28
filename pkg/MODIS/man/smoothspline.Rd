@@ -73,7 +73,7 @@ timeInfo <- orgTime(vi,nDays=16,begin="2005001",end="2005365",pillow=40)
 vi <- preStack(files=vi,timeInfo=timeInfo)
 
 # For speedup try (Sometimes problematic on Win7): 
-beginCluster(type="SOCK",exclude="MODIS") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
+beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(smooth.spline.raster(vi,timeInfo=timeInfo))
 
 # Doesn't works in version 0.5-0!
@@ -81,7 +81,7 @@ system.time(smooth.spline.raster(vi,timeInfo=timeInfo))
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
-beginCluster(type="SOCK",exclude="MODIS") # on linux you can also set the 'nice' level for the workers see: ?beginCluster
+beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo))
 
 }

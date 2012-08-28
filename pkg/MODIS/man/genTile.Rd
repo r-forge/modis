@@ -11,7 +11,8 @@
 This function generates a matrix with bounding box information for a global tiling system (based on Lat/Lon!). 
 }
 
-\usage{genTile(tileSize = 1, offset = 0, StartNameFrom = c(0, 0), extent = list(xmin = -180, xmax = 180, ymin = -90,ymax = 90))}
+\usage{genTile(tileSize = 1, offset = 0, StartNameFrom = c(0, 0),
+ extent = list(xmin = -180, xmax = 180, ymin = -90,ymax = 90))}
 
 \arguments{
 
@@ -38,8 +39,10 @@ This function generates a matrix with bounding box information for a global tili
 \examples{
 \dontrun{
 e1 <- genTile() # 1x1 degree tiling system.  
-e2 <- genTile(tileSize=10,offset=(1/112)/2) # 10x10 degree tiling system with shift to be aligned to the Geoland2 (BioPar) Dataset (1km with pixel center reference)
-e3 <- genTile(tileSize=5,StartNameFrom = c(1, 1), extent=list(xmin = -180, xmax = 180, ymin = -60,ymax = 60)) # Tiling system for SRTM data (CI.
+# 10x10 degree tiling system with offset to be aligned to Geoland2 Dataset (1km with pixel center reference)
+e2 <- genTile(tileSize=10,offset=(1/112)/2)
+# Tiling system for SRTMv4 data (CGIAR-CSI) 
+e3 <- genTile(tileSize=5,StartNameFrom = c(1, 1), extent=list(xmin = -180, xmax = 180, ymin = -60,ymax = 60)) 
 
 head(e1)
 head(e2)
