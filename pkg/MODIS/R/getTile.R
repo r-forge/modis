@@ -9,10 +9,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (!is.null(extent))
     {
-        if (file.exists(extent))
-        {
-            extent <- raster(extent) 
-        }
+      if (!inherits(try(file.exists(extent),silent=TRUE),"try-error"))
+      {
+          extent <- raster(extent) 
+      }
     }
     
     if (toupper(system) == "MERIS") {

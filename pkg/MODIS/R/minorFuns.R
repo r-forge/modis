@@ -102,8 +102,8 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
     
         MRT <- 0
         
-        mrtH  <- Sys.getenv("MRT_HOME")
-        mrtDD <- Sys.getenv("MRT_DATA_DIR")
+        mrtH  <- normalizePath(Sys.getenv("MRT_HOME"),winslash="/", mustWork = FALSE)
+        mrtDD <- normalizePath(Sys.getenv("MRT_DATA_DIR"),winslash="/", mustWork = FALSE)
         
         if (!quiet){
             cat("Checking availabillity of MRT:\n")
@@ -158,24 +158,13 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
                 cat("Checking availabillity of 'FWTools' (GDAL with HDF4 support for Windows):\n")    
             }
             gdalPath <- MODIS:::.getDef()$FWToolsPath
-#            if (is.null(gdalPath))
- #           {
-  #              gdal <- shell("gdalinfo --version",intern=TRUE)
-   #         } else {
-                #localArcPath <- normalizePath(gdalPath,"/gdalinfo",mustWork=FALSE)
-                gdal <- shell(paste(gdalPath,'gdalinfo --version',sep="",collapse="/"),intern=TRUE)
-    #        }
+            gdal <- shell(paste(gdalPath,'gdalinfo --version',sep="",collapse="/"),intern=TRUE)
             
             if (length(grep(x=gdal,pattern="FWTools"))==0)
             {
                 cat("   'FWTools' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools'! You can get it from 'http://fwtools.maptools.org/'\nTrying to autodetect FWTools:\n")
 
                 a <- dirname(list.files(path="\\.",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
-                
-                if (length(a)==0)
-                {
-                    break
-                }
                 a <- a[grep(a,pattern="FWTools")]
                                 
                 if (length(a)==0)
