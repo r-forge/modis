@@ -9,7 +9,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (!is.null(extent))
     {
-      if (!inherits(try(file.exists(extent),silent=TRUE),"try-error"))
+       test <- try(file.exists(extent),silent=TRUE)
+      if (isTRUE(test))
       {
           extent <- raster(extent) 
       }
