@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getSds <- function(HdfName,SDSstring=NULL,method="gdal",...) {
+getSds <- function(HdfName,SDSstring=NULL,method="gdal") {
 ######
 
 method <- tolower(method) 
