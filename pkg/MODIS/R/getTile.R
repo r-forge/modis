@@ -2,41 +2,48 @@
 # Date : August 2011
 # Licence GPL v3
 
-getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom=TRUE){
+getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom=TRUE)
+{
 
     old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
     target <- NULL  # if extent is a raster* and has a different proj it is changed
     
     if (!is.null(extent))
     {
-       test <- try(file.exists(extent),silent=TRUE)
+      test <- try(file.exists(extent),silent=TRUE)
       if (isTRUE(test))
       {
           extent <- raster(extent) 
       }
     }
     
-    if (toupper(system) == "MERIS") {
+    if (toupper(system) == "MERIS") 
+    {
         tiltab <- genTile(tileSize = 5)
         old <- TRUE
-    } else if (toupper(system) == "SRTM") {
+    } else if (toupper(system) == "SRTM") 
+    {
         tiltab <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
         old <- TRUE
     } else {
-        if (! require(rgdal) ) {
+        if (! require(rgdal) ) 
+        {
             cat("For using a precise subsetting method install the 'rgdal' package: install.packages('rgdal')\n")
             old <- TRUE
             tiltab <- tiletable
         }
-        if (! require(rgeos) ) {
+        if (! require(rgeos) ) 
+        {
             cat("For using a precise subsetting method install the 'rgeos' package: install.packages('rgeos')\n")
             old <- TRUE
             tiltab <- tiletable
         }
     }
         
-    if (isTRUE(isTRUE(is.null(tileH) | is.null(tileV)) & is.null(extent))) {
-        if (! require(mapdata) ) {
+    if (isTRUE(isTRUE(is.null(tileH) | is.null(tileV)) & is.null(extent))) 
+    {
+        if (! require(mapdata) ) 
+        {
             stop("For interactive TILE selection need to install the 'mapdata' package: install.packages('mapdata')")
         }
         
@@ -81,7 +88,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     }
     
     # if extent is expressed using tileV+H
-    if(all(c(!is.null(tileH), !is.null(tileV)))) {
+    if(all(c(!is.null(tileH), !is.null(tileV)))) 
+    {
         
         tileH <- as.numeric(tileH)
         tileV <- as.numeric(tileV)
@@ -165,25 +173,23 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
                   
             } else
             {
-            
                 extent <- list(xmin = ext@xmin, xmax = ext@xmax, ymin = ext@ymin, ymax = ext@ymax)
                 target <- list(resolution = resolution) 
-            
             }
 
         } else
         {
-            
             extent <- extent(extent)
             extent <- list(xmin = extent@xmin, xmax = extent@xmax, ymin = extent@ymin, ymax = extent@ymax)
-        
         }
 
     } 
   #############
      # every extent information should merge to a list, evaluated here below:
-    if (inherits(extent, "list")) {
-        if (length(extent$extent) == 4) {
+    if (inherits(extent, "list")) 
+    {
+        if (length(extent$extent) == 4) 
+        {
             extent <- extent$extent
         }
         
@@ -208,7 +214,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             extent[4] <- as.numeric(extent[4]) + buffer[2]
         }
       
-        if(old){
+        if(old)
+        {
         
             if (toupper(system) == "SRTM") {
                 if (extent$ymin >  60){stop("Latitudes higer than SRTM coverage! Select an area inside Latitudes -60/+60\n")}
@@ -246,25 +253,27 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             result <- list(tile = unlist(tiles), tileH = tileH, tileV = tileV,extent = extent, system = system, target = target)
             return(result)
     
-        } else {
-            
-            sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
-
+        } else 
+        {
+            sr   <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
             po   <- Polygon(cbind(c(extent$xmin,extent$xmax,extent$xmax,extent$xmin,extent$xmin),c(extent$ymax,extent$ymax,extent$ymin,extent$ymin,extent$ymax)),hole=FALSE)
             pos  <- Polygons(list(po),"selection")
             spos <- SpatialPolygons(list(pos))
 
-            if (is.na(proj4string(spos))) {
+            if (is.na(proj4string(spos)))
+            {
                 proj4string(spos) <- proj4string(sr)
             }
-            selected = sr[spos,]
+            
+            selected <- sr[spos,]
             tileH  <- unique(as.numeric(selected@data$h))
             tileV  <- unique(as.numeric(selected@data$v))
             result <- as.character(apply(selected@data,1,function(x) {paste("h",sprintf("%02d",x[2]),"v",sprintf("%02d",x[3]),sep="")}))
             result <- list(tile = result, tileH = tileH, tileV = tileV,extent = extent, system = system, target = target)
             return(result)
         }
-    } else {
+    } else 
+    {
         stop("Could not convert extent informtion to a list")
     }
 }

@@ -3,7 +3,8 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) {
+getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) 
+{
 
 localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
 dir.create(localArcPath,showWarnings=FALSE)
@@ -14,6 +15,7 @@ if(!exists("testDir")) {stop("'localArcPath' not set properly!")}
 auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
 
 sturheit <- MODIS:::.stubborn(level=stubbornness)
+wait <- as.numeric(wait)
 
 # TODO HdfName as regex
 
@@ -49,7 +51,7 @@ if (!missing(HdfName)){
                 if (hdf==0 & !quiet & g>1) {cat("Downloaded after:",g,"retries\n")}
                 if (hdf==0 & !quiet & g==1) {cat("Downloaded by the first try!\n")}
                 if (hdf==0) {break}    
-                Sys.sleep(as.numeric(wait))
+                Sys.sleep(wait)
                 g=g+1    
             }
             if(hdf==0) {break}    
@@ -112,13 +114,16 @@ return(invisible(unlist(dates)))
         files  <- paste("srtm",tileID,".zip",sep="")
         dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
-        if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) {
+        if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) 
+        {
             cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once (the metadata is not used at the moment!)\n")
             download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
             mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE)
         }
-        if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/"))){
-            if (! require(RCurl) ) {
+        if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/")))
+        {
+            if (! require(RCurl)) 
+            {
                 stop("You need to install the 'RCurl' package: install.packages('RCurl')")
             }
             sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
@@ -127,6 +132,7 @@ return(invisible(unlist(dates)))
             names(sizes) <- NULL
             write.table(sizes,paste(path$localPath,".SRTM_sizes",sep="/"),quote=FALSE,row.names=FALSE,col.names=FALSE)
         }
+        
         sizes <- read.table(paste(path$localPath,".SRTM_sizes",sep="/"))
         
         files <- files[files %in% sizes[,1]] # remove Tiles that are not on the server
@@ -134,19 +140,22 @@ return(invisible(unlist(dates)))
         startIND <- 1:length(path$remotePath) # for better cycling over the servers
         startIND <- rep(startIND,length(files))
         
-        cat("Be avare, that some sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
+        cat("Be avare, that sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
         
-        for(d in seq(along=files)) {
+        for(d in seq_along(files)) {
         
             isOK <- TRUE
-            if (file.exists(paste(path$localPath,"/",files[d],sep=""))){
+            if (file.exists(paste(path$localPath,"/",files[d],sep="")))
+            {
                 isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)$isOK # flexB!
             }
-            if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK) {
+            if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK)
+            {
                 timeout <- options("timeout") # TEST I'm not sure if it helps (timeout is used in ?download.file)
                 options(timeout=15)
 
-                for(g in 1:sturheit) {
+                for(g in 1:sturheit) 
+                {
                     server <- names(path$remotePath)[rep(startIND[d:(d+length(path$remotePath)-1)],length=sturheit)]
                     cat("Getting SRTM data from:",server[g],"\n")
                     Sys.sleep(wait)        
@@ -159,15 +168,19 @@ return(invisible(unlist(dates)))
                             mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE),
                         silent=TRUE
                     )
-                    if (hdf==0) {
+                    if (hdf==0) 
+                    {
                         SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)
                         if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
                     }
-                    if(hdf==0 & !quiet) {
+                    if(hdf==0 & !quiet) 
+                    {
                         lastused <- server[g] 
-                        if (g==1) {
+                        if (g==1) 
+                        {
                             cat("Downloaded by the first try!\n\n")
-                        } else {
+                        } else 
+                        {
                             cat("Downloaded after",g,"retries!\n\n")
                         }
                     }
@@ -252,21 +265,25 @@ return(invisible(unlist(dates)))
                             }
                         }
 
-                        if (sum(mtr)!=0) { # if one or more of the tiles in date is missing, its necessary to go on ftp
+                        if (sum(mtr)!=0) 
+                        { # if one or more of the tiles in date is missing, its necessary to go on ftp
 
-                            if(exists("ftpfiles")) {
+                            if(exists("ftpfiles")) 
+                            {
                                 rm(ftpfiles)
                             }
                             
-                            if (!require(RCurl)) {
+                            if (!require(RCurl)) 
+                            {
                                 stop("You need to install the 'RCurl' package: install.packages('RCurl')")
                             }
             
-                            for (g in 1:sturheit){ # get list of FILES in remote dir
+                            for (g in 1:sturheit)
+                            { # get list of FILES in remote dir
                                 server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
                                 try(ftpfiles <- getURL(paste(path$remotePath[[server]],"/",sep="")),silent=TRUE)
                                 if(exists("ftpfiles")){break}
-                                Sys.sleep(as.numeric(wait))
+                                Sys.sleep(wait)
                             }
                             if(!exists("ftpfiles")) {stop("Problems with FTP connections try a little later")} # TODO This breaks the entire job! it schouldn't, better to jump to the next file...may it is local!
             
@@ -319,7 +336,7 @@ return(invisible(unlist(dates)))
                                             }
                     
                                             mtr[j] <- hdf
-                                            Sys.sleep(as.numeric(wait))
+                                            Sys.sleep(wait)
                                         } else { 
                                             dates[[l]][i,j+1] <- "NULL" 
                                         }
