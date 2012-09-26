@@ -48,7 +48,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     # argument extent is prioritary to tileV/H.
     
     # if extent is a raster or a "path/name" to a rasterfile. 
-    if(!inherits(extent,"SpatialPolygonsDataFrame"))
+    if(!inherits(extent,c("Extent","SpatialPolygonsDataFrame")))
     {
         test <- try(ex <- raster(extent), silent=TRUE)
         if (!inherits(test,"try-error"))
@@ -349,6 +349,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         {
             po <- list(Polygon(cbind(c(extent@xmin,extent@xmax,extent@xmax,extent@xmin,extent@xmin),c(extent@ymax,extent@ymax,extent@ymin,extent@ymin,extent@ymax)),hole=FALSE))
         }
+        
         pos  <- Polygons(po,"selection")
         spos <- SpatialPolygons(list(pos))
        

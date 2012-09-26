@@ -107,7 +107,7 @@ runGdal <- function(...)
             stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
         }
         
-        cat("No resampling method specified, using default: ",pm$resamplingType,"!\n",sep="")
+        cat("No 'resamplingType' specified, using default: ",pm$resamplingType,"!\n",sep="")
     } else {    
 
         if (toupper(pm$resamplingType) == "NN"){
@@ -116,7 +116,7 @@ runGdal <- function(...)
         
         if (!pm$resamplingType %in% c("near","bilinear","cubic","cubicspline","lanczos")) 
         {
-            stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
+            stop("'resamplingType' must be one of: 'near','bilinear','cubic','cubicspline','lanczos'")
         }
         cat("Resampling method: ", pm$resamplingType,"\n")
     }
@@ -131,7 +131,7 @@ runGdal <- function(...)
         } else 
         {
             pm$outProj <- MODIS:::.getDef("outProj")
-            cat("No output projection specified, using ", pm$outProj,"\n",sep="")
+            cat("No 'outProj' specified, using ", pm$outProj,"\n",sep="")
         }
 
     }

@@ -2,13 +2,12 @@
 
 \docType{methods}
 \alias{getTile}
-\alias{getTile,tileH,tileV,extent,buffer,system, zoom}
 
 \title{Get MODIS tile id(s)}
 
 \description{Get MODIS tile id(s) for a geographic area.}
 
-\usage{getTile(extent=NULL,tileH=NULL,tileV=NULL,buffer=NULL,system="MODIS",zoom=TRUE)}
+\usage{getTile(extent=NULL, tileH=NULL, tileV=NULL, buffer=NULL, system="MODIS", zoom=TRUE)}
 
 \arguments{
 
@@ -18,7 +17,7 @@
 
   \item{extent}{Extent Informations see details.}
   
-  \item{buffer}{Numeric [map units]. Buffers the extent, used only in combination with \code{extent}. \code{buffer=0.5} or \code{buffer=c(x,y)}. }
+  \item{buffer}{Numeric [map units]. Buffers the extent, negative values are allowed. If \code{extent} is a vector object ('shp' or _'character'_ name of a 'map' object) only 1 value is allowed i.e. \code{buffer=0.5} (rgeos:::gBuffer() is used). In the other cases also \code{buffer=c(x,y)} _can_ be specified.}
 
   \item{system}{Character. Default is \code{MODIS}. Alternative is the \code{SRTM} tiling system!}
   \item{zoom}{Logical, default \code{TRUE}. The interactive mode is only activated if no other extent arguments ("extent","tileH", "tileV") are specified. If \code{zoom==TRUE} the first 2 clicks on the map are defining the zoom-in area, and the next 2 clicks the download area. For large areas you can set to \code{FALSE}.}  
@@ -26,10 +25,24 @@
 }
 
 \details{
-\code{extent}: \cr
-If 'list': \code{myExtent <- list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
-If 'character', the country name check \code{mapdata} for it, or file name of a raster file (internally loaded with raster()).\cr
-One of the following objects from the raster package: \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'}. If extent is a raster* object, and has a valid CRS a re-projection of the raster*object's bbox (using \code{rgdal:::spTransform()}) to LatLon is performed, so you should be able to use a raster*object of any projection as extent argument (double check the result!).
+\code{extent}: 
+\cr
+
+If 'list':\cr Then LatLon coordinates in the following form:\cr 
+\code{list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
+\cr
+If 'character':\cr
+- the country name of a \code{map} object (see package \code{maps})\cr
+- the file name of a raster or a ESRI Shapefile (shp).\cr
+\cr
+One of the following 'R-objects':\cr
+- Package raster: \code{'extent','rasterLayer','rasterStack'} or \code{'rasterBrick'}.\cr
+Using a raster object (not 'extent'!), and if not specified otherwise, the 'extent', 'pixelsize', and the 'projection' of the raster object is used as output arguments \code{'extent','pixelSize','outProj'}. (if not LatLon it requires a valid CRS string!)\cr
+If ESRI shapefile (shp) or \code{maps:::map} object, a call to ?sp:::over is performed to determine MODIS tile containg the 'extent', this often reduces the number of required MODIS tiles considerably but leads to NO-DATA areas outside the specified 'extent' in the result! 
+\cr
+\cr
+\code{tileH, tileV}:\cr
+If the extent is specified through this method, no cropping is performed and the full un-cutted tile(s) is/are processed!  
 }
 
 \value{List}
@@ -39,31 +52,35 @@ One of the following objects from the raster package: \code{'extent','rasterLaye
 }
 
 \seealso{
-  \code{\link{getHdf}}, raster package: \code{?extent,?raster,?stack} or \code{?brick}
+raster package: \code{?extent,?raster,?stack,?brick} or \code{?shapefile}
 }
 
 \examples{
 \dontrun{
-#############
+# ex 1 ############
 # drawing the extent. NOTE: It is not possible to draw a date-line crossing area!
 # draw extent with zoom, for smaller extents
 getTile()
 
-# draw extent without zoom, for large areas
-getTile(zoom=FALSE)
+# ex 2 ############
+# 'extent' specified with a vector file (map or shp)
+japan <- getTile(extent="Japan")
+japan
+# and here the same 'extent' without polygon (vwector object) 
+getTile(extent=japan$extent)
 
-#############
+# ex 3 ############
 # with tileH and tileV
 getTile(tileH=18:19,tileV=4)
 
-#############
+# ex 4 ############
 # with Extent of class 'list'
 Austria <- list(ymin=46.12,ymax=49.3,xmin=9.2,xmax=17.47)
 getTile(extent=Austria)
 getTile(extent=Austria,buffer=10)
-getTile(extent=Austria,buffer=c(0.5,10)) 
+getTile(extent=Austria,buffer=c(0,10)) 
 
-#############
+# ex 5 ############
 # with Extent or raster* object from raster package
 # rasterObject
 rasterObject <- raster(xmn=9.2,xmx=17.47,ymn=46.12,ymx=49.3)
@@ -80,11 +97,12 @@ extent(rasterObject)
 projection(rasterObject)
 getTile(extent=rasterObject) 
 
-##################
-# require(mapdata)
-# If you pass a character name to extent a standard call to 'map('worldHires',extent,plot=FALSE)' is performed.
+# ex 6 #################
+require(mapdata)
+# Character name of a map contained in 'map('worldHires',extent,plot=FALSE)'.
 # Use with caution! The following example includes much more areas than the main USA. 
-# map('worldHires','usa')
+map('worldHires','usa')
+
 # Maybe before using this option run a test map('worldHires',yourCharacterExtent).
 # Check awailability of maps with: 
 map('worldHires',plot=FALSE)$names
@@ -93,7 +111,8 @@ search4map("Gua")
 
 getTile(extent='usa')
 # it is also possible to put an map object. In this specific example the low resolution map is used!
-getTile(extent=map('usa',plot=FALSE)) 
+# in such case polygon matching is used see ex 2
+getTile(extent=map('usa',plot=FALSE))
 
 # also possible: 
 ext <-  map('state', region = c('new york', 'new jersey', 'penn'))
