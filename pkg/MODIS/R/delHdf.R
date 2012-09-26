@@ -33,9 +33,11 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
     if (!is.null(tileV)&!is.null(tileH))
     {
         ext <- getTile(tileV=tileV,tileH=tileH)
-    } else if (extent[1]!="global"){ 
+    } else if (extent[1]!="global")
+    { 
         ext <- getTile(extent=extent)
-    } else {
+    } else 
+    {
         ext      <- list()
         ext$tile <- extent
     }

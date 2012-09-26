@@ -141,8 +141,8 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
                 {
                     png(paste(outDir,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
                     
-                    xlim <- c(ext$extent$xmin,ext$extent$xmax)
-                    ylim <- c(ext$extent$ymin,ext$extent$ymax)
+                    xlim <- c(ext$extent@xmin,ext$extent@xmax)
+                    ylim <- c(ext$extent@ymin,ext$extent@ymax)
      
                     globe <- map("worldHires",plot=FALSE,xlim=xlim,ylim=ylim)
                     globe <- map2SpatialLines(globe)

@@ -67,58 +67,67 @@ runMrt <- function(ParaSource=NULL,...)
     if(!exists("testDir")) {stop("'outDirPath' not set properly!")} 
     ##############
 
-    if (is.null(pm$pixelsize)) {
+    if (is.null(pm$pixelsize)) 
+    {
         cat("No output 'pixelsize' specified, input size used!\n")
         pm$pixelsize <- "asIn"
-    } else {
+    } else 
+    {
         cat("Resampling to pixelsize:", pm$pixelsize,"\n")
     }
 
-    if (is.null(pm$resample)) {
+    if (is.null(pm$resample)) 
+    {
         cat("No resampling method specified, using ",.getDef('resamplingType'),"!\n",sep="")
         pm$resample <- .getDef("resamplingType")
-    } else {    
+    } else 
+    {    
         cat("Resampling method:", pm$resample,"\n")
     }
 
-    if (is.null(pm$outProj)) {
+    if (is.null(pm$outProj)) 
+    {
         cat("No output projection specified, using ", .getDef("outProj"),"!\n",sep="")
         pm$outProj <- .getDef("outProj")
-    } else {
+    } else 
+    {
         cat("Output projection:", pm$outProj,"\n")
         if (pm$outProj=="UTM"){
-            if (!is.null(pm$zone)) {
+            if (!is.null(pm$zone)) 
+            {
                 cat("No UTM zone specified used MRT autodetection.\n")            
-            } else {
+            } else 
+            {
                 cat("Using UTM zone:", pm$zone,"\n")
             }
         }
     }
 
-    if (is.null(pm$datum)) {
+    if (is.null(pm$datum)) 
+    {
         cat("No Datum specified, using WGS84!\n")
         pm$datum <- "WGS84"
     }
-    if (is.null(pm$projPara)) {
+    if (is.null(pm$projPara)) 
+    {
         cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
         # pm$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
-    } else {
+    } else 
+    {
         cat("Output projection parameters specified!\nUsing:",pm$projPara,"\n")
     }
 
-    for (z in 1:length(pm$product$PRODUCT)){
+    for (z in 1:length(pm$product$PRODUCT))
+    {
             
-        if (pm$product$TYPE[z]=="CMG") {
+        if (pm$product$TYPE[z]=="CMG") 
+        {
             tileID="GLOBAL"
             ntiles=1 
-        } else {
-            if(!is.null(pm$extent)) {
-                extentCall <- pm$extent
-                pm$extent  <- getTile(extent=pm$extent,buffer=pm$buffer)
-            } else {
-                pm$extent <- getTile(tileH=pm$tileH,tileV=pm$tileV)
-            }
-            ntiles <- length(pm$extent$tile)
+        } else 
+        {
+            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
+            ntiles    <- length(pm$extent$tile)
         }
     
         todo <- paste(pm$product$PRODUCT[z],".",pm$product$CCC[[pm$product$PRODUCT[z]]],sep="")    
@@ -151,7 +160,7 @@ runMrt <- function(ParaSource=NULL,...)
             ######################### along begin -> end date
                 for (l in 1:length(avDates))
                 { 
-                    files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],extent=pm$extent,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
+                    files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
 
                     if (length(files)!=0){
     
@@ -244,10 +253,10 @@ runMrt <- function(ParaSource=NULL,...)
     
                             write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
     
-                            if (pm$extent$extent[1]!="")
+                            if (!is.null(pm$extent$extent))
                             {
-                                write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent$ymax,' ',pm$extent$extent$xmin,')',sep=''),filename)
-                                write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent$ymin,' ',pm$extent$extent$xmax,')',sep=''),filename)
+                                write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent@ymax,' ',pm$extent$extent@xmin,')',sep=''),filename)
+                                write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent@ymin,' ',pm$extent$extent@xmax,')',sep=''),filename)
                             }
                             if (!is.null(pm$pixelSize))
                             {
