@@ -8,9 +8,13 @@
     
 getProduct <- function(x=NULL,quiet=FALSE) 
 {    
+
+#load(system.file("external", "MODIS_Products.RData", package="MODIS"))
+
     if (is.null(x))
     { # if x isn't provided, return table of supported files.
-        return(MODIS_Products[order(MODIS_Products$PRODUCT),c(1:3,6:9)])
+        products <- as.data.frame(MODIS:::MODIS_Products[c("SENSOR", "PRODUCT", "PLATFORM","TYPE", "RES", "TEMP_RES")])
+        return(products[order(products$PRODUCT),])
     }
 
     if (is.list(x) && names(x) %in% c("request", "PRODUCT", "DATE", "TILE", "TILEV", "TILEH", "CCC", "PROCESSINGDATE", "FORMAT", "SENSOR", "PLATFORM", "PF1", "PF2", "TOPIC", "TYPE", "RES", "TEMP_RES", "INTERNALSEPARATOR")) 
@@ -33,10 +37,10 @@ getProduct <- function(x=NULL,quiet=FALSE)
     }
     
     product <- product[1]
-    pattern <- sub(pattern="MXD", replacement="M.D", x=product, ignore.case=TRUE) # make a regEx out of "x"     
-    info    <- MODIS:::MODIS_Products[grep(pattern=pattern,x=MODIS:::MODIS_Products$PRODUCT,ignore.case=TRUE),]
+    pattern <- sub(pattern="MXD", replacement="M.D", x=product, ignore.case=TRUE) # make a regEx out of "x"
+    info    <- MODIS:::listPather(MODIS:::MODIS_Products,grep(pattern=pattern,x=MODIS:::MODIS_Products$PRODUCT,ignore.case=TRUE))
 
-    if(dim(info)[1]==0)
+    if(length(info$PRODUCT)==0)
     {
         cat("No product found with the name ",inbase," try 'getProduct()' to list available products.\n",sep = "")
         return(NULL)
@@ -46,7 +50,6 @@ getProduct <- function(x=NULL,quiet=FALSE)
         info$PRODUCT <- toupper(info$PRODUCT)
     }
     
-    
     if (isFile)
     { # in this case it must be a filename
         fname <- unlist(strsplit(inbase,info$INTERNALSEPARATOR[1]))
@@ -55,29 +58,49 @@ getProduct <- function(x=NULL,quiet=FALSE)
         if (info$SENSOR[1] == "MODIS") 
         { # file TEST
             
-            if (info$TYPE == "Tile") { # file check.
+            if (info$TYPE == "Tile") 
+            { # file check.
+             
                 Tpat    <- "h[0-3][0-9]v[0-1][0-9]"
                 isok <- all((grep(fname[2],pattern=Tpat)) + (substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
             
-            } else if (info$TYPE == "CMG") {
+            } else if (info$TYPE == "CMG") 
+            {
+            
                 isok <- all((substr(fname[2],1,1) == "A") + (fname[5]=="hdf") + (length(fname)==5))
             
-            } else if (info$TYPE == "Swath"){
+            } else if (info$TYPE == "Swath")
+            {
                 isok <- all((substr(fname[2],1,1) == "A") + (fname[6]=="hdf") + (length(fname)==6))
-            } else {
+           
+            } else 
+            {
                 isok <- FALSE
             }
-            if (!isok) stop("Check filename:", inbase,"\nIt seams to be not supported...if it should please send some feedback! matteo.mattiuzzi@boku.ac.at") 
-                
+            
+            if (!isok)
+            {   
+            
+                stop("Check filename:", inbase,"\nIt seams to be not supported...if it should please send some feedback! matteo.mattiuzzi@boku.ac.at") 
+            
+            }
+               
             PD <- substr(info$PRODUCT[1], 4, nchar(as.character(info$PRODUCT[1])))
               
-            if (info$TYPE=="Tile") {
+            if (info$TYPE=="Tile") 
+            {
                 names(fname) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
-            } else if (info$TYPE=="CMG") {
+            
+            } else if (info$TYPE=="CMG") 
+            {
                 names(fname) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
-                } else if (info$TYPE=="Swath") { 
+            
+            } else if (info$TYPE=="Swath") 
+            { 
                 names(fname) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
-            } else {
+           
+            } else 
+            {
                 stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
             }
             request <- x
@@ -90,13 +113,20 @@ getProduct <- function(x=NULL,quiet=FALSE)
           
     } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR")) 
     {
-        return(invisible(list(request = as.character(info$PRODUCT), PF1 = NULL, PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM), TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),SENSOR = as.character(info$SENSOR))))
+        return(
+            invisible(
+                list(request = as.character(info$PRODUCT), PF1 = NULL, 
+                PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM),
+                TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
+                SENSOR = as.character(info$SENSOR), SOURCE=info$SOURCE)
+            )
+        )
     }         
-    } else 
-    { # if not a file
+    } else  # if not a file
+    {
         if (!quiet) 
         {
-           for (i in 1:nrow(info)) 
+           for (i in seq_along(info$PRODUCT)) 
            {
                cat(paste(info$PRODUCT[i],'the',info$TEMP_RES[i],info$TYPE[i], info$TOPIC[i],'product from',info$SENSOR[i], info$PLATFORM[i],'with a ground resolution of', info$RES[i],'\n', sep = " "))
            }
@@ -106,20 +136,28 @@ getProduct <- function(x=NULL,quiet=FALSE)
         {    
             PD <- substr(info$PRODUCT, 4, nchar(as.character(info$PRODUCT)))
             
-            return(invisible(list(request = inbase, PF1 = as.character(info$PF1),
-            PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM),
-            TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
-            SENSOR = as.character(info$SENSOR))))
+            return(
+                invisible(
+                    list(request = inbase, PF1 = as.character(info$PF1),
+                    PF2 = as.character(info$PF2), PD = PD, PLATFORM = as.character(info$PLATFORM),
+                    TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
+                    SENSOR = as.character(info$SENSOR), SOURCE=info$SOURCE)
+                )
+            )
     
         } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR"))
         {
-            return(invisible(list(request = as.character(info$PRODUCT), PF1 = NULL,
-            PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM),
-            TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
-            SENSOR = as.character(info$SENSOR))))
+            return(
+                invisible(
+                    list(request = as.character(info$PRODUCT), PF1 = NULL,
+                    PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM),
+                    TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
+                    SENSOR = as.character(info$SENSOR), SOURCE=info$SOURCE)
+                )       
+            )
         }         
     }
 }
-##################################
+
 
 

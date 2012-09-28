@@ -1,18 +1,22 @@
 
 tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"), header=TRUE)
-MODIS_Products <- read.table(system.file("external", "MODIS_Products.txt", package="MODIS"), header=TRUE)
+#MODIS_Products <- read.table(system.file("external", "MODIS_Products.txt", package="MODIS"), header=TRUE)
+load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
 # central setting for stubbornness 
-.stubborn <- function(level="high"){
-if (is.numeric(level)) {
-    sturheit <- level    
-    } else {
-    sturheit <- c(5,50,100,1000,10000)[which(level==c("low","medium","high","veryhigh","extreme"))]
+.stubborn <- function(level="high")
+{
+    if (is.numeric(level)) 
+    {
+        sturheit <- level    
+    } else 
+    {
+        sturheit <- c(5,50,100,1000,10000)[which(level==c("low","medium","high","veryhigh","extreme"))]
     }
 }
 
-file.size <- function(file,units="B"){
-    
+file.size <- function(file,units="B")
+{
     units <- toupper(units)
     unit <- c(1,1024,1048576,1073741824,1073741824*1024) 
     names(unit) <- c("B","KB", "MB", "GB","TB")
@@ -29,12 +33,13 @@ file.size <- function(file,units="B"){
     return(res)
 }
 
-.checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0){
-
+.checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0)
+{
     # determine reference size
-    if (type=="MODIS"){
-    
-        if (! require(XML) ) {
+    if (type=="MODIS")
+    {
+        if (! require(XML)) 
+        {
             stop("You need to install the 'XML' package: install.packages('XML')")
         }
 
@@ -42,14 +47,17 @@ file.size <- function(file,units="B"){
         xmlfile  <- xmlParse(xmlfile)
         MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
         MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
-    } else {
+    } else 
+    {
         MetaSize <- as.numeric(SizeInfo[which(SizeInfo[,1]==basename(file)),2])
     }
     
     FileSize <- file.size(file)
-    if (flexB!=0){
+    if (flexB!=0)
+    {
         isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB)     
-    } else {
+    } else 
+    {
         isOK <- (MetaSize == FileSize)
     }
     res  <- list(MetaSize,FileSize,isOK)    
@@ -58,29 +66,35 @@ return(res)
 }
 
 
-search4map <- function(pattern="",database='worldHires',plot=FALSE){
-
-    if (!require(mapdata)){
-    stop("This function requires 'mapdata', please install it first: install.packages('mapdata')")
+search4map <- function(pattern="",database='worldHires',plot=FALSE)
+{
+    if (!require(mapdata))
+    {
+        stop("This function requires 'mapdata', please install it first: install.packages('mapdata')")
     }
 
     areas <- grep(x=map(database,plot=FALSE)$names,pattern=pattern,value=TRUE,ignore.case=TRUE)
 
-    if (length(areas)==0){
+    if (length(areas)==0)
+    {
         cat("No country (region or island) found! please change your pattern!\n")
         return(invisible(NULL))
-    } else {
+    } else 
+    {
 
-    if (plot){
+    if (plot)
+    {
         map(database,areas)
         map.axes() 
         box()
         grid(36,18,col="blue",lwd=0.5)
     
-        if(length(areas)>4) {
+        if(length(areas)>4) 
+        {
             subareas <- paste(areas[1:3],collapse=", ") 
             title(c(paste(subareas,"and",(length(areas)-3),"other")))
-        } else {
+        } else 
+        {
             title(areas)
         }
     }
@@ -110,48 +124,59 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
         }
     
         if(mrtH=="") {
-            if (!quiet){
+            if (!quiet)
+            {
                 cat("  'MRT_HOME' not set/found! MRT is NOT enabled! See: 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
             }
-        } else {
-            if (!quiet){
+        } else 
+        {
+            if (!quiet)
+            {
                 cat("  'MRT_HOME' found:", mrtH,"\n")
             }
-            if (mrtDD=="") {
-                if (!quiet){
+            if (mrtDD=="") 
+            {
+                if (!quiet)
+                {
                     cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled! You need to set the path, read in the MRT manual! 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
                 }
-            } else {
-                if (!quiet){
+            } else 
+            {
+                if (!quiet)
+                {
                     cat("  'MRT_DATA_DIR' found:",mrtDD,"\n")
                     cat("   MRT enabled, settings are fine!\n")
                 }
                 MRT <- 1 
             }
         }
-
     }
 
-    if ("GDAL" %in% what){
-
+    if ("GDAL" %in% what)
+    {
         GDAL <- 0
 
         if (.Platform$OS=="unix")
         {    
-            if (!quiet){
+            if (!quiet)
+            {
                 cat("Checking availabillity of GDAL:\n")
             }
             gdal <- try(system("gdalinfo --version",intern=TRUE),silent=TRUE)
-            if (inherits(gdal,"try-error")){
+            if (inherits(gdal,"try-error"))
+            {
                 cat("   GDAL not found, install it or check path settings in order to use related functionalities!\n")
-            } else {
-                if (!quiet){
+            } else 
+            {
+                if (!quiet)
+                {
                     cat("   OK,",gdal,"found!\n")
                 }
                 GDAL <- 1
             }    
         
-        } else {
+        } else 
+        {
         
             if (!quiet)
             {
@@ -170,10 +195,12 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
                 if (length(a)==0)
                 {
                     cat("No 'FWTools' installation found! In order to use it please solve this problem first.\n")
-                } else {
+                } else 
+                {
                     cat("Ok, 'FWTools' installation found! Please add the following line in the options file (section: Windows specific): '",path.expand("~/.MODIS_Opts.R"),"'\nFWToolsPath <- ",normalizePath(a,winslash="/"),"\n",sep="")
                 }
-            } else {
+            } else 
+            {
                 if (!quiet)
                 {
                     cat("   OK,",gdal,"found!\n")
@@ -186,39 +213,44 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE){
 }
 
 
-.isSupported <- function(x) {
-
+.isSupported <- function(x) 
+{
     fname   <- basename(x)
     
     warn <- options("warn")
     options(warn=-1)
     on.exit(options(warn=warn$warn))
     
-    res <- sapply(fname,function(y) {
-    
+    res <- sapply(fname,function(y) 
+    {
         product <- getProduct(y,quiet=TRUE)
     
-        if (is.null(product)){
+        if (is.null(product))
+        {
             return(FALSE)
-        } else {
-
+        } else 
+        {
             secName <- MODIS:::.defineName(product$request)
         
-            if (product$SENSOR[1] == "MODIS") {
-    
-                if (product$TYPE[1] == "Tile") {
+            if (product$SENSOR[1] == "MODIS") 
+            {
+                if (product$TYPE[1] == "Tile") 
+                {
                     Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
                     return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
             
-                } else if (product$TYPE[1] == "CMG") {
-                        return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
+                } else if (product$TYPE[1] == "CMG") 
+                {
+                    return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
             
-                } else if (product$TYPE[1] == "Swath"){ # actually no support for Swath data!
-#                        return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+                } else if (product$TYPE[1] == "Swath")  # actually no support for Swath data!
+                {
+#                  return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
 #                } else {
-                        return(FALSE)
+                    return(FALSE)
                 }
-            } else {
+            } else 
+            {
                 return(FALSE)
             }
         }
@@ -229,69 +261,75 @@ return(unlist(res))
 # TODO enhancement of SENSOR/PRODUCT detection capabilities! 
 # the metods below are based on the results of the strsplit().
 
-.defineName <- function(x) { # "x" is a MODIS,SRTM or culture-MERIS filename
+.defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
+{
     
-    if(missing(x)) {
-        stop("x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
-    } else {
-    
+    if(missing(x)) 
+    {
+        stop("Error in function 'MODIS:::.defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
+    } else 
+    {
     fname   <- basename(x)
     secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"
     
-    if (toupper(substring(secName[1],1,4))=="CULT") {
+    if (toupper(substring(secName[1],1,4))=="CULT") 
+    {
         sensor="MERIS"
-    } else if (tolower(substring(secName[1],1,4))=="srtm"){
+    } else if (tolower(substring(secName[1],1,4))=="srtm")
+    {
         sensor = "C-Band-RADAR"
         secName <- strsplit(secName[1],"_")[[1]]
-    } else {
+    } else 
+    {
         sensor="MODIS"
     }
-     # PROVISORIC
-
-###################################
-###################################
-# date NAME definition (must be File-specific!)
-
-# MODIS
-    if (sensor=="MODIS"){
-
+    ###################################
+    # NAME definitions (is File-specific!)
+    #########################
+    # MODIS
+    if (sensor=="MODIS")
+    {
         product <- getProduct(x=secName[1],quiet=TRUE)
-            if (product$TYPE=="Tile") {
-                names(secName) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
-            } else if (product$TYPE=="CMG") {
-                names(secName) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
-            } else if (product$TYPE=="Swath") { 
-                names(secName) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
-            } else {
-                stop("Not a 'Tile', 'CMG' or 'Swath'! Product not supported. See: 'getProduct()'!")
-            }
-#        }
-
-# MERIS
-    } else if (sensor=="MERIS") {
-        
-            product  <- getProduct(x="culture-MERIS",quiet=TRUE)
-            secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-            lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-            secName  <- secName[-length(secName)]
+        if (product$TYPE=="Tile") 
+        {
+            names(secName) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
+        } else if (product$TYPE=="CMG") 
+        {
+            names(secName) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
+        } else if (product$TYPE=="Swath") 
+        { 
+            names(secName) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
+        } else 
+        {
+            stop("Not a MODIS 'Tile', 'CMG' or 'Swath'!")
+        }
+    # MERIS
+    } else if (sensor=="MERIS") 
+    {
+        product  <- getProduct(x="culture-MERIS",quiet=TRUE)
+        secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
+        lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
+        secName  <- secName[-length(secName)]
         secName  <- c(secName,lastpart)
-    
-        if (length(secName)==6) {
+        if (length(secName)==6) 
+        {
             names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT","COMPRESSION")
-        }else if (length(secName)==5) {
-               names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT")
+        } else if (length(secName)==5) 
+        {
+            names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT")
         }
 
-# XXX
-    } else if (sensor=="C-Band-RADAR") {
-            product  <- getProduct(x=secName[1],quiet=TRUE)
-                secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-                lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-                secName  <- secName[-length(secName)]
-            secName  <- c(secName,lastpart)
-                names(secName) <- c("PRODUCT","tileH","tileV","COMPRESSION") 
+    # SRTM
+    } else if (sensor=="C-Band-RADAR") 
+    {
+        product  <- getProduct(x=secName[1],quiet=TRUE)
+        secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
+        lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
+        secName  <- secName[-length(secName)]
+        secName  <- c(secName,lastpart)
+        names(secName) <- c("PRODUCT","tileH","tileV","COMPRESSION") 
 
-    } # XXX else if ....
+    } # XXX else if .... add Products here
 }
 ##
 return(secName)
@@ -312,6 +350,23 @@ checkDeps <- function()
         cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('",missingP,"'))\n",sep="")
     }
 }
+
+# this function selects elements of a list by "row".
+listPather <- function(x,index)
+{
+    x   <- as.list(x)
+    res <- list()
+    
+    for (i in seq_along(x))
+    {
+        res[[i]] <- x[[i]][index]
+    }
+    names(res) <- names(x)
+    return(res)
+}
+
+
+
 
 
 
