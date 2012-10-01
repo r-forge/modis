@@ -382,9 +382,9 @@ filesUrl <- function(url)
 	{
 		r <- raster(files[1])
 		ln <- extension(basename(files), '')
-		s <- stack(r)
-		s@layers <- sapply(1:length(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
-		s@layernames <- ln
+		s <- stack(r,values=FALSE)
+		s@layers <- sapply(seq_along(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
+		#s@file@name <- ln
 		return(s)
 	}
  
