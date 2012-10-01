@@ -365,7 +365,29 @@ listPather <- function(x,index)
     return(res)
 }
 
+# list files in a Url
+filesUrl <- function(url)
+{
+            require(RCurl)
+            getlist <- getURL(url) 
+            getlist <- strsplit(getlist, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+            return(unlist(lapply(strsplit(getlist," "),function(x){x[length(x)]})))
 
+}
+
+# create a stack file without file checks (extent etc)
+# suggested by Robert J. Hijmans 
+
+	fastStack <- function(files)
+	{
+		r <- raster(files[1])
+		ln <- extension(basename(files), '')
+		s <- stack(r)
+		s@layers <- sapply(1:length(files), function(x){ r@file@name = files[x]; r@layernames=ln[x]; r@data@haveminmax=FALSE ; r })
+		s@layernames <- ln
+		return(s)
+	}
+ 
 
 
 

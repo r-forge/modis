@@ -327,7 +327,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                             if(!exists("ftpfiles")) 
                             {
                                 stop("Problems with FTP connections try a little later")
-                            } # TODO This breaks the entire job! it schouldn't, better to jump to the next file...may it is local!
+                            } # TODO This breaks the entire job! But it schouldn't, better to jump to the next file...may it is local!
             
                             ftpfiles <- strsplit(ftpfiles, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
     
