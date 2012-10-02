@@ -380,9 +380,9 @@ filesUrl <- function(url)
 
 	fastStack <- function(files)
 	{
-		r <- raster(files[1])
+		r  <- raster(files[1])
 		ln <- extension(basename(files), '')
-		s <- stack(r,values=FALSE)
+		s  <- stack(raster(r))
 		s@layers <- sapply(seq_along(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
 		#s@file@name <- ln
 		return(s)

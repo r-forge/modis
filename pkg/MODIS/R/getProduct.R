@@ -13,11 +13,11 @@ getProduct <- function(x=NULL,quiet=FALSE)
 
     if (is.null(x))
     { # if x isn't provided, return table of supported files.
-        products <- as.data.frame(MODIS:::MODIS_Products[c("SENSOR", "PRODUCT", "PLATFORM","TYPE", "RES", "TEMP_RES")])
+        products <- as.data.frame(MODIS:::MODIS_Products[c("SENSOR", "PRODUCT", "TOPIC", "PLATFORM","TYPE", "RES", "TEMP_RES")])
         return(products[order(products$PRODUCT),])
     }
 
-    if (is.list(x) && names(x) %in% c("request", "PRODUCT", "DATE", "TILE", "TILEV", "TILEH", "CCC", "PROCESSINGDATE", "FORMAT", "SENSOR", "PLATFORM", "PF1", "PF2", "TOPIC", "TYPE", "RES", "TEMP_RES", "INTERNALSEPARATOR")) 
+    if (is.list(x) && names(x) %in% c("request", "PRODUCT", "TOPIC", "DATE", "TILE", "TILEV", "TILEH", "CCC", "PROCESSINGDATE", "FORMAT", "SENSOR", "PLATFORM", "PF1", "PF2", "TOPIC", "TYPE", "RES", "TEMP_RES", "INTERNALSEPARATOR")) 
     {
         # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS for it!
         return(x)

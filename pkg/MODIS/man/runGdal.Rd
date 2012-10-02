@@ -77,6 +77,11 @@ runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001",
 runGdal( job="LSTaustria", product="MOD11A1", extent="Austria", begin="2010001", end="2010005",
  SDSstring="1", resamplingType="lanczos", outProj="32634", pixelSize=100)
 
+### processing entire tiles and keeping Sinusoidal projection
+# This corresponds to a format conversion (eos-hdf04 to Geotiff) and layer extraction (multi-layer to single layer)
+runGdal( job="LSTaustria", product="MOD11A1", tileH=18:19,tileV=4, begin="2010001", end="2010005",
+ SDSstring="1", outProj="asIn")
+
 }
 }
 
