@@ -21,6 +21,7 @@ export("extractDate")
 export("orgTime")
 export("smooth.spline.raster")
 export("whittaker.raster")
+export("makeWeights")
 
 exportPattern(".+WS$")
 
