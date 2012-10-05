@@ -51,7 +51,8 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
             b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_year",y,".tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
         }
     
-    } else {
+    } else 
+    {
         b[[1]] <- brick(raster(vi),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
         b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_fullPeriod.tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
     }
@@ -101,21 +102,8 @@ clFun <- function(l)
     
     if (!is.null(wt))
     {
-
-        require(bitops)
         wtu <- getValues(wt, row=tr$row[l], nrows=tr$nrows[l])
         set0[wtu==0] <- TRUE
-
-        wtu <- bitAnd(bitShiftR(wtu, bitShift ), bitMask)
-        
-        if(!is.null(bitTreshold))
-        {
-            set0[wtu > bitTreshold] <- TRUE
-        }
-        
-        # turn upsidedown wtu values
-        wtu <- ((-1) * (wtu - bitMask))/bitMask # bitMask is the maximum possible value in the VI Qual Mask in MODIS: "1111" 
-        wtu <- matrix(wtu,nrow=mtrdim[1],ncol=mtrdim[2])
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])

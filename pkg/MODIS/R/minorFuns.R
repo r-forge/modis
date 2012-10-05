@@ -112,18 +112,19 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     MRT  <- NULL
     GDAL <- NULL
         
-    if ("MRT" %in% what){
-    
+    if ("MRT" %in% what)
+    {
         MRT <- 0
+        mrtH  <- normalizePath(Sys.getenv("MRT_HOME"), winslash="/", mustWork = FALSE)
+        mrtDD <- normalizePath(Sys.getenv("MRT_DATA_DIR"), winslash="/", mustWork = FALSE)
         
-        mrtH  <- normalizePath(Sys.getenv("MRT_HOME"),winslash="/", mustWork = FALSE)
-        mrtDD <- normalizePath(Sys.getenv("MRT_DATA_DIR"),winslash="/", mustWork = FALSE)
-        
-        if (!quiet){
+        if (!quiet)
+        {
             cat("Checking availabillity of MRT:\n")
         }
     
-        if(mrtH=="") {
+        if(mrtH=="") 
+        {
             if (!quiet)
             {
                 cat("  'MRT_HOME' not set/found! MRT is NOT enabled! See: 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
@@ -183,11 +184,18 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                 cat("Checking availabillity of 'FWTools' (GDAL with HDF4 support for Windows):\n")    
             }
             gdalPath <- MODIS:::.getDef()$FWToolsPath
-            gdal <- shell(paste(gdalPath,'gdalinfo --version',sep="",collapse="/"),intern=TRUE)
+            if (is.null(gdalPath))
+            {
+                cmd <- 'gdalinfo --version'
+            } else
+            {
+                cmd <- file.path(shortPathName(gdalPath),'gdalinfo --version',fsep="\\")            
+            }
+            gdal <- shell(cmd,intern=TRUE)
             
             if (length(grep(x=gdal,pattern="FWTools"))==0)
             {
-                cat("   'FWTools' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools'! You can get it from 'http://fwtools.maptools.org/'\nTrying to autodetect FWTools:\n")
+                cat("   'FWTools' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools'! You can get it from 'http://fwtools.maptools.org/'\nTrying to autodetect FWTools (this may take a little):\n")
 
                 a <- dirname(list.files(path="\\.",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
                 a <- a[grep(a,pattern="FWTools")]
@@ -197,7 +205,8 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                     cat("No 'FWTools' installation found! In order to use it please solve this problem first.\n")
                 } else 
                 {
-                    cat("Ok, 'FWTools' installation found! Please add the following line in the options file (section: Windows specific): '",path.expand("~/.MODIS_Opts.R"),"'\nFWToolsPath <- ",normalizePath(a,winslash="/"),"\n",sep="")
+                    cat("Ok, 'FWTools' installation found! Please add the following line in the options file ('",normalizePath("~/.MODIS_Opts.R",winslash="/"),"', section: Windows specific):\n FWToolsPath <- '", normalizePath(a,winslash="/"),"'\n",sep="")
+                    read.table(normalizePath("~/.MODIS_Opts.R",winslash="/"))
                 }
             } else 
             {
