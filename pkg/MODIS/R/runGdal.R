@@ -8,14 +8,14 @@ runGdal <- function(...)
         {
             stop("GDAL path not set (properly) or GDAL not installed on your system!")
         } else {
-            stop("FWTools path not set (properly) or FWTools (GDAL with hdf4 support on Windows) not installed on your system! see: 'http://   fwtools.maptools.org/'")
+            stop("FWTools path not set (properly) or FWTools (GDAL with hdf4 support on Windows) not installed on your system! see: 'http://fwtools.maptools.org/'")
         }
     }
-
+    
     pm <- list(...)
     
     # absolutly needed
-    pm$product     <- getProduct(pm$product,quiet=TRUE)
+    pm$product <- getProduct(pm$product,quiet=TRUE)
     
     # optional and if missing it is added here:
     pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
@@ -25,9 +25,8 @@ runGdal <- function(...)
     # Some defaults:
     if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
     if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
-    if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
     if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
-    if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
+    # if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
 
     if (is.null(pm$localArcPath))
     {
@@ -98,29 +97,39 @@ runGdal <- function(...)
     {
         pm$resamplingType <- MODIS:::.getDef("resamplingType")
 
-        if (toupper(pm$resamplingType) == "NN"){
-            pm$resamplingType <- "near"
+        if (toupper(pm$resamplingType) == "NN")
+        {
+            rt <- "near"
+        } else
+        {
+            rt <- tolower(pm$resamplingType)
         }
         
-        if (!pm$resamplingType %in% c("near","bilinear","cubic","cubicspline","lanczos")) 
+        if (!rt %in% c("near", "bilinear","cubic","cubicspline","lanczos"))  
         {
             stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
         }
         
-        cat("No 'resamplingType' specified, using default: ",pm$resamplingType,"!\n",sep="")
-    } else {    
+        cat("No 'resamplingType' specified, using default: ",rt,"\n",sep="")
+    } else 
+    {    
 
-        if (toupper(pm$resamplingType) == "NN"){
-            pm$resamplingType <- "near"
+        if (toupper(pm$resamplingType) == "NN")
+        {
+            rt <- "near"
+        } else
+        {
+            rt <- tolower(pm$resamplingType)
         }
         
-        if (!pm$resamplingType %in% c("near","bilinear","cubic","cubicspline","lanczos")) 
+        if (!rt %in% c("near", "bilinear", "cubic", "cubicspline", "lanczos"))
         {
             stop("'resamplingType' must be one of: 'near','bilinear','cubic','cubicspline','lanczos'")
         }
-        cat("Resampling method: ", pm$resamplingType,"\n")
+        cat("Resampling method: ", rt,"\n")
     }
-
+    rt <- paste(" -r",rt)
+    
     if (is.null(pm$outProj))
     {
 
@@ -135,7 +144,7 @@ runGdal <- function(...)
         }
 
     }
-    
+    # some support of mrt setting
     if (pm$outProj=="GEOGRAPHIC")
     {
         pm$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
@@ -146,10 +155,13 @@ runGdal <- function(...)
         if (pm$product$SENSOR=="MODIS")
         {
             pm$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
+        } else if (pm$product$SENSOR=="SRTM")
+        {
+            pm$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
         } 
     }
         
-    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | !is.na(as.numeric(pm$outProj)))
+    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | is.numeric(pm$outProj))
     {
         require(rgdal)
         epsg <- make_EPSG()
@@ -166,13 +178,14 @@ runGdal <- function(...)
            
         pm$outProj <- outProj
     }
+    t_srs <- paste(' -t_srs \"',pm$outProj,'\"',sep='')
     
     if (pm$product$SENSOR=="MODIS")
     {
-        s_srs <- " -s_srs '-s_srs +proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs'"
-    } else 
+        s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
+    } else if (pm$product$SENSOR=="SRTM")
     {
-        s_srs <- NULL
+        s_srs <- ' -s_srs \"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs\"'
     }
      
     for (z in 1:length(pm$product$PRODUCT))
@@ -217,7 +230,11 @@ runGdal <- function(...)
     
                 for (l in 1:length(avDates))
                 { 
-                    files <- unlist(getHdf(product=prodname,collection=coll,begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
+                    files <- unlist(
+                                getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
+                                tileH=pm$extent$tileH, tileV=pm$extent$tileV, stubbornness=pm$stubbornness,
+                                log=FALSE, localArcPath=pm$localArcPath)
+                             )
                     files <- files[basename(files)!="NULL"]
                     
         			w <- options()$warn
@@ -233,7 +250,7 @@ runGdal <- function(...)
                     {
                         outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),".",gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"),".tif",sep="")
                         
-                        gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files(SDS)
+                        gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
                         te <- NULL
                         if ( !is.null(pm$extent$extent) )
@@ -243,7 +260,8 @@ runGdal <- function(...)
                                 if (!is.null(pm$extent$target$extent[[1]]))
                                 {
                                 
-                                    te <- paste(" -te", pm$extent$target$extent@xmin, pm$extent$target$extent@ymin, pm$extent$target$extent@xmax, pm$extent$target$extent@ymax, collapse=" ") 
+                                    te <- paste(" -te", pm$extent$target$extent@xmin, pm$extent$target$extent@ymin,
+                                    pm$extent$target$extent@xmax, pm$extent$target$extent@ymax, collapse=" ") 
                         
                                 } else 
                                 {
@@ -289,11 +307,58 @@ runGdal <- function(...)
 
                         if (.Platform$OS=="unix")
                         {
-                            invisible(system(paste("gdalwarp",s_srs," -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", paste(gdalSDS,collapse="' '"), "' ", outDir, "/", outname,sep=""), intern=TRUE))
+
+                            ofile <- paste(normalizePath(outDir), '/', outname,sep='')
+
+                            invisible(
+                                system(
+                                    paste(
+                                        "gdalwarp",
+                                        s_srs,
+                                        t_srs,
+                                        te,
+                                        tr,
+                                        cp,
+                                        bs,
+                                        rt,
+                                        " -overwrite",
+                                        " -multi",
+                                        " ",gdalSDS,
+                                        " ",ofile,
+                                    sep=""),
+                                intern=TRUE)
+                            )
+                            
                         } else 
                         {
                             gdalPath <- MODIS:::.getDef()$FWToolsPath
-                            invisible(shell(paste(gdalPath, "gdalwarp", s_srs," -t_srs '", pm$outProj, "'", te, tr, cp, bs, " -r ", pm$resamplingType, " -overwrite -multi '", shQuote(gdalSDS), "' ", normalizePath(outDir), "\\", outname, sep=""), intern=TRUE))
+                            if(!is.null(gdalPath))
+                            {
+                                cmd <- file.path(shortPathName(gdalPath),"gdalwarp",fsep="\\")
+                            } else 
+                            {
+                                cmd <- "gdalwarp"
+                            }
+
+                            ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
+                            ofile <- shortPathName(paste(normalizePath(outDir), '\\', outname,sep=''))
+                            ov <- NULL # Fwtools doesn't support ' -overwrite'
+                            invisible(file.remove(ofile))
+                            
+                            shell(
+                               paste(cmd,
+                                    s_srs,
+                                    t_srs,
+                                    te,
+                                    tr,
+                                    cp,
+                                    bs,
+                                    rt,
+                                    ' -multi',
+                                    ' \"', ifile,'\"',
+                                    ' \"', ofile,'\"',
+                                sep = '')
+                            ) 
                         }
                     }
                 }

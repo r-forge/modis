@@ -220,7 +220,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         } else
         {
             extent <- ext
-            target <- list(resolution = resolution) 
+            target <- list(t_srs=t_srs, extent= extent, resolution = resolution) 
         }
     }
 
