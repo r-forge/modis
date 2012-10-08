@@ -48,7 +48,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     # argument extent is prioritary to tileV/H.
     
     # if extent is a raster or a "path/name" to a rasterfile. 
-    if(!inherits(extent,c("Extent","SpatialPolygonsDataFrame")) & !is.null(extent))
+    if(!inherits(extent,c("map","Extent","SpatialPolygonsDataFrame")) & !is.null(extent))
     {
         if (file.exists(extent))
         {
