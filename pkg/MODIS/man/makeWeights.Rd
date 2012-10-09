@@ -18,7 +18,7 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
   \item{x}{One of Raster -Stack or -Brick}
   \item{bitShift}{bit starting point}
   \item{bitMask}{bit mask size} 
-  \item{threshold}{Tresshold for valid quality} 
+  \item{threshold}{Threshold for valid quality} 
   \item{filename}{Argument passed to \code{writeRaster}, if not set it writes to a tempfile} 
   \item{decodeOnly}{default FASLE, convert bits to a weights from 0 (not used) to 1 (best quality). Or TRUE only extract selected bits and convert to decimal system.} 
   \item{...}{Other arguments for \code{writeRaster}} 
@@ -54,11 +54,11 @@ a <- makeWeights(VIqual,bitShift,bitMask,decodeOnly=TRUE)
 
 b <- makeWeights(VIqual,bitShift,bitMask,decodeOnly=FALSE)
 
-treshold=6 # every thing < treshold becomes a weight = 0
-c <- makeWeights(VIqual,bitShift,bitMask,treshold,decodeOnly=FALSE)
+threshold=6 # every thing < threshold becomes a weight = 0
+c <- makeWeights(VIqual,bitShift,bitMask,threshold,decodeOnly=FALSE)
 
 res <- round(cbind(a[],b[],c[]),2)
-colnames(res) <- c("ORIG","Weight","WeightTreshold") 
+colnames(res) <- c("ORIG","Weight","WeightThreshold") 
 res
 }
 }

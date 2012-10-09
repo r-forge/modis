@@ -1,9 +1,9 @@
 .onLoad <- function(lib, pkg)
 {
-	pkg.info <- drop(read.dcf(file=system.file("DESCRIPTION", package=pkg), fields=c("Version","Date")))
-	
-	packageStartupMessage(paste("\n",pkg, " version ", pkg.info["Version"], " (", pkg.info["Date"], ") \nMODIS_manual: https://www.dropbox.com/sh/18t0rgcm6bga7xt/-4k_Xwojxr/MODIS\nTo install the complete set of suggested packages run: MODIS:::checkDeps()", sep=""))
-
+    # Starting message taken from pkg raster (R.J.Hijmans)
+	pkg.info <- utils::packageDescription('MODIS')
+	packageStartupMessage(paste("\nMODIS version ", pkg.info[["Version"]], " (", pkg.info["Date"], ") \nMODIS_manual: https://www.dropbox.com/sh/18t0rgcm6bga7xt/-4k_Xwojxr/MODIS\nTo install the complete set of suggested packages run: MODIS:::checkDeps()", sep=""))
+    
 	if (!file.exists("~/.MODIS_Opts.R"))
 	{
         packageStartupMessage(
