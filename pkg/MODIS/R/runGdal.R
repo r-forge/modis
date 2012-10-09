@@ -308,26 +308,27 @@ runGdal <- function(...)
                         if (.Platform$OS=="unix")
                         {
 
-                            ofile <- paste(normalizePath(outDir), '/', outname,sep='')
-
-                            invisible(
-                                system(
-                                    paste(
-                                        "gdalwarp",
-                                        s_srs,
-                                        t_srs,
-                                        te,
-                                        tr,
-                                        cp,
-                                        bs,
-                                        rt,
-                                        " -overwrite",
-                                        " -multi",
-                                        " ",gdalSDS,
-                                        " ",ofile,
-                                    sep=""),
-                                intern=TRUE)
-                            )
+                            ifile <- paste(gdalSDS,collapse="' '")
+                            ofile <- paste(outDir, '/', outname,sep='')
+                            cmd <- paste(
+                                    "gdalwarp",
+                                    s_srs,
+                                    t_srs,
+                                    te,
+                                    tr,
+                                    cp,
+                                    bs,
+                                    rt,
+                                    " -overwrite",
+                                    " -multi",
+                                    " \'", ifile,"\'",
+                                    " ",
+                                    ofile,
+                                    sep="")
+                            cmd <- gsub(x=cmd,pattern="\"",replacement="'")
+#                           invisible(
+                                system(cmd)
+#                           )
                             
                         } else 
                         {
