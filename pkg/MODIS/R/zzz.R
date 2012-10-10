@@ -9,7 +9,8 @@
         packageStartupMessage(
             "#################################\n IMPORTANT PLEASE READ!\n#################################\n\nThe file containing package defaults doesn't exist!\nOpen \'",file.path(find.package("MODIS"), "external","MODIS_Opts.R") ,"\' with an editor, check/modify the values in that file and save it to: \'", normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"\'\nIf settings are fine as they are just copy the file with:\n\'file.copy('",file.path(find.package('MODIS'), 'external','MODIS_Opts.R'),"','",normalizePath("~/.MODIS_Opts.R","/",mustWork=FALSE),"')",sep="")
 
-	} else {
+	} else 
+	{
 	
 	    opts  <- new.env()
 	    eval(parse(file.path(find.package("MODIS"), "external","MODIS_Opts.R")),envir=opts) # if we need to add an option, this makes it possible
@@ -55,6 +56,7 @@
     	
     	if (is.null(opt$FWToolsPath))
     	{
+        	write('# Example:', filename)
         	write('# FWToolsPath <- "C:/Programms/FWTools2.4.7/bin"', filename)
     	} else 
     	{
@@ -67,7 +69,8 @@
     	write('  ', filename)	
  
     	a=0
-    	for (i in grep(names(opt),pattern="^ftpstring.")) {
+    	for (i in grep(names(opt),pattern="^ftpstring.")) 
+    	{
         	a = a+1
         	write(paste('ftpstring',a,' <- ',opt[i], sep=''), filename)
         	write('  ', filename)	

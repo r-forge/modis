@@ -18,22 +18,28 @@ makeWeights <- function(x, bitShift, bitMask, threshold=NULL, filename='', decod
     for (i in 1:tr$n) 
     {
         v <- getValues(x, row=tr$row[i], nrows=tr$nrows[i])
-        
+        ve <- dim(v)
+
         # decode bits
         v <- bitAnd(bitShiftR(v, bitShift ), bitMask)
         
+        if (!is.null(threshold))
+        {
+            # thres <- ((-1) * (threshold - bitMask))/bitMask
+            v[v > threshold] <- 0
+        }
+       
         if (!decodeOnly)
         {
-            # turn up side down and scale bits for weighting an also the threshold
+            # turn up side down and scale bits for weighting
             v <- ((-1) * (v - bitMask))/bitMask      
-        
-            if (!is.null(threshold))
-            {
-                thres <- ((-1) * (threshold - bitMask))/bitMask
-                v[v < thres] <- 0
-            }
         }
-        
+
+        if (!is.null(ve))
+        {
+            v <- matrix(v,ncol=ve[2],nrow=ve[1],byrow=FALSE)
+        } 
+
         out <- writeValues(out, v, tr$row[i])
     }
     out <- writeStop(out)

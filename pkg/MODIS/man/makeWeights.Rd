@@ -15,7 +15,7 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
 }
 
 \arguments{
-  \item{x}{One of Raster -Stack or -Brick}
+  \item{x}{One of Raster-Layer, -Stack or -Brick}
   \item{bitShift}{bit starting point}
   \item{bitMask}{bit mask size} 
   \item{threshold}{Threshold for valid quality} 
@@ -25,7 +25,7 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
 } 
 
 \value{
-    A raster object like the input with transformed values
+   A rasterLayer if input is a rasterLayer, a rasterBrick if input is a rasterBrick or rasterStack.
 }
 
 \author{
@@ -35,10 +35,7 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
 \examples{
 \dontrun{
 
-require(bitopts)
-bit <- round(runif(16*10*10,1,65536))
-bit <- matrix(bit,ncol=16,nrow=100)
-
+bit <- round(runif(10*10,1,65536))
 VIqual <- raster(ncol=10,nrow=10)
 VIqual[] <- bit
 
@@ -51,7 +48,6 @@ bitMask = 15 # ('15' is the decimal of the binary '1111')
 a <- makeWeights(VIqual,bitShift,bitMask,decodeOnly=TRUE)
 
 # linear conversion of 0 (0000) to 15 (1111) to 1 fo 0 
-
 b <- makeWeights(VIqual,bitShift,bitMask,decodeOnly=FALSE)
 
 threshold=6 # every thing < threshold becomes a weight = 0
