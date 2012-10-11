@@ -18,9 +18,8 @@
     if(length(product$PRODUCT)>1)
     {
         cat(".genString() does not support multiple products! Generating the string only for the first:",product$PRODUCT[1],"\n")
+        product <- lapply(product,function(x){x[1]}) # take only the first argument
     }
-    
-    product <- lapply(product,function(x){x[1]}) # take only the first argument
     
     if(length(product$CCC)==0)
     {
@@ -77,7 +76,7 @@
        
                 stringX <- opts[[e]]
                 
-                if (stringX$name %in% unlist(product$SOURCE) & what %in% stringX$content) 
+                if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content) 
                 {
                     n=n+1                    
                     if(is.null(stringX$variablepath))
@@ -166,7 +165,7 @@
             {
                 stringX <- opts[[e]]
 
-                if (stringX$name %in% unlist(product$SOURCE) & what %in% stringX$content)                 
+                if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
                 {
                     struc <- stringX$variablepath    
                     tempString <- strsplit(struc,"/")[[1]]
