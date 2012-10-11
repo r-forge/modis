@@ -2,7 +2,8 @@
 # Date : August 2012
 # Licence GPL v3
 
-whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./")
+# maybe to add: derivate=2
+whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./")
 {
     
     dir.create(outPath,showWarnings=FALSE)
@@ -18,14 +19,14 @@ whittaker.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = 
         vi <- stack(vi)
     }
     
-    if(!inherits(wt,"Raster") & !is.null(wt)) 
+    if(!inherits(w,"Raster") & !is.null(w)) 
     {
-        wt <- stack(wt)
+        w <- stack(w)
     }
 
-    if(!inherits(inT,"Raster") & !is.null(inT)) 
+    if(!inherits(t,"Raster") & !is.null(t)) 
     {
-        inT <- stack(inT)
+        t <- stack(t)
     }
    
     tsLength <- as.numeric(max(timeInfo$inputLayerDates) - (min(timeInfo$inputLayerDates)-1)) 
@@ -107,11 +108,11 @@ clFun <- function(l)
     set0[is.na(val)] <- TRUE
 
     
-    if (!is.null(wt))
+    if (!is.null(w))
     {
 
         require(bitops)
-        wtu <- getValues(wt, row=tr$row[l], nrows=tr$nrows[l])
+        wtu <- getValues(w, row=tr$row[l], nrows=tr$nrows[l])
         set0[wtu==0] <- TRUE
         wtu <- bitAnd(bitShiftR(wtu, bitShift ), bitMask)
         
@@ -129,9 +130,9 @@ clFun <- function(l)
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
     }
     
-    if (inherits(inT,"Raster"))
+    if (inherits(t,"Raster"))
     {
-        inTu  <- getValues(inT, row=tr$row[l], nrows=tr$nrows[l])
+        inTu  <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
         inTu  <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
         set0[is.na(inTu)] <- TRUE
         inTu[set0] <- 0
@@ -275,19 +276,36 @@ whittakerMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,lambda=NULL, nIte
     Cvec <- (colSums(wti!=0) > minVal)
     Cvec <- (1:yCol)[Cvec]
 
-    for (u in Cvec)
-    {
-        inTo    <- inTi[,u]
-        msk     <- inTo > 0
-        inTiVec <- inTo[msk]
-        valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
-        valVec[inTiVec] <- vali[msk,u]
-        wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
-        wtVec[inTiVec]  <- wti[msk,u]
-        s <- MODIS:::miwhitatzb1(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
-        out[,u] <- s[outTi[,u]]
-    }
+#    if(derivate==1)
+#    {
+#        for (u in Cvec)
+#        {   
+#            inTo    <- inTi[,u]
+#            msk     <- inTo > 0
+#            inTiVec <- inTo[msk]
+#            valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
+#            valVec[inTiVec] <- vali[msk,u]
+#            wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
+#            wtVec[inTiVec]  <- wti[msk,u]
+#            s <- MODIS:::miwhitatzb1(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
+#            out[,u] <- s[outTi[,u]]
+#        }
+#    } else  
+#    {
+        for (u in Cvec)
+        {   
+            inTo    <- inTi[,u]
+            msk     <- inTo > 0
+            inTiVec <- inTo[msk]
+            valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
+            valVec[inTiVec] <- vali[msk,u]
+            wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
+            wtVec[inTiVec]  <- wti[msk,u]
+            s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
+            out[,u] <- s[outTi[,u]]
+        }
 
+#    }
 return(t(out))
 }
     

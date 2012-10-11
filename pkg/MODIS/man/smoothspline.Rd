@@ -11,13 +11,13 @@ This function uses the \code{smooth.spline} function to filter a vegetation inde
 }
 
 \usage{
-smooth.spline.raster(vi,wt=NULL,inT=NULL,groupYears=TRUE,timeInfo=orgTime(vi),df=6,outPath ="./")
+smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),df=6,outPath ="./")
 }
 
 \arguments{
-  \item{vi}{Sorted 'Vegetation index' raster-Brick or -Stack or filenames.}
-  \item{wt}{In case of MODIS composite the 'VI_Quality' raster-Brick or -Stack or filenames.}
-  \item{inT}{In case of MODIS composite the 'composite_day_of_the_year' raster-Brick or -Stack or filenames.} 
+  \item{x}{Sorted 'Vegetation index' raster-Brick or -Stack or filenames.}
+  \item{w}{Raster-Brick or -Stack with _weighting_ information. Use \link{makeWeights} for the generation of this file.}
+  \item{t}{In case of MODIS composite the 'composite_day_of_the_year' raster-Brick or -Stack or filenames.} 
   \item{groupYears}{Default \code{TRUE}, raster-Brick files separated by years. If \code{FALSE} a overall raster-Brick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{df}{Numeric: _Yearly_ degree of freedom value passed to \code{?smooth.spline}. If set as character (i.e. df="6"), it is not adapted to the time serie length but used as a fixed value (see deteils).} 
@@ -57,7 +57,7 @@ Currently tested on MODIS and Landsat data. Using M*D13 data it is also possible
 # Afterward extract it to: 
 MODIS:::.getDef()$outDirPath
 
-# the only obligatory dataset is "vi" (vegetatino index), get the 'vi' data on the source directory: 
+# the only obligatory dataset is "x" (vegetatino index), get the 'vi' data on the source directory: 
 path <- paste(MODIS:::.getDef()$outDirPath,"/fullCapa",sep="")
 vi <- preStack(path=path, pattern="*_NDVI.tif$")
 
@@ -74,16 +74,17 @@ vi <- preStack(files=vi,timeInfo=timeInfo)
 
 # For speedup try (Sometimes problematic on Win7): 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
-system.time(smooth.spline.raster(vi,timeInfo=timeInfo))
+system.time(smooth.spline.raster(x=vi,timeInfo=timeInfo))
 
-# Doesn't works in version 0.5-0!
+# Filter with weighting and time information:
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
-wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
-# you can also stack/brick it
-inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo))
+w <- stack(preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo))
+w <- makeWeights(w,bitShift=2,bitMask=15,threshold=6) 
+# you can also pass only the names
+t <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
-system.time(smooth.spline.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo))
+system.time(smooth.spline.raster(x=vi,w=w,t=t,timeInfo=timeInfo))
 
 }
 }

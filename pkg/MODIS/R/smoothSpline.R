@@ -2,25 +2,25 @@
 # Date : August 2012
 # Licence GPL v3
 
-smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInfo = orgTime(vi), df = 6,outPath = "./")
+smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(x), df = 6,outPath = "./",...)
 {
     
     dir.create(outPath,showWarnings=FALSE)
     outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
     
-    if(!inherits(vi,"Raster")) 
+    if(!inherits(x,"Raster")) 
     {
-        vi <- stack(vi)
+        x <- stack(x)
     }
     
-    if(!inherits(wt,"Raster") & !is.null(wt)) 
+    if(!inherits(w,"Raster") & !is.null(w)) 
     {
-        wt <- stack(wt)
+        w <- stack(w)
     }
 
-    if(!inherits(inT,"Raster") & !is.null(inT)) 
+    if(!inherits(t,"Raster") & !is.null(t)) 
     {
-        inT <- stack(inT)
+        t <- stack(t)
     }
    
     tsLength <- as.numeric(max(timeInfo$inputLayerDates) - (min(timeInfo$inputLayerDates)-1)) 
@@ -40,24 +40,24 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
     df <- as.numeric(df)
     
     # TEMP
-    NAflag=-10000
+    
     b <- list()
     if (groupYears)
     {
         for (a in seq_along(unique(format(timeInfo$outputLayerDates,"%Y"))))
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
-            b[[a]] <- brick(raster(vi),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_year",y,".tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+            b[[a]] <- brick(raster(x),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
+            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_year",y,".tif",sep=""),...)
         }
     
     } else 
     {
-        b[[1]] <- brick(raster(vi),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_fullPeriod.tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+        b[[1]] <- brick(raster(x),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
+        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_fullPeriod.tif",sep=""),...)
     }
         
-    tr <- blockSize(vi)
+    tr <- blockSize(x)
     
     cluster <- raster:::.doCluster()
     if (cluster)
@@ -79,7 +79,7 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
         clusterEvalQ(cl,require(rgdal))
         clusterEvalQ(cl,require(raster))
         
-        tr <- MODIS:::blockSizeCluster(vi)
+        tr <- MODIS:::blockSizeCluster(x)
     }    
 
     cat("Data is in, start processing!\n")
@@ -90,28 +90,25 @@ smooth.spline.raster <- function(vi, wt=NULL, inT=NULL, groupYears=TRUE, timeInf
 clFun <- function(l)
 {
     minval      <- -2000
-    bitShift    <-  2 
-    bitMask     <- 15
-    bitTreshold <-  6
     
-    val    <- getValues(vi, row=tr$row[l], nrows=tr$nrows[l])
+    val    <- getValues(x, row=tr$row[l], nrows=tr$nrows[l])
     mtrdim <- dim(val)
     set0   <- val <= minval # M.D13 specific!
     set0[is.na(val)] <- TRUE
-
+    set0[rowSums(val,na.rm=TRUE)==0] <- TRUE
     
-    if (!is.null(wt))
+    if (!is.null(w))
     {
-        wtu <- getValues(wt, row=tr$row[l], nrows=tr$nrows[l])
+        wtu <- getValues(w, row=tr$row[l], nrows=tr$nrows[l])
         set0[wtu==0] <- TRUE
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
     }
     
-    if (inherits(inT,"Raster"))
+    if (inherits(t,"Raster"))
     {
-        inTu  <- getValues(inT, row=tr$row[l], nrows=tr$nrows[l])
+        inTu  <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
         inTu  <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
         set0[is.na(inTu)] <- TRUE
         inTu[set0] <- 0
@@ -124,11 +121,11 @@ clFun <- function(l)
     val[set0] <- 0    
      
     r <- smooth.splineMtr(vali=val,wti=wtu,inTi=inTu,timeInfo=timeInfo,df=df)
-    r[rowSums(abs(r))==0,] <- NAflag
+    r[rowSums(abs(r))==0,] <- NA
 
 return(r)
 }
-# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;df=df
+
     if (!cluster)
     {    
         for ( i in seq_along(tr$row) )
@@ -161,7 +158,7 @@ return(r)
     
             if (!d$value$success)
             {
-                stop("cluster error in Row:", tr$row[d$value$tag],"\n")
+                stop("Cluster error in Row: ", tr$row[d$value$tag],"\n")
             }
             ind <- d$value$tag
             d$value$value <- round(d$value$value)
@@ -205,7 +202,7 @@ return(r)
 return(NULL)
 }
 
-
+# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;df=df
 smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,df=NULL)
 {
     vali <- t(vali)
@@ -224,7 +221,8 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,df=NULL)
     if(is.null(inTi))
     {
         inTi <- matrix(1:yRow,ncol=yCol,nrow=yRow)
-    } else {
+    } else 
+    {
         inTi <- as.matrix(inTi)
         # if inT is a fixed vector (i.e.: from filename of Landsat of length nrow(x) (==nlayer) create a matrix with 1:nlayer for each col.
         if(ncol(inTi)==1)
@@ -250,7 +248,7 @@ smooth.splineMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,df=NULL)
     }
         
     # minimum "minVal" input values for filtering 
-    Cvec <- (colSums(wti!=0) > df)
+    Cvec <- (colSums(wti>0) > df)
     Cvec <- (1:yCol)[Cvec]
 
     for (u in Cvec)

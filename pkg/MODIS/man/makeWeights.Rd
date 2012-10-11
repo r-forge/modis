@@ -15,7 +15,7 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
 }
 
 \arguments{
-  \item{x}{One of Raster-Layer, -Stack or -Brick}
+  \item{x}{Matrix, vector or one of Raster-Layer, -Stack or -Brick}
   \item{bitShift}{bit starting point}
   \item{bitMask}{bit mask size} 
   \item{threshold}{Threshold for valid quality} 
@@ -35,16 +35,24 @@ makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,
 \examples{
 \dontrun{
 
-bit <- round(runif(10*10,1,65536))
-VIqual <- raster(ncol=10,nrow=10)
-VIqual[] <- bit
-
 # example MOD13Q1 see https://lpdaac.usgs.gov/products/modis_products_table/mod13q1 
 # enter in Layers
 # See in TABLE 2: MOD13Q1 VI Quality
 # column 1 (bit) row 2 VI usefulness 
 bitShift = 2
 bitMask = 15 # ('15' is the decimal of the binary '1111')  
+
+# simulate bit info
+bit <- round(runif(10*10,1,65536))
+
+# extract from vector
+makeWeights(bit,bitShift,bitMask,decodeOnly=TRUE)
+
+# create a Raster object
+VIqual <- raster(ncol=10,nrow=10)
+VIqual[] <- bit
+
+# extract from Raster object
 a <- makeWeights(VIqual,bitShift,bitMask,decodeOnly=TRUE)
 
 # linear conversion of 0 (0000) to 15 (1111) to 1 fo 0 

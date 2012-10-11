@@ -4,21 +4,21 @@
 
 \alias{whittaker.raster}
 
-\title{Filter time series imagery with the modified whittaker approach} 
+\title{Filter vegetation index time series imagery with the modified whittaker approach} 
 
 \description{
 This function uses a modified whittaker filter function (see references) from package 'ptw' to filter a vegetation index time serie of satellite data.
 }
 
 \usage{
-whittaker.raster(vi,wt=NULL,inT=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5,
+whittaker.raster(vi,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5,
  outPath ="./")
 }
 
 \arguments{
   \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames.}
-  \item{wt}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames.}
-  \item{inT}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames.} 
+  \item{w}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames.}
+  \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames.} 
   \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years. If \code{FALSE} a overall rasterBrick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="6"), it is not adapted to the time serie length but used as a fixed value (see deteils). High values = stiff/rigid spline} 

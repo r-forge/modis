@@ -29,7 +29,7 @@ Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 \tab \code{pixelSize}\tab Numeric single value. Output pixel size in target reference system unit. Default is 'asIn'.\cr
 \tab \code{resamplingType}\tab Character. Default is 'near' or one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL. Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
-\tab \code{compression}\tab logical. Default is \code{FALSE}, no compression or GDAL default. Alternative is \code{TRUE} that uses (currently) the LZW compression with "predictor=2". See: http://www.gdal.org/frmt_gtiff.html\cr
+\tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2". See: http://www.gdal.org/frmt_gtiff.html\cr
 }
 }
 }
