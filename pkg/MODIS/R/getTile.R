@@ -11,13 +11,13 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (toupper(system) == "MERIS") 
     {
-
+        # generate tiling structure of Culture-Meris data
         tiltab <- genTile(tileSize = 5)
         old <- TRUE
 
     } else if (toupper(system) == "SRTM") 
     {
-
+        # generate tiling structure of SRTMv4 data
         tiltab <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
         old <- TRUE
 
@@ -48,7 +48,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     # argument extent is prioritary to tileV/H.
     
     # if extent is a raster or a "path/name" to a rasterfile. 
-    if(!inherits(extent,c("map","Extent","SpatialPolygonsDataFrame")) & !is.null(extent))
+    if(inherits(extent,"character"))
     {
         if (file.exists(extent))
         {
@@ -69,6 +69,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         rm(ex)
         isPoly <- TRUE
     }
+    
         
     if (isTRUE(isTRUE(is.null(tileH) | is.null(tileV)) & is.null(extent))) 
     {
@@ -179,7 +180,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         try(test <- map("worldHires", extent, plot = FALSE),silent = TRUE)
         if (!exists("test"))
         {
-            stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires,'",extent, "'), or use 'search4map()' function", sep = ""))
+            stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires,'",extent, "'), or use 'search4map('pattern')' function", sep = ""))
         }
         extent <- map("worldHires", extent, plot = FALSE, fill=TRUE)
     }
@@ -234,11 +235,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
 
     if (inherits(extent, "list")) 
     {
-        if (length(extent@extent) == 4) 
+        if (length(extent$extent) == 4) 
         {
-            extent <- extent@extent
+            extent <- extent$extent
         }
-        extent <- extent(c(min(extent@xmin,extent@xmax), max(extent@xmin,extent@xmax), min(extent@ymin,extent@ymax), max(extent@ymin,extent@ymax)))
+        
+        extent <- extent(c(min(extent$xmin,extent$xmax), max(extent$xmin,extent$xmax), min(extent$ymin,extent$ymax), max(extent$ymin,extent$ymax)))
     }
     
     if (inherits(extent,"Extent"))
