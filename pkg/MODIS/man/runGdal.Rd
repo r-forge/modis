@@ -25,7 +25,7 @@ Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 \tab \code{extent}\tab See: \code{?getTile()} and Details!\cr
 \tab \code{SDSstring}\tab See: \code{?getSds(). Default is extract all SDS (layers).}\cr
 \tab \code{job}\tab Character. Name of the current job for the creation of the output folder. If not specified it is created: 'PRODUCT.COLLECTION_DATETIME'\cr
-\tab \code{outProj}\tab CRS/ prj4/ EPSG code of output any format supported by gdal utilities see examples. Default is 'GEOGRAPHIC', alternative is 'asIn' for no warping. You can set a default in the '.MODIS_opts.R' file.\cr
+\tab \code{outProj}\tab CRS/ prj4/ EPSG code of output any format supported by gdal utilities see examples. Default is 'GEOGRAPHIC', alternative is 'asIn' for no warping. You can change the default in the '.MODIS_opts.R' file.\cr
 \tab \code{pixelSize}\tab Numeric single value. Output pixel size in target reference system unit. Default is 'asIn'.\cr
 \tab \code{resamplingType}\tab Character. Default is 'near' or one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL. Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
@@ -36,8 +36,7 @@ Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 
 \details{
 \code{runGdal()} uses a lot of 'MODIS'-package functions, see their manual (?funX) for details and input possibilities. You can also pass arguments of \code{getHdf()} such as 'dlmetod', 'checkSize'... see \code{getHdf}.
-\cr If the argument \code{extent} is a raster* object, and if not specified otherwise with dedicated arguments (pixelSize and outProj), the output has exactly the same extent, pixelSize and output projection as the used raster* object.   
-!!! DOESN'T WORK CURRENTLY ON WINDOWS !!!
+\cr If the argument \code{extent} is a raster* object, and if not specified otherwise with dedicated arguments (pixelSize and outProj), the output has exactly the same extent, pixelSize and output projection as the used raster* object.
 }
 
 \author{

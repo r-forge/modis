@@ -296,7 +296,10 @@ runGdal <- function(...)
                         }
                         
                         # compress output data
-                        if(!isTRUE(pm$compression))
+                        if(is.null(pm$compression))
+                        {
+                            cp <- " -co compress=lzw -co predictor=2"
+                        } else if (isTRUE(pm$compression))
                         {
                             cp <- " -co compress=lzw -co predictor=2"
                         } else
