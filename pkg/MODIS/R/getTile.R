@@ -4,18 +4,21 @@
 
 getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom=TRUE)
 {
+    # debug:
+    # extent = "austria"; tileH = NULL; tileV = NULL; buffer = NULL; system = "srtm"; zoom=TRUE
 
     old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
     target <- NULL  # if extent is a raster* and has a different proj it is changed
     isPoly <- FALSE
+    system <- toupper(system) 
     
-    if (toupper(system) == "MERIS") 
+    if (system == "MERIS") 
     {
         # generate tiling structure of Culture-Meris data
         tiltab <- genTile(tileSize = 5)
         old <- TRUE
 
-    } else if (toupper(system) == "SRTM") 
+    } else if (system == "SRTM") 
     {
         # generate tiling structure of SRTMv4 data
         tiltab <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
@@ -48,7 +51,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     # argument extent is prioritary to tileV/H.
     
     # if extent is a raster or a "path/name" to a rasterfile. 
-    if(inherits(extent,"character"))
+    if(inherits(extent,"character") & length(extent)==1)
     {
         if (file.exists(extent))
         {
@@ -130,7 +133,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         tileH <- as.numeric(tileH)
         tileV <- as.numeric(tileV)
 
-        if (toupper(system) == "MODIS")
+        if (system == "MODIS")
         {
             tiltab <- MODIS:::tiletable
         }
@@ -138,7 +141,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         tt      <- subset(tiltab,(tiltab$ih %in% tileH) & (tiltab$iv %in% tileV) & tiltab$xmin>-999)
         extent  <- extent(c(min(tt$xmin),max(tt$xmax),min(tt$ymin),max(tt$ymax)))
         
-        if (toupper(system) == "SRTM")
+        if (system == "SRTM")
         {
             tilesSUB <- as.character(apply(tt,1, function(x)
             {
@@ -146,7 +149,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             ))
             tiles <- as.character(sapply(tileH, function(x){paste("_", sprintf(paste("%02d", sep = ""), x), "_", sprintf(paste("%02d", sep = ""), tileV), sep = "")}))
 
-        } else if(toupper(system) == "MODIS")
+        } else if(system == "MODIS")
         {
             tilesSUB <- as.character(apply(tt,1, function(x)
             {
@@ -165,7 +168,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             tileH <- unique(tt$ih)
             tileV <- unique(tt$iv)
         }
-        return(list(tile=tiles,tileH=tileH,tileV=tileV,extent=NULL,system=system,target=NULL))
+        return(list( tile = tiles, tileH = tileH, tileV = tileV, extent = NULL, system = system, target=NULL ))
     }
 
         
@@ -187,7 +190,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (inherits(extent, "map")) # if MAP
     {
-        if (require(maptools))
+        if (require(maptools) & system == "MODIS")
         {
             extent <- map2SpatialPolygons(extent, extent$names,CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
             isPoly <- TRUE            
@@ -204,8 +207,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         resolution <- res(extent)
         ext        <- extent(extent)
             
-        # TODO a more trustful check than %in%!
-        if (!t_srs %in% c("+proj=longlat +datum=WGS84","+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs") | !isLonLat(extent)) 
+        # Is this grep query right to catch LatLon wgs84? are there other latlons?
+        if (length(grep(t_srs,pattern="+proj=longlat"))==0 | !isLonLat(extent)) 
         { 
             if (! require(rgdal) )
             {
@@ -219,13 +222,11 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             proj4string(xy) <- CRS(t_srs)
             outBB  <- spTransform(xy,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))@bbox
             extent <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
-            target <- list(t_srs = t_srs, extent = ext, resolution = resolution) 
-              
         } else
         {
             extent <- ext
-            target <- list(t_srs=t_srs, extent= extent, resolution = resolution) 
         }
+        target <- list(t_srs = t_srs, extent = ext, resolution = resolution) 
     }
 
     if (inherits(extent,"SpatialPolygonsDataFrame") & old)
@@ -245,7 +246,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (inherits(extent,"Extent"))
     {
-    # every input extent information (except "SpatialPolygonsDataFrame" & old == TRUE) should merge to a "raster:::extent" object, evaluated here below. Buffer is not applicable on "SpatialPolygonsDataFrame".  
+    # every input extent information (except "SpatialPolygonsDataFrame" & old == TRUE)
+    # should merge to a "raster:::extent" object, evaluated here below.
          
     # if min/max is inverted
         Txmax <- max(extent@xmin,extent@xmax)
@@ -278,21 +280,20 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             warning(paste("'buffer' on a vector object must have length==1. Used only the first element of 'buffer': ",buffer,sep=""))
         }
         
+        # gBuffer doesn't allow buffer on LatLon, fake CRS bypass this. Found in: 
+        # http://stackoverflow.com/questions/9735466/how-to-compute-a-line-buffer-with-spatiallinesdataframe
         win <- options()$warn 
         options(warn=-2)
         inproj <- proj4string(extent)
         proj4string(extent) <- CRS("+init=epsg:3395")
         extent <- gBuffer(extent,width=buffer)
         proj4string(extent) <- CRS(inproj)
-        
         options(warn=win)
-         
     }
     
     if(old)
     {
-        
-        if (toupper(system) == "SRTM") 
+        if (system == "SRTM") 
         {
             if (extent@ymin >  60){stop("Latitudes are higer than SRTM coverage! Select an area inside Latitudes -60/+60\n")}
             if (extent@ymax < -60){stop("Latitudes are lower than SRTM coverage! Select an area inside Latitudes -60/+60\n")}
@@ -300,10 +301,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             if (extent@ymax >  60){extent@ymax <-  60;  warning("Maximum Latitude is out of SRTM coverage, extent is trimmed to max LAT 60\n")}
         }
         
-        minTile <- subset(tiltab, (tiltab$xmin <= extent@xmin & tiltab$xmax >= extent@xmin) & (tiltab$ymin <= extent@ymin & tiltab$ymax >= extent@ymin))[,c("iv","ih")]
+        # minTile <- subset(tiltab, (tiltab$xmin <= extent@xmin & tiltab$xmax >= extent@xmin) & (tiltab$ymin <= extent@ymin & tiltab$ymax >= extent@ymin))[,c("iv","ih")]
+        minTile <- tiltab[((tiltab$xmin <= extent@xmin & tiltab$xmax >= extent@xmin) & (tiltab$ymin <= extent@ymin & tiltab$ymax >= extent@ymin)),c("iv","ih")]
         minTile <- c(min(minTile$iv), min(minTile$ih))
         
-        maxTile <- subset(tiltab, (tiltab$xmin <= extent@xmax & tiltab$xmax >= extent@xmax) & (tiltab$ymin <= extent@ymax & tiltab$ymax >= extent@ymax))[,c("iv","ih")]
+        # maxTile <- subset(tiltab, (tiltab$xmin <= extent@xmax & tiltab$xmax >= extent@xmax) & (tiltab$ymin <= extent@ymax & tiltab$ymax >= extent@ymax))[,c("iv","ih")]
+        maxTile <- tiltab[((tiltab$xmin <= extent@xmax & tiltab$xmax >= extent@xmax) & (tiltab$ymin <= extent@ymax & tiltab$ymax >= extent@ymax)),c("iv","ih")]
         maxTile <- c(max(maxTile$iv), max(maxTile$ih))
             
         tileV <- as.vector(minTile[1]:maxTile[1])
@@ -326,7 +329,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         
         for (i in seq(along = tileH)) 
         {
-            if (toupper(system) == "SRTM")
+            if (system == "SRTM")
             {
                 tiles[[i]] <- paste("_", sprintf(paste("%0", hsize, "d", sep = ""), tileH[i]), "_", sprintf(paste("%0", hsize, "d", sep = ""), tileV), sep = "")
             } else 

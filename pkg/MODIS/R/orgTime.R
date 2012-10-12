@@ -2,7 +2,7 @@
 # Date : August 2012
 # Licence GPL v3
 
-orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16,format="%Y%j")
+orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16,format="%Y%j")
 {
 
     if (inherits(files,"Raster"))
@@ -52,7 +52,13 @@ orgTime <- function(files,nDays=16,begin=NULL,end=NULL,pillow=75,pos1=10,pos2=16
         warning("'end' + 'pillow' is later by, ",as.numeric(maxData - max(inputLayerDates)) ," days, than the available input dates!")
     }
 
-    # equalise the in and out "doys"
+    if (nDays=="asIn")
+    {
+        nDays <- c(as.numeric(inputLayerDates),0) - (c(0,as.numeric(inputLayerDates))-1)
+        nDays <- as.numeric(names(which.max(table(nDays[c(-1,-length(nDays))]))))[1]-1
+    }
+ 
+    # equalise the in and out "doys"    
     outputLayerDates <- seq(minCalc,maxCalc,by=nDays)
     
     t0     <- min(outputLayerDates,inputLayerDates)
