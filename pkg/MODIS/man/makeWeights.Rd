@@ -11,7 +11,7 @@ This function applies \code{bitMask} and \code{bitShiftR} from package bitops to
 }
 
 \usage{
-makeWeights(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,...)
+makeWeights(x, bitShift=2, bitMask=15, threshold=NULL, filename='', decodeOnly=FALSE,...)
 }
 
 \arguments{

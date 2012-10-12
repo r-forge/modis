@@ -100,12 +100,25 @@ clFun <- function(l)
     if (!is.null(w))
     {
         wtu <- getValues(w, row=tr$row[l], nrows=tr$nrows[l])
+        
+        # is it a weight info?
+        if(max(wtu) > 1)
+        {
+            bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+            
+            if(is.null(bits))
+            {
+                stop("Could not extract 'bits' for weighting from this product. Use 'makeWeights' function to generate weightings manualy!")
+            }
+            wtu  <- makeWeights(wtu, bitShift = bits$bitShift, bitMask = bits$bitMask, decodeOnly = TRUE)
+        }
         set0[wtu==0] <- TRUE
+
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
     }
-    
+     
     if (inherits(t,"Raster"))
     {
         inTu  <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])

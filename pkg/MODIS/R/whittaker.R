@@ -98,33 +98,29 @@ clFun <- function(l)
 {
     # TODO
     minval      <- -2000
-    bitShift    <-  2 
-    bitMask     <- 15
-    bitTreshold <-  6
     
     val    <- getValues(vi, row=tr$row[l], nrows=tr$nrows[l])
     mtrdim <- dim(val)
     set0   <- val <= minval
     set0[is.na(val)] <- TRUE
-
     
     if (!is.null(w))
     {
-
-        require(bitops)
         wtu <- getValues(w, row=tr$row[l], nrows=tr$nrows[l])
-        set0[wtu==0] <- TRUE
-        wtu <- bitAnd(bitShiftR(wtu, bitShift ), bitMask)
         
-        if(!is.null(bitTreshold))
+        # is it a weight info?
+        if(max(wtu) > 1)
         {
-            set0[wtu > bitTreshold] <- TRUE
+            bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+            
+            if(is.null(bits))
+            {
+                stop("Could not extract 'bits' for weighting from this product. Use 'makeWeights' function to generate weightings manualy!")
+            }
+            wtu  <- makeWeights(wtu, bitShift = bits$bitShift, bitMask = bits$bitMask, decodeOnly = TRUE)
         }
-        
-        # turn upsidedown wtu values
-        wtu <- ((-1) * (wtu - bitMask))/bitMask # bitMask is the maximum possible value in the VI Qual Mask in MODIS: "1111" 
-        wtu <- matrix(wtu,nrow=mtrdim[1],ncol=mtrdim[2])
-        
+        set0[wtu==0] <- TRUE
+
     } else
     {
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])

@@ -2,7 +2,7 @@
 # Date : October 2012
 # Licence GPL v3
 
-makeWeights <- function(x, bitShift, bitMask, threshold=NULL, filename='', decodeOnly=FALSE,...)
+makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', decodeOnly=FALSE,...)
 {
     if (inherits(x,"Raster"))
     {
@@ -32,7 +32,9 @@ makeWeights <- function(x, bitShift, bitMask, threshold=NULL, filename='', decod
             if (!decodeOnly)
             {
                 # turn up side down and scale bits for weighting
-                v <- ((-1) * (v - bitMask))/bitMask      
+                v <- ((-1) * ((v-1) - (bitMask-1)))/bitMask
+                v[v > 1] <- 1
+                v[v < 0] <- 0      
             }
     
             if (!is.null(ve))
@@ -53,14 +55,16 @@ makeWeights <- function(x, bitShift, bitMask, threshold=NULL, filename='', decod
         
         if (!is.null(threshold))
         {
-            # thres <- ((-1) * (threshold - bitMask))/bitMask
             x[x > threshold] <- 0
         }
        
         if (!decodeOnly)
         {
             # turn up side down and scale bits for weighting
-            x <- ((-1) * (x - bitMask))/bitMask      
+            # theoretically best is 0 but the lowest value I have ever noticed is 1! So: (x-1)
+            x <- ((-1) * ((x-1) - bitMask))/bitMask      
+            x[x > 1] <- 1
+            x[x < 0] <- 0
         }
 
         if (!is.null(ve))
@@ -71,8 +75,8 @@ makeWeights <- function(x, bitShift, bitMask, threshold=NULL, filename='', decod
     }
 }    
 
-
-maskWater <- function(QC, bitShift=NULL, bitMask = NULL, maskOut = c(0,5,6),...)
+### maskWater (experimental)
+maskWater <- function(QC, bitShift=NULL, bitMask = NULL, maskOut = c(0,5,6),datatype="INT1U",...)
 {
     if (!inherits(QC,"Raster"))
     {
@@ -85,25 +89,13 @@ maskWater <- function(QC, bitShift=NULL, bitMask = NULL, maskOut = c(0,5,6),...)
         fname    <- filename(QC)        
         prodinfo <- strsplit(fname,"\\.")[[1]][1]
         # test
-        prodinfo <- getProduct(prodinfo)$request
+        bits <- detectBitInfo(prodinfo, what='Land/Water Flag',warn=FALSE)
         
-        try(info <- eval(parse(text=paste("MODIS:::",prodinfo,"_QC",sep=""))),silent=TRUE)
-        if(exists("info"))
-        {
-            water    <- grep(info$LongName,pattern="Land/Water Flag")
-            if (length(water)==1)
-            {
-                cat("Ok 'Land/Water Flag' found, extracting\n")
-                result <- makeWeights(QC, bitShift = info$bitShift[water], bitMask = info$bitMask[water], decodeOnly=TRUE,...)
-            } else 
-            {
-                stop(paste("No 'Land/Water Flag' found, please set it manualy. See: https://lpdaac.usgs.gov/products/modis_products_table/",tolower(prodinfo),sep=""))
-            }
-
-        } else
+        if(is.null(bits))
         {
             stop(paste("No 'Land/Water Flag' found, please set it manualy. See: https://lpdaac.usgs.gov/products/modis_products_table/",tolower(prodinfo),sep=""))
         }
+        result <- makeWeights(QC, bitShift = bits$bitShift, bitMask = bits$bitMask, decodeOnly=TRUE,...)
     } else 
     {
         result <- makeWeights(QC, bitShift = bitShift, bitMask = bitMask, decodeOnly=TRUE,...)
@@ -114,6 +106,52 @@ maskWater <- function(QC, bitShift=NULL, bitMask = NULL, maskOut = c(0,5,6),...)
     }
 return(result)
 }
+
+### detectBitInfo
+detectBitInfo <- function(product,what='all',warn=TRUE)
+{
+    if(inherits(product,"Raster"))
+    {
+        product <- basename(names(product)[1])
+        product <- strsplit(product,"\\.")[[1]][1]
+    }
+    
+    prodinfo <- getProduct(product,quiet=TRUE)$PRODUCT[1]
+    if(is.null(prodinfo))
+    {
+        stop()
+    } 
+    
+    if(exists("info"))
+    {
+        rm(info)
+    }  
+      
+    try(info <- eval(parse(text=paste("MODIS:::",prodinfo,"_QC",sep=""))),silent=TRUE)
+    
+    if(exists("info"))
+    {
+        if(what!='all')
+        {
+            index <- grep(info$LongName,pattern=what)
+            res <- list(bitShift=info[index,"bitShift"],bitMask=info[index,"bitMask"])
+        } else 
+        {
+            res <- info
+        }
+    } else
+    {
+        if(warn)
+        {
+            warning("Could not detect 'bit' information, please provide me the product name you have used so I can enable it!")
+        }
+        res <- NULL
+    }
+return(res)    
+}
+
+
+
 
 
 
