@@ -25,6 +25,4 @@ export("makeWeights")
 
 exportPattern(".+WS$")
 
-#useDynLib(MODIS)
-
 

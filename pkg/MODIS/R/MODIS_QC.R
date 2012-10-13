@@ -37,17 +37,42 @@ MYD09GA_QC <- data.frame(
 
 ########### M.D11
 
-MOD11C2_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
 
-MYD11C2_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
+MOD11A1_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MYD11A1_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MOD11A2_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MYD11A2_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MOD11B1_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MYD11B1_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
 
 MOD11C1_QC <- data.frame(
         LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
@@ -60,30 +85,38 @@ MYD11C1_QC <- data.frame(
         bitShift=c(0,2,4,6),
         bitMask=c(3,3,3,3)
     )
-    
-MOD11A1_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
 
-MYD11A1_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
-    
-MOD11A2_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
+MOD11C2_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
 
-MYD11A2_QC <- data.frame(
-        LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
-        bitShift=c(0,2,4,6),
-        bitMask=c(3,3,3,3)
-    )
+MYD11C2_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MOD11C3_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+MYD11C3_QC <- data.frame(
+  LongName=c("Mandatory QA flag", "Data quality flag", "Emissivity error flag", "LST error flag"), 
+  bitShift=c(0,2,4,6),
+  bitMask=c(3,3,3,3)
+)
+
+############ MCD12
+
+MCD12C1_QC <- data.frame(
+  LongName=c("Mandatory QA", "Quarters since updated", "Land/Water"), 
+  bitShift=c(0,2,4),
+  bitMask=c(3,3,15)
+)
 
 ############ M.D13
 
@@ -144,4 +177,11 @@ MOD13A3_QC <- data.frame(
         bitMask=c(3,15,3,1,1,1,7,1,1)
     )
 
+#### MOD 15
 
+MCD15A2_QC <- data.frame(
+  LongName=c("MODLAND_QC bits", "Sensor", "DeadDetector", "CloudState (inherited from Aggregate_QC bits {0,1} cloud state)",
+             "SCF_QC (five level confidence score)", 
+  bitShift=c(0,1,2,3,5),
+  bitMask=c(1,1,1,3,7)
+)
