@@ -181,7 +181,7 @@ MOD13A3_QC <- data.frame(
 
 MCD15A2_QC <- data.frame(
   LongName=c("MODLAND_QC bits", "Sensor", "DeadDetector", "CloudState (inherited from Aggregate_QC bits {0,1} cloud state)",
-             "SCF_QC (five level confidence score)", 
+             "SCF_QC (five level confidence score)"), 
   bitShift=c(0,1,2,3,5),
   bitMask=c(1,1,1,3,7)
 )
