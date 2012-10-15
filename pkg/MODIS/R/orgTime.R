@@ -19,7 +19,8 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     {
         minCalc <- datLim$begin
         minTheo <- minCalc - pillow
-        minData <- max(allDates[allDates <= minTheo])
+        minData <- max(allDates[allDates <= minTheo],min(allDates))
+   
     } else 
     {
         minTheo <- minCalc <- minData <- min(allDates)
@@ -29,7 +30,7 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     {
         maxCalc <- datLim$end
         maxTheo <- (maxCalc + pillow)
-        maxData <- min(allDates[allDates >= maxTheo])
+        maxData <- min(allDates[allDates >= maxTheo],max(allDates))
     } else 
     {
         maxTheo <- maxCalc <- maxData <- max(allDates)
@@ -44,22 +45,21 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
             warning("'begin' - 'pillow' is earlier by, ",as.numeric(minData - minTheo) ," days, than the available input dates!\nPillow at the start of the time serie is reduced")
         } else if (minCalc == minData)
         {      
-            warning("Is is not possible to use the pillow at the begin of the time serie!")
+            warning("Is is not possible to use the pillow at the begin of the time series since there is no data available!")
         }
     }
-    if (maxTheo > maxData) # TODO check and enhance the warning!
+    if (maxTheo > maxData)
     {
         warning("'end' + 'pillow' is later by, ",as.numeric(maxData - max(inputLayerDates)) ," days, than the available input dates!")
     }
 
     if (nDays=="asIn")
     {
-        nDays <- c(as.numeric(inputLayerDates),0) - (c(0,as.numeric(inputLayerDates))-1)
-        nDays <- as.numeric(names(which.max(table(nDays[c(-1,-length(nDays))]))))[1]-1
+        outputLayerDates <- inputLayerDates[datLim$begin <= inputLayerDates & datLim$end > inputLayerDates]
+    } else 
+    {
+        outputLayerDates <- seq(minCalc,maxCalc,by=nDays)
     }
- 
-    # equalise the in and out "doys"    
-    outputLayerDates <- seq(minCalc,maxCalc,by=nDays)
     
     t0     <- min(outputLayerDates,inputLayerDates)
     inSeq  <- as.numeric(inputLayerDates - t0+1)
