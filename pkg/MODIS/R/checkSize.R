@@ -2,7 +2,7 @@
 # Date : Oktober 2012
 # Licence GPL v3
 
-checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.getDef('localArcPath'))
+checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", localArcPath=.getDef('localArcPath'))
 {
     # 4 debug
     # quiet=FALSE;dlmethod="auto";stubbornness="low";localArcPath=MODIS:::.getDef('localArcPath'); u=1;j=1
@@ -109,7 +109,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
             {
                 server   <- names(path$remotePath)[j]
                 try(info <- read.table(list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE),header=TRUE),silent=TRUE)
-                isOK     <- MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)
+                isOK     <- MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""), sizeInfo=info, flexB = flexB)
                 
                 if (is.null(isOK$isOK))
                 {
@@ -140,7 +140,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                 {               
                     server   <- names(path$remotePath)[j]
                     try(info <- read.table(list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE),header=TRUE),silent=TRUE)
-                    isOK     <- MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)
+                    isOK     <- MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info, flexB = flexB)
 
                     cat("  Size Error detected for ",avFiles[u],"\nFileSize is ", isOK$FileSize,", but should be: ",isOK$MetaSize,"\n",sep="")
                 
@@ -157,7 +157,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                             mode='wb', method=dlmethod, quiet=FALSE, cacheOK=FALSE)
                         ,silent=TRUE)
                         
-                        if (MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)$isOK)
+                        if (MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)$isOK,flexB = flexB)
                         {
                             hdf <- 0
                         }

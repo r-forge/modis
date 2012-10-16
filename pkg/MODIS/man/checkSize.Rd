@@ -12,7 +12,7 @@ The expected filesize is determined by listening file size infomration on the FT
 }
 
 \usage{
-checkSize(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.getDef('localArcPath'))
+checkSize(HdfName, flexB = 0, dlmethod = "auto", stubbornness = "low", localArcPath=.getDef('localArcPath'))
 }
 
 \arguments{
@@ -20,11 +20,10 @@ checkSize(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.getDef('loca
 \item{HdfName}{Character. MODIS-hdf filename or a pattern (regular expression) to check
   locally. If \code{HdfName} is not provided all found
   MODIS GRID files are gathered inside the \code{LocalArcPath}}
+\item{flexB}{positive integer. Rigor of the file size check in _Bites_}
 \item{dlmethod}{Default \code{"auto"}. Argument is passed to \code{?download.file} if it is called!}
 \item{stubbornness}{Character or numeric. Default \code{extreme}. See: code{?getHdf}}
-\item{localArcPath}{Character. Is the path to look recursively for MODIS-HDF files. default is \code{MODIS:::.getDef('localArcPath')} If \code{HdfName} is not set, all underlaying MODIS-HDF files
-  are checked for the XML file presence. If not available locally the
-  are checked.}
+\item{localArcPath}{Character. Is the path to look recursively for MODIS-HDF files. default is \code{MODIS:::.getDef('localArcPath')} If \code{HdfName} is not set, all underlaying MODIS-HDF files are checked.}
 }
 
 \value{
@@ -41,11 +40,12 @@ checkSize(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.getDef('loca
 
 \examples{
 \dontrun{
-# checks all HDF files under MODIS:::.getDef('localArcPath')
-checkSize()
-
+# only local available files are checked!
 # check all MODIS Terra Vegetation Indices 250 m (13Q1)
 checkSize(HdfName="MOD13Q1*")
+
+# checks all HDF files under MODIS:::.getDef('localArcPath')
+checkSize()
 
 # check for a single file
 chekSize(HdfName="MYD09GA.A2011002.h19v05.005.2011007211429.hdf")
