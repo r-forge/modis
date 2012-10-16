@@ -22,7 +22,7 @@ whittaker.raster(vi,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=50
   \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years. If \code{FALSE} a overall rasterBrick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="6"), it is not adapted to the time serie length but used as a fixed value (see deteils). High values = stiff/rigid spline} 
-  \item{nIter}{Number of iteration for the upper envelope ...(TODO) }   
+  \item{nIter}{Number of iteration for the upper envelope fitting.}   
   \item{outPath}{Output path default is the current directory.}   
 } 
 
