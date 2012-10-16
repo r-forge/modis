@@ -157,7 +157,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                             mode='wb', method=dlmethod, quiet=FALSE, cacheOK=FALSE)
                         ,silent=TRUE)
                         
-                        if (MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)$isOK,flexB = flexB)
+                        if (MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""), sizeInfo = info, flexB = flexB)$isOK)
                         {
                             hdf <- 0
                         }
