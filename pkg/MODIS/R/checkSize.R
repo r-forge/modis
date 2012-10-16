@@ -136,7 +136,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
             } else
             {
     
-                for(j in which(onS==-1))
+                for(j in which(onS==0))
                 {               
                     server   <- names(path$remotePath)[j]
                     try(info <- read.table(list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE),header=TRUE),silent=TRUE)
