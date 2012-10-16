@@ -60,6 +60,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
             
             Sinfo <- seq_along(path$remotePath)
             refFile <- rep(0,length(Sinfo))
+            
             # first get information from all servers
             for(j in Sinfo)
             {
@@ -79,7 +80,6 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                     for (g in 1:20)
                     {
                         remoteInfo <- NULL
-                        #cat(paste(path$remotePath[j],"/",avFiles[u],sep=""),"\n")
                         try(remoteInfo <- MODIS:::filesUrl(paste(path$remotePath[j],"/",sep="")),silent=TRUE)
                         
                         if(!is.null(remoteInfo$fileNames))
@@ -87,7 +87,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                             break
                         } else 
                         {
-                            cat("Server refused, retry",g+1,"       \r")
+                            cat("Server refused, retry",g,"       \r")
                         }
                     }                    
                     
@@ -132,7 +132,7 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
             } else if (sum(onS==-1)==length(onS))
             {
                 cat("Chould not determine expected filesize!\n")
-                # TODO try to open the file...ik ok it is probebly ok
+                # TODO try to open the file...if opens, filesize is probably ok
             } else
             {
     
@@ -150,8 +150,8 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                         if(g==1) cat("Getting HDF file from:",server,"\n")
     
                         hdf=1
-                        #cat(paste(path$remotePath[j],"/",avFiles[u],sep=""),"\n")
-                        try(hdf <- download.file( ## hdf file
+
+                        try(hdf <- download.file(
                             paste(path$remotePath[j],"/",avFiles[u],sep=""),
                             destfile=paste(path$localPath, "/",avFiles[u],sep=""),
                             mode='wb', method=dlmethod, quiet=FALSE, cacheOK=FALSE)
