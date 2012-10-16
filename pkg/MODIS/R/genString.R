@@ -76,7 +76,7 @@
        
                 stringX <- opts[[e]]
                 
-                if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content) 
+                if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {
                     n=n+1                    
                     if(is.null(stringX$variablepath))
@@ -164,8 +164,9 @@
             for (e in Hmany)
             {
                 stringX <- opts[[e]]
-
-                if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
+                
+                # if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
+                if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {
                     struc <- stringX$variablepath    
                     tempString <- strsplit(struc,"/")[[1]]

@@ -70,7 +70,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                 while(g <= sturheit) 
                 {
                     if (g==1){qi <- quiet} else { qi <- TRUE}
-                    try(xml <- getXml(HdfName = HdfName[i],checkSize=TRUE,wait=wait,quiet=qi,dlmethod=dlmethod))
+                    try(xml <- checkSize(HdfName = HdfName[i],quiet=qi,dlmethod=dlmethod))
                     if(sum(xml)==0) {break}
                     g=g+1
                 }
@@ -167,7 +167,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             isOK <- TRUE
             if (file.exists(paste(path$localPath,"/",files[d],sep="")))
             {
-                isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)$isOK # flexB!
+                isOK <- MODIS:::.checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
             }
             if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK)
             {
@@ -190,7 +190,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                     )
                     if (hdf==0) 
                     {
-                        SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",SizeInfo=sizes,flexB=50000)
+                        SizeCheck <- MODIS:::.checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",sizeInfo=sizes,flexB=50000)
                         if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
                     }
                     if(hdf==0 & !quiet) 
@@ -408,7 +408,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                             for (g in 1:sturheit)
                             { 
                                 try(
-                                xmlIn <- getXml(paste(path$localPath,"/",dates[[l]][i,-1],sep=""))
+                                xmlIn <- checkSize(paste(path$localPath,"/",dates[[l]][i,-1],sep=""))
                                 ,silent=TRUE)
                                 if(sum(xmlIn)==0) 
                                 {

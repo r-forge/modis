@@ -1,6 +1,7 @@
 
 tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"), header=TRUE)
-#MODIS_Products <- read.table(system.file("external", "MODIS_Products.txt", package="MODIS"), header=TRUE)
+
+# save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes
 load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
 # central setting for stubbornness 
@@ -33,26 +34,33 @@ file.size <- function(file,units="B")
     return(res)
 }
 
-.checksizefun <- function(file,type="MODIS",SizeInfo=NULL,flexB=0)
+.checksizefun <- function(file,sizeInfo=NULL,flexB=0)
 {
     # determine reference size
-    if (type=="MODIS")
+    if (is.null(sizeInfo))
     {
-        if (! require(XML)) 
+
+        if (!require(XML)) 
         {
             stop("You need to install the 'XML' package: install.packages('XML')")
         }
-
         xmlfile  <- paste(file,".xml",sep="")
         xmlfile  <- xmlParse(xmlfile)
         MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
         MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
+
     } else 
     {
-        MetaSize <- as.numeric(SizeInfo[which(SizeInfo[,1]==basename(file)),2])
+        MetaSize <- as.numeric(sizeInfo[which(sizeInfo[,1]==basename(file)),2])
     }
     
-    FileSize <- file.size(file)
+    if(length(MetaSize)==0)
+    {
+        res  <- list(MetaSize=NULL,FileSize=NULL,isOK=NULL)    
+        return(res)    
+    }
+    
+    FileSize <- as.numeric(file.size(file))
     if (flexB!=0)
     {
         isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB)     
@@ -60,8 +68,7 @@ file.size <- function(file,units="B")
     {
         isOK <- (MetaSize == FileSize)
     }
-    res  <- list(MetaSize,FileSize,isOK)    
-    names(res) <- c("MetaSize","FileSize","isOK")
+    res  <- list(MetaSize=MetaSize,FileSize=FileSize,isOK=as.logical(isOK))    
 return(res)    
 }
 
@@ -377,27 +384,40 @@ listPather <- function(x,index)
 # list files in a Url
 filesUrl <- function(url)
 {
-            require(RCurl)
-            getlist <- getURL(url) 
-            getlist <- strsplit(getlist, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
-            return(unlist(lapply(strsplit(getlist," "),function(x){x[length(x)]})))
-
+    require(RCurl)
+    getlist <- getURL(url) 
+    getlist <- strsplit(getlist, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+    
+    getlist <- strsplit(getlist," ")
+    elim    <- grep(getlist,pattern="total")
+    if(length(elim)==1)
+    {
+        getlist <- getlist[-elim]
+    }
+    fnames  <- sapply(getlist,function(x){x[length(x)]})
+    size    <- sapply(getlist,
+                    function(x)
+                    { # filesize is one befor month info
+                        x[
+                        which(x %in% c("Jan", "Feb", "Mar", "Apr", "May",
+                        "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")==TRUE)-1
+                        ]
+                    })
+    return(data.frame(fileNames=fnames,fileSize=size))
 }
 
 # create a stack file without file checks (extent etc)
 # suggested by Robert J. Hijmans 
 
-	fastStack <- function(files)
-	{
-		r  <- raster(files[1])
-		ln <- extension(basename(files), '')
-		s  <- stack(raster(r))
-		s@layers <- sapply(seq_along(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
-		#s@file@name <- ln
-		return(s)
-	}
+fastStack <- function(files)
+{
+    r  <- raster(files[1])
+    ln <- extension(basename(files), '')
+    s  <- stack(raster(r))
+    s@layers <- sapply(seq_along(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
+    return(s)
+}
  
-
 
 
 

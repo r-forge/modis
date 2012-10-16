@@ -6,7 +6,17 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
 {
     # debug:
     # extent = "austria"; tileH = NULL; tileV = NULL; buffer = NULL; system = "srtm"; zoom=TRUE
-
+    
+    # if extent is a former result of getTile
+    if (is.list(extent))
+    {
+        if(!is.null(extent$tile))
+        {
+            return(extent)
+        }    
+    
+    }
+    
     old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
     target <- NULL  # if extent is a raster* and has a different proj it is changed
     isPoly <- FALSE
