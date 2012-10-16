@@ -111,17 +111,18 @@ checkSize <- function(HdfName, dlmethod="auto",stubbornness="low",localArcPath=.
                 try(info <- read.table(list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE),header=TRUE),silent=TRUE)
                 isOK     <- MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""),sizeInfo=info)
                 
-                if (isTRUE(isOK$isOK))
+                if (is.null(isOK$isOK))
+                {
+                    onS[j] <- -1                
+                }
+                else if (isTRUE(isOK$isOK))
                 {
                     onS <- 1
                     islocal[u] <- TRUE
                     break
-                } else if (isOK$isOK==FALSE)
-                {
-                    onS[j] <- 0
                 } else
                 {
-                    onS[j] <- -1
+                    onS[j] <- 0
                 }        
             }
             
