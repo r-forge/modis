@@ -19,7 +19,7 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     {
         minCalc <- datLim$begin
         minTheo <- minCalc - pillow
-        minData <- max(allDates[allDates <= minTheo],min(allDates))
+        minData <- min(allDates[allDates >= minTheo])
    
     } else 
     {
@@ -30,7 +30,7 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     {
         maxCalc <- datLim$end
         maxTheo <- (maxCalc + pillow)
-        maxData <- min(allDates[allDates >= maxTheo],max(allDates))
+        maxData <- max(allDates[allDates <= maxTheo])
     } else 
     {
         maxTheo <- maxCalc <- maxData <- max(allDates)
