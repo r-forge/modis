@@ -66,18 +66,22 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
             {
                 server   <- names(path$remotePath)[j]
                 infofile <- list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE)
-                getIt    <- length(infofile)==0
-                                
+
+                if(length(infofile) != 1) # if 0 then no file available, if>1 multiple files avalable, so delete them and take a new one
+                {
+                    getIt <- TRUE
+                }
                 if (!getIt)
                 {  
-                   getIt <- as.numeric(file.size(infofile)) < 14000
+                    getIt <- (as.numeric(file.size(infofile)) < 8000)
                 }
                 
                 if(getIt)
                 { 
+                    unlink(infofile) # if get it remove all possible older version
                     cat("Getting information from",server,"          \r")
                     
-                    for (g in 1:20)
+                    for (g in 1:25)
                     {
                         remoteInfo <- NULL
                         try(remoteInfo <- MODIS:::filesUrl(paste(path$remotePath[j],"/",sep="")),silent=TRUE)
