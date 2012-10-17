@@ -131,7 +131,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                 cat("FileSize OK:",avFiles[u],"\n")
             } else if (sum(onS==-1)==length(onS))
             {
-                cat("Chould not determine expected filesize of:",avFiles[u],"\n")
+                cat("Could not determine expected filesize of:",avFiles[u],"\n")
                 # TODO try to open the file...if opens, filesize is probably ok
             } else
             {
