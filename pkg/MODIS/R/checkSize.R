@@ -66,11 +66,15 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
             {
                 server   <- names(path$remotePath)[j]
                 infofile <- list.files(path=path$localPath,pattern=paste(server,"_*",sep=""),full.names=TRUE)
-
+                
                 if(length(infofile) != 1) # if 0 then no file available, if>1 multiple files avalable, so delete them and take a new one
                 {
                     getIt <- TRUE
+                } else 
+                {
+                    getIt <- FALSE
                 }
+                
                 if (!getIt)
                 {  
                     getIt <- (as.numeric(file.size(infofile)) < 8000)
