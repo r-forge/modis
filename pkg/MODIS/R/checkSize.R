@@ -87,7 +87,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                             break
                         } else 
                         {
-                            cat("Server refused, retry",g,"       \r")
+                            cat("Server refuses, retry",g,"       \r")
                         }
                     }                    
                     
