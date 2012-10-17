@@ -131,8 +131,11 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                 cat("FileSize OK:",avFiles[u],"\n")
             } else if (sum(onS==-1)==length(onS))
             {
-                cat("Could not determine expected filesize of:",avFiles[u],"\n")
-                # TODO try to open the file...if opens, filesize is probably ok
+                cat("Could not determine expected filesize of:",avFiles[u],"\nUpdating to remote file.\n")
+                unlink(paste(path$localPath,avFiles[u],sep="/"))
+                getHdf(product = product, tileH = substring(product$TILE,2,3),
+                    tileV=substring(product$TILE,5,6), begin=fdate, end=fdate,
+                    collection=collection, checkSize=TRUE)
             } else
             {
     
