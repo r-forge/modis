@@ -17,40 +17,48 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     
     if (!is.null(begin))
     {
-        minCalc <- datLim$begin
-        minTheo <- minCalc - pillow
-        minData <- min(allDates[allDates >= minTheo])
+        minOUT  <- datLim$begin
+        minIN   <- minOUT - pillow
+        minHAVE <- min(allDates[allDates >= minIN])
+        if (nDays=="asIn")
+        {
+            minIN <- minHAVE
+        }
    
     } else 
     {
-        minTheo <- minCalc <- minData <- min(allDates)
+        minIN <- minOUT <- minHAVE <- min(allDates)
     }
 
     if (!is.null(end))
     {
-        maxCalc <- datLim$end
-        maxTheo <- (maxCalc + pillow)
-        maxData <- max(allDates[allDates <= maxTheo])
+        maxOUT  <- datLim$end
+        maxIN   <- maxOUT + pillow
+        maxHAVE <- max(allDates[allDates <= maxIN])
+        if (nDays=="asIn")
+        {
+            maxIN <- maxHAVE
+        }
     } else 
     {
-        maxTheo <- maxCalc <- maxData <- max(allDates)
+        maxIN <- maxOUT <- maxHAVE <- max(allDates)
     }
     
-    inputLayerDates <- allDates[allDates >= minData & allDates <= maxData]
+    inputLayerDates <- allDates[allDates >= minHAVE & allDates <= maxHAVE]
 
-    if (minTheo < minData)
+    if (minIN < minHAVE)
     {
-        if (as.numeric(minData - minTheo) >= pillow)
+        if (as.numeric(minHAVE - minIN) >= pillow)
         {
-            warning("'begin' - 'pillow' is earlier by, ",as.numeric(minData - minTheo) ," days, than the available input dates!\nPillow at the start of the time serie is reduced")
-        } else if (minCalc == minData)
+            warning("'begin' - 'pillow' is earlier by, ",as.numeric(minHAVE - minIN) ," days, than the available input dates!\nPillow at the start of the time serie is reduced")
+        } else if (minOUT == minHAVE)
         {      
             warning("Is is not possible to use the pillow at the begin of the time series since there is no data available!")
         }
     }
-    if (maxTheo > maxData)
+    if (maxIN > maxHAVE)
     {
-        warning("'end' + 'pillow' is later by, ",as.numeric(maxData - max(inputLayerDates)) ," days, than the available input dates!")
+        warning("'end' + 'pillow' is later by, ",as.numeric(maxHAVE - max(inputLayerDates)) ," days, than the available input dates!")
     }
 
     if (nDays=="asIn")
@@ -58,7 +66,7 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
         outputLayerDates <- inputLayerDates[datLim$begin <= inputLayerDates & datLim$end > inputLayerDates]
     } else 
     {
-        outputLayerDates <- seq(minCalc,maxCalc,by=nDays)
+        outputLayerDates <- seq(minOUT,maxOUT,by=nDays)
     }
     
     t0     <- min(outputLayerDates,inputLayerDates)
