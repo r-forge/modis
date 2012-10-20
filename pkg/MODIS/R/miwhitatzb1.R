@@ -59,23 +59,23 @@ miwhitatzb2 <- function(orgTS,w=NULL, l=10, f=2, minval=-3000, maxval=10000, min
     orgTS[orgTS > maxval] <- NA
 	orgTS[orgTS < minval] <- NA
   
-  # prepare weights
-  if (is.null(w))
-  {
-    w <-  orgTS * 0 + 1
-  } 
-  nas <- is.na(orgTS)
-  w[nas]     <- 0 
-  orgTS[nas] <- 0 # whit1() does not accept NAs !!! but value will be ignored because of miw
-  
-  for(i in 1:maxiter)
-  {
-    filteredTS <- whit2(orgTS,w=w,lambda=l)
-    #The modification according to whittaker_smoother.m:
-    #"Finds x positions were measured values are lower than the fitted
-    #values. These positions are than set to the fitted values at these places"
-    orgTS[orgTS<filteredTS] <- filteredTS[orgTS<filteredTS]
-  }
+    # prepare weights
+    if (is.null(w))
+    {
+      w <-  orgTS * 0 + 1
+    } 
+    nas <- is.na(orgTS)
+    w[nas]     <- 0 
+    orgTS[nas] <- 0 # whit1() does not accept NAs !!! but value will be ignored because of miw
+    
+    for(i in 1:maxiter)
+    {
+        filteredTS <- whit2(orgTS,w=w,lambda=l)
+        #The modification according to whittaker_smoother.m:
+        #"Finds x positions were measured values are lower than the fitted
+        #values. These positions are than set to the fitted values at these places"
+        orgTS[orgTS<filteredTS] <- filteredTS[orgTS<filteredTS]
+    } 
   
 	# All filtered values lower than minval or larger than maxval are set to
 	# these limits

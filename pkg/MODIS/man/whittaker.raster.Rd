@@ -12,7 +12,7 @@ This function uses a modified whittaker filter function (see references) from pa
 
 \usage{
 whittaker.raster(vi,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5,
- outPath ="./")
+ outPath ="./", ...)
 }
 
 \arguments{
@@ -21,9 +21,10 @@ whittaker.raster(vi,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=50
   \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames.} 
   \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years. If \code{FALSE} a overall rasterBrick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
-  \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="6"), it is not adapted to the time serie length but used as a fixed value (see deteils). High values = stiff/rigid spline} 
+  \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="600"), it is not adapted to the time serie length but used as a fixed value (see details). High values = stiff/rigid spline} 
   \item{nIter}{Number of iteration for the upper envelope fitting.}   
   \item{outPath}{Output path default is the current directory.}   
+  \item{...}{Arguments passed to ?writeRaster (except filename ist automatic), NAflag, datatype, overwrite,..., and if }   
 } 
 
 \details{
@@ -75,22 +76,21 @@ vi <- preStack(path=path, pattern="*_NDVI.tif$")
   
 timeInfo <- orgTime(vi,nDays=16,begin="2005001",end="2005365",pillow=40)
 
-# now re-run "preStack" with two diferences, 'files' (output of the first 'preStack' call. and the 'timeInfo'
-# Here only the data needed for the filtering is extractet:
+# now re-run "preStack" with two differences, 'files' (output of the first 'preStack' call. and the 'timeInfo'
+# Here only the data needed for the filtering is extracted:
 vi <- preStack(files=vi,timeInfo=timeInfo)
 
-# For speedup try (Sometimes problematic on Win7): 
+# For speedup try (On some Win7 problematic): 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
 system.time(whittaker.raster(vi,timeInfo=timeInfo,lambda=1000))
 
-# Doesn't works in version 0.5-0!
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 # can also be already stacked:
 inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)) 
 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
-system.time(whittaker.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,lambda=1000))
+system.time(whittaker.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,lambda=1000,overwrite=TRUE))
 
 }
 }

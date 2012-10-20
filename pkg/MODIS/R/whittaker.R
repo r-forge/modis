@@ -3,15 +3,24 @@
 # Licence GPL v3
 
 # maybe to add: derivate=2
-whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./")
+whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./",...)
 {
-    
-    dir.create(outPath,showWarnings=FALSE)
+    # debug 
+    # w=wt; t=inT; groupYears=TRUE; lambda = 500; nIter= 5; outPath = "./"
+    # args <- list(bitShift=2,bitMask=15,threshold=6)
+    # args <- list()
+    args <- list(...)
+    assign("bitShift",args$bitShift)
+    assign("bitMask",args$bitMask)
+    assign("threshold",args$threshold)
+    assign("NAflag",args$NAflag)
+       
+    dir.create(outPath,recursive=TRUE,showWarnings=FALSE)
     outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
 
     if(!require(ptw))
     {
-        stop("For using the whittaker filter please install the package: install.package('ptw')") 
+        stop("For using the the whittaker filter please install the package: install.package('ptw')") 
     }
     
     if(!inherits(vi,"Raster")) 
@@ -45,10 +54,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     }
     
     lambda <- as.numeric(lambda)
-    
-    #TEMP
-    NAflag=-10000
-    
+
     b <- list()
     if (groupYears)
     {
@@ -56,25 +62,39 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             b[[a]] <- brick(raster(vi),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""),...)
         }
     
-    } else {
+    } else 
+    {
         b[[1]] <- brick(raster(vi),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_fullPeriod.tif",sep=""),overwrite=TRUE,datatype="INT2S",NAflag=NAflag)
+        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_fullPeriod.tif",sep=""),...)
     }
-        
+
+    if(substr(dataType(b[[1]]),1,3) == "FLT")
+    {
+        doround <- FALSE
+    } else
+    {
+        doround <- TRUE
+    }
+    if(is.null(NAflag))
+    {
+        NAflag <- NAvalue(b[[1]])
+    }
+    
     tr <- blockSize(vi)
     
     cluster <- raster:::.doCluster()
     if (cluster)
     {
+        # beginCluster()
         cl <- getCluster()
         on.exit(endCluster())
         nodes <- getOption("rasterClusterCores")
-        
-        clF <- function(i){require(MODIS)}
 
+        # MODIS fails to load if not done like that ...        
+        clF <- function(i){require(MODIS)}
         for (i in 1:nodes) 
         {
             sendCall(cl[[i]], clF, i, tag=i)
@@ -96,28 +116,38 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
 
 clFun <- function(l)
 {
-    # TODO
-    minval      <- -2000
-    
     val    <- getValues(vi, row=tr$row[l], nrows=tr$nrows[l])
     mtrdim <- dim(val)
-    set0   <- val <= minval
+
+    set0   <- matrix(FALSE,nrow=mtrdim[1], ncol=mtrdim[2])
     set0[is.na(val)] <- TRUE
     
     if (!is.null(w))
     {
         wtu <- getValues(w, row=tr$row[l], nrows=tr$nrows[l])
         
-        # is it a weight info?
-        if(max(wtu) > 1)
+        # is it not a weight info [0-1]?
+        if(max(wtu,na.rm=TRUE) > 1)
         {
-            bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
-            
-            if(is.null(bits))
+            if(is.null(bitShift) | is.null(bitMask))
+            {
+                # try to detect VI usefulness layer
+                bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+                if(is.null(bitShift))
+                {
+                    bitShift <- bits$bitShift
+                }
+                if(is.null(bitMask))
+                {
+                    bitMask <- bits$bitMask
+                }
+            }
+             
+            if(is.null(bitShift))
             {
                 stop("Could not extract 'bits' for weighting from this product. Use 'makeWeights' function to generate weightings manualy!")
             }
-            wtu  <- makeWeights(wtu, bitShift = bits$bitShift, bitMask = bits$bitMask, decodeOnly = TRUE)
+            wtu  <- makeWeights(wtu, bitShift = bitShift, bitMask = bitMask, threshold = threshold, decodeOnly = FALSE)
         }
         set0[wtu==0] <- TRUE
 
@@ -128,30 +158,37 @@ clFun <- function(l)
     
     if (inherits(t,"Raster"))
     {
-        inTu  <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
-        inTu  <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
+        inTu <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
+        inTu <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
+        set0[ inTu <= 0 ] <- TRUE
         set0[is.na(inTu)] <- TRUE
-        inTu[set0] <- 0
+#        inTu[set0] <- 0
     } else 
     {
         inTu <- matrix(timeInfo$inSeq,nrow=mtrdim[1],ncol=mtrdim[2],byrow=TRUE)
     }
 
+    # the entire info to use or nor a pix in in "wtu"
     wtu[set0] <- 0
-    val[set0] <- 0    
+#    val[set0] <- 0    
 
     r <- whittakerMtr(vali=val, wti=wtu, inTi=inTu, timeInfo=timeInfo, lambda=lambda, nIter=nIter, minVal=5)
-    r[rowSums(abs(r))==0,] <- NAflag
+    r[rowSums(abs(r))==0,] <- NA
+
 return(r)
 }
 
     if (!cluster)
     {    
-        for ( i in seq_along(tr$row) )
+        for (i in seq_along(tr$row))
         {    
             res <- clFun(i)
-            res <- round(res)
-    
+            
+            if(doround)
+            {
+                res <- round(res)
+            }
+               
             if (groupYears)
             {
                 for (a in seq_along(unique(format(timeInfo$outputLayerDates,"%Y"))))
@@ -168,7 +205,7 @@ return(r)
     {
         for (i in 1:nodes) 
         {
-            sendCall(cl[[i]], clFun, i, tag=i)
+            sendCall(cl[[i]], fun = clFun, args = i, tag=i)
         }
     
         for (i in 1:tr$n)
@@ -177,12 +214,16 @@ return(r)
     
             if (!d$value$success)
             {
-                stop("cluster error in Row:", tr$row[d$value$tag],"\n")
+                stop("cluster error")
             }
             
             ind <- d$value$tag
-            d$value$value <- round(d$value$value)
             
+            if(doround)
+            {
+                d$value$value <- round(d$value$value)
+            }
+
             #####
             if (groupYears)
             {
@@ -200,7 +241,7 @@ return(r)
             ni <- nodes + i
             if (ni <= tr$n)
             {
-                sendCall(cl[[d$node]], clFun, ni, tag=ni)
+                sendCall(cl[[i]], fun = clFun, args = ni, tag=ni)
             }
         
         }
@@ -213,95 +254,61 @@ return(r)
         if (groupYears)
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
-            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y],file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"_year",y,sep=""),row.names=FALSE,col.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y], 
+                file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"_year",y,sep=""),row.names=FALSE,col.names=FALSE)
         } else
         {
-            write.table(x=timeInfo$outputLayerDates,file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"fullPeriod",sep=""),col.names=FALSE,row.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates, file=paste(outPath,"/LayerDates_NDVI_",nameL,inlam,"fullPeriod",sep=""), 
+                col.names=FALSE,row.names=FALSE)
         }
     }
 
 return(NULL)
 }
 
-# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda
-whittakerMtr <- function(vali,wti=NULL,inTi=NULL,timeInfo=NULL,lambda=NULL, nIter= 5, minVal=5)
+# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda;minVal=5
+whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minVal=5)
 {
-    
-    vali <- t(vali)
+    vali <- t(as.matrix(vali))
+    wti  <- t(as.matrix(wti))
+    inTi <- t(as.matrix(inTi))
     
     yRow <- nrow(vali)
     yCol <- ncol(vali)
-
-    if(is.null(wti))
-    {
-        wti <- matrix(1,nrow=yRow,ncol=yCol)
-    } else {
-        wti <- as.matrix(wti)
-        wti <- t(wti)
-    }
-                    
-    if(is.null(inTi))
-    {
-        inTi <- matrix(1:yRow,ncol=yCol,nrow=yRow)
-    } else {
-        inTi <- as.matrix(inTi)
-        # if inT is a fixed vector (i.e.: from filename of Landsat of length nrow(x) (==nlayer) create a matrix with 1:nlayer for each col.
-        if(ncol(inTi)==1)
-        {
-            inTi <- matrix(inTi[,1],ncol=yCol,nrow=yRow)            
-        } else {
-            inTi <- t(inTi)
-        }
-    }
     
     # generate output matrix    
     if (is.null(timeInfo))
     {
         outTi <- inTi
-        out   <- matrix(NA, nrow=nrow(inTi), ncol=yCol)
-    } else {
-        outTi <- as.matrix(timeInfo$outSeq)
-        if (ncol(outTi)==1)
-        {
-            outTi <- matrix(outTi, nrow=length(outTi), ncol=yCol)            
-        }
-        out <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
+        out   <- matrix(NA, nrow=yRow, ncol=yCol)
+    } else 
+    {
+        outTi <- matrix(timeInfo$outSeq, nrow=length(timeInfo$outSeq), ncol=yCol)            
+        out   <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
     }
         
     # minimum "minVal" input values for filtering 
-    Cvec <- (colSums(wti!=0) > minVal)
+    Cvec <- (colSums(wti==0) < minVal)
     Cvec <- (1:yCol)[Cvec]
 
-#    if(derivate==1)
-#    {
-#        for (u in Cvec)
-#        {   
-#            inTo    <- inTi[,u]
-#            msk     <- inTo > 0
-#            inTiVec <- inTo[msk]
-#            valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
-#            valVec[inTiVec] <- vali[msk,u]
-#            wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
-#            wtVec[inTiVec]  <- wti[msk,u]
-#            s <- MODIS:::miwhitatzb1(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
-#            out[,u] <- s[outTi[,u]]
-#        }
-#    } else  
-#    {
-        for (u in Cvec)
-        {   
-            inTo    <- inTi[,u]
-            msk     <- inTo > 0
-            inTiVec <- inTo[msk]
-            valVec  <- rep(NA,max(timeInfo$inSeq,timeInfo$outSeq) - (min(timeInfo$inSeq,timeInfo$outSeq)-1))
-            valVec[inTiVec] <- vali[msk,u]
-            wtVec   <- rep(0,max(inTiVec,na.rm=TRUE))
-            wtVec[inTiVec]  <- wti[msk,u]
-            s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
-            out[,u] <- s[outTi[,u]]
-        }
+    inTi[inTi<=0] <- FALSE
+    wtVec1 <- valVec1 <- rep(0,max(inTi))
 
-#    }
-return(t(out))
+    win <- options("warn")
+    options(warn=-1)
+    for (u in Cvec)
+    {   
+        #cat(u,"\n")
+        valVec <- valVec1
+        wtVec  <- wtVec1
+        valVec[inTi[,u]] <- vali[,u]
+        wtVec[inTi[,u]]  <- wti[,u]
+        s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
+        out[,u] <- s[outTi[,u]]
+    }
+    options(warn=win$warn)
+    
+    return(t(out))
 }
     
+

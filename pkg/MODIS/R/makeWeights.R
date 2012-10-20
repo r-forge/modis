@@ -17,22 +17,25 @@ makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', 
     
         for (i in 1:tr$n) 
         {
-            v <- getValues(x, row=tr$row[i], nrows=tr$nrows[i])
+            v  <- getValues(x, row=tr$row[i], nrows=tr$nrows[i])
             ve <- dim(v)
-    
+
+            v[v==0] <- NA    
+            
             # decode bits
             v <- bitAnd(bitShiftR(v, bitShift ), bitMask)
             
+            v[is.na(v)] <- bitMask
+                    
             if (!is.null(threshold))
             {
-                # thres <- ((-1) * (threshold - bitMask))/bitMask
                 v[v > threshold] <- bitMask
             }
            
             if (!decodeOnly)
             {
                 # turn up side down and scale bits for weighting
-                v <- ((-1) * ((v-1) - (bitMask-1)))/bitMask
+                v <- ((-1) * (v - bitMask))/bitMask
                 v[v > 1] <- 1
                 v[v < 0] <- 0      
             }
@@ -49,20 +52,24 @@ makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', 
     } else
     {
         ve <- dim(x)
+        
+        x[x==0] <- NA
 
         # decode bits
         x <- bitAnd(bitShiftR(x, bitShift ), bitMask)
-        
+
+        x[is.na(x)] <- bitMask        
+
         if (!is.null(threshold))
         {
-            x[x > threshold] <- 0
+            x[x > threshold] <- bitMask
         }
        
         if (!decodeOnly)
         {
             # turn up side down and scale bits for weighting
             # theoretically best is 0 but the lowest value I have ever noticed is 1! So: (x-1)
-            x <- ((-1) * ((x-1) - bitMask))/bitMask      
+            x <- ((-1) * (x - bitMask))/bitMask     
             x[x > 1] <- 1
             x[x < 0] <- 0
         }
@@ -70,7 +77,8 @@ makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', 
         if (!is.null(ve))
         {
             x <- matrix(x,ncol=ve[2],nrow=ve[1],byrow=FALSE)
-        } 
+        }
+
         return(x)
     }
 }    
