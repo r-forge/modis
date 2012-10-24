@@ -85,6 +85,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                     unlink(infofile) # if get it remove all possible older version
                     cat("Getting information from",server,"          \r")
                     
+                    # retry 25 times, seams reasonalbe
                     for (g in 1:25)
                     {
                         remoteInfo <- NULL

@@ -2,18 +2,29 @@
 # Date : August 2012
 # Licence GPL v3
 
-# maybe to add: derivate=2
+# maybe to add: derivate=1
 whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 5, outPath = "./",...)
 {
     # debug 
     # w=wt; t=inT; groupYears=TRUE; lambda = 500; nIter= 5; outPath = "./"
+    # w=NULL; t=NULL; groupYears=TRUE; lambda = 500; nIter= 5; outPath = "./SUB/"
+
     # args <- list(bitShift=2,bitMask=15,threshold=6)
+    # args <- list(bitShift=2,bitMask=15)
     # args <- list()
     args <- list(...)
-    assign("bitShift",args$bitShift)
-    assign("bitMask",args$bitMask)
-    assign("threshold",args$threshold)
-    assign("NAflag",args$NAflag)
+    bitShift  <- args$bitShift
+    bitMask   <- args$bitMask
+    threshold <- args$threshold
+    NAflag    <- args$NAflag
+    
+    if (is.null(args$minDat))
+    {
+        mindat <- 5
+    } else 
+    {
+        minDat <- args$minDat
+    }
        
     dir.create(outPath,recursive=TRUE,showWarnings=FALSE)
     outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
@@ -162,7 +173,7 @@ clFun <- function(l)
         inTu <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
         set0[ inTu <= 0 ] <- TRUE
         set0[is.na(inTu)] <- TRUE
-#        inTu[set0] <- 0
+        inTu[set0] <- 0
     } else 
     {
         inTu <- matrix(timeInfo$inSeq,nrow=mtrdim[1],ncol=mtrdim[2],byrow=TRUE)
@@ -170,9 +181,9 @@ clFun <- function(l)
 
     # the entire info to use or nor a pix in in "wtu"
     wtu[set0] <- 0
-#    val[set0] <- 0    
+    val[set0] <- 0    
 
-    r <- whittakerMtr(vali=val, wti=wtu, inTi=inTu, timeInfo=timeInfo, lambda=lambda, nIter=nIter, minVal=5)
+    r <- whittakerMtr(vali=val, wti=wtu, inTi=inTu, timeInfo=timeInfo, lambda=lambda, nIter=nIter, minDat=minDat)
     r[rowSums(abs(r))==0,] <- NA
 
 return(r)
@@ -266,13 +277,14 @@ return(r)
 return(NULL)
 }
 
-# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda;minVal=5
-whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minVal=5)
+
+# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda;minDat=5
+whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minDat=5)
 {
     vali <- t(as.matrix(vali))
     wti  <- t(as.matrix(wti))
     inTi <- t(as.matrix(inTi))
-    
+       
     yRow <- nrow(vali)
     yCol <- ncol(vali)
     
@@ -287,8 +299,8 @@ whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minVal=
         out   <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
     }
         
-    # minimum "minVal" input values for filtering 
-    Cvec <- (colSums(wti==0) < minVal)
+    # minimum "minDat" input values for filtering 
+    Cvec <- (colSums(wti!=0) >= minDat)
     Cvec <- (1:yCol)[Cvec]
 
     inTi[inTi<=0] <- FALSE
@@ -298,13 +310,19 @@ whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minVal=
     options(warn=-1)
     for (u in Cvec)
     {   
-        #cat(u,"\n")
         valVec <- valVec1
         wtVec  <- wtVec1
         valVec[inTi[,u]] <- vali[,u]
         wtVec[inTi[,u]]  <- wti[,u]
-        s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
-        out[,u] <- s[outTi[,u]]
+        # s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
+        # taken form A. Lobo
+        for(i in 1:nIter)
+        {
+            fTS <- whit2(valVec,w=wtVec,lambda=lambda)
+            valVec[valVec < fTS] <- fTS[valVec < fTS]
+        }
+        #
+        out[,u] <- fTS[outTi[,u]]
     }
     options(warn=win$warn)
     
