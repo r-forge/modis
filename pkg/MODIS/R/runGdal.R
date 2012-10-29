@@ -257,9 +257,8 @@ runGdal <- function(...)
                         {
                             if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
                             {   
-                                if (!is.null(pm$extent$target$extent[[1]]))
+                                if (!is.null(pm$extent$target$extent))
                                 {
-                                
                                     te <- paste(" -te", pm$extent$target$extent@xmin, pm$extent$target$extent@ymin,
                                     pm$extent$target$extent@xmax, pm$extent$target$extent@ymax, collapse=" ") 
                         
@@ -346,8 +345,10 @@ runGdal <- function(...)
 
                             ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
                             ofile <- shortPathName(paste(normalizePath(outDir), '\\', outname,sep=''))
-                            ov <- NULL # Fwtools doesn't support ' -overwrite'
+                            # Fwtools doesn't support ' -overwrite'
+                            ov <- NULL 
                             invisible(file.remove(ofile))
+                            # 
                             
                             shell(
                                paste(cmd,
