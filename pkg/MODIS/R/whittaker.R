@@ -20,7 +20,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     
     if (is.null(args$minDat))
     {
-        mindat <- 5
+        minDat <- 3
     } else 
     {
         minDat <- args$minDat
@@ -73,7 +73,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             b[[a]] <- brick(raster(vi),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""),...)
+            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""))#,...)
         }
     
     } else 
@@ -128,6 +128,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
 clFun <- function(l)
 {
     val    <- getValues(vi, row=tr$row[l], nrows=tr$nrows[l])
+    val    <- t(val)
     mtrdim <- dim(val)
 
     set0   <- matrix(FALSE,nrow=mtrdim[1], ncol=mtrdim[2])
@@ -143,15 +144,9 @@ clFun <- function(l)
             if(is.null(bitShift) | is.null(bitMask))
             {
                 # try to detect VI usefulness layer
-                bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
-                if(is.null(bitShift))
-                {
-                    bitShift <- bits$bitShift
-                }
-                if(is.null(bitMask))
-                {
-                    bitMask <- bits$bitMask
-                }
+                bits     <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+                bitShift <- bits$bitShift
+                bitMask  <- bits$bitMask
             }
              
             if(is.null(bitShift))
@@ -160,10 +155,11 @@ clFun <- function(l)
             }
             wtu  <- makeWeights(wtu, bitShift = bitShift, bitMask = bitMask, threshold = threshold, decodeOnly = FALSE)
         }
+        wtu <- t(wtu)
         set0[wtu==0] <- TRUE
-
     } else
     {
+        # if no weighting info is available, weight all to 1
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
     }
     
@@ -171,6 +167,7 @@ clFun <- function(l)
     {
         inTu <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
         inTu <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
+        inTu <- t(inTu)
         set0[ inTu <= 0 ] <- TRUE
         set0[is.na(inTu)] <- TRUE
         inTu[set0] <- 0
@@ -178,15 +175,42 @@ clFun <- function(l)
     {
         inTu <- matrix(timeInfo$inSeq,nrow=mtrdim[1],ncol=mtrdim[2],byrow=TRUE)
     }
-
-    # the entire info to use or nor a pix in in "wtu"
+    # the entire info to use or not a pix is in "wtu"
     wtu[set0] <- 0
     val[set0] <- 0    
 
-    r <- whittakerMtr(vali=val, wti=wtu, inTi=inTu, timeInfo=timeInfo, lambda=lambda, nIter=nIter, minDat=minDat)
-    r[rowSums(abs(r))==0,] <- NA
+    out <- matrix(NA, nrow=length(timeInfo$outSeq), ncol=mtrdim[2])
+    
+    # minimum "minDat" input values for filtering 
+    Cvec   <- (colSums(wtu > 0) >= minDat)
+    Cvec   <- (1:mtrdim[2])[Cvec]
+    ind    <- inTu > 0    
+    wtVec0 <- valVec0 <- rep(0,max(inTu))
 
-return(r)
+    win <- options("warn")
+    options(warn=-1)
+    for (u in Cvec)
+    {   
+        valVec <- valVec0
+        wtVec  <- wtVec0
+        index  <- ind[,u]
+        doys   <- inTu[index,u]
+
+        valVec[doys] <- val[index,u]
+        wtVec[doys]  <- wtu[index,u]
+
+        # taken form A. Lobo
+        for(i in 1:nIter)
+        {
+            fTS <- whit2(valVec,w=wtVec,lambda=lambda)
+            valVec[valVec < fTS] <- fTS[valVec < fTS]
+        }
+        #
+        out[,u] <- fTS[timeInfo$outSeq]
+    }
+    options(warn=win$warn)
+    out[,colSums(abs(out))==0] <- NA
+return(t(out))
 }
 
     if (!cluster)
@@ -194,7 +218,7 @@ return(r)
         for (i in seq_along(tr$row))
         {    
             res <- clFun(i)
-            
+
             if(doround)
             {
                 res <- round(res)
@@ -209,7 +233,7 @@ return(r)
                 }   
             } else 
             {
-                b[[1]]  <- writeValues(b[[1]], res, tr$row[i])
+                b[[1]] <- writeValues(b[[1]], res, tr$row[i])
             }
         }       
     } else
@@ -228,8 +252,6 @@ return(r)
                 stop("cluster error")
             }
             
-            ind <- d$value$tag
-            
             if(doround)
             {
                 d$value$value <- round(d$value$value)
@@ -241,11 +263,11 @@ return(r)
                 for (a in seq_along(unique(format(timeInfo$outputLayerDates,"%Y"))))
                 {
                     y      <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
-                    b[[a]] <- writeValues(b[[a]], d$value$value[,format(timeInfo$outputLayerDates,"%Y")==y], tr$row[ind])
+                    b[[a]] <- writeValues(b[[a]], d$value$value[,format(timeInfo$outputLayerDates,"%Y")==y], tr$row[d$value$tag])
                 }   
             } else 
             {
-                b[[1]]  <- writeValues(b[[1]], d$value$value, tr$row[ind])
+                b[[1]]  <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
             }
             #####        
     
@@ -278,55 +300,4 @@ return(NULL)
 }
 
 
-# vali=val;wti=wtu;inTi=inTu;timeInfo=timeInfo;lambda=lambda;minDat=5
-whittakerMtr <- function(vali,wti,inTi,timeInfo=NULL, lambda, nIter = 5, minDat=5)
-{
-    vali <- t(as.matrix(vali))
-    wti  <- t(as.matrix(wti))
-    inTi <- t(as.matrix(inTi))
-       
-    yRow <- nrow(vali)
-    yCol <- ncol(vali)
-    
-    # generate output matrix    
-    if (is.null(timeInfo))
-    {
-        outTi <- inTi
-        out   <- matrix(NA, nrow=yRow, ncol=yCol)
-    } else 
-    {
-        outTi <- matrix(timeInfo$outSeq, nrow=length(timeInfo$outSeq), ncol=yCol)            
-        out   <- matrix(NA, nrow=nrow(outTi), ncol=yCol)
-    }
-        
-    # minimum "minDat" input values for filtering 
-    Cvec <- (colSums(wti!=0) >= minDat)
-    Cvec <- (1:yCol)[Cvec]
-
-    inTi[inTi<=0] <- FALSE
-    wtVec1 <- valVec1 <- rep(0,max(inTi))
-
-    win <- options("warn")
-    options(warn=-1)
-    for (u in Cvec)
-    {   
-        valVec <- valVec1
-        wtVec  <- wtVec1
-        valVec[inTi[,u]] <- vali[,u]
-        wtVec[inTi[,u]]  <- wti[,u]
-        # s <- MODIS:::miwhitatzb2(orgTS=valVec, w=wtVec, l=lambda, maxiter=nIter)
-        # taken form A. Lobo
-        for(i in 1:nIter)
-        {
-            fTS <- whit2(valVec,w=wtVec,lambda=lambda)
-            valVec[valVec < fTS] <- fTS[valVec < fTS]
-        }
-        #
-        out[,u] <- fTS[outTi[,u]]
-    }
-    options(warn=win$warn)
-    
-    return(t(out))
-}
-    
 

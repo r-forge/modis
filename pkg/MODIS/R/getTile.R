@@ -8,13 +8,9 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     # extent = "austria"; tileH = NULL; tileV = NULL; buffer = NULL; system = "srtm"; zoom=TRUE
     
     # if extent is a former result of getTile
-    if (is.list(extent))
+    if (inherits(extent,"MODISextent"))
     {
-        if(!is.null(extent$tile))
-        {
-            return(extent)
-        }    
-    
+        return(extent)
     }
     
     old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
@@ -178,7 +174,9 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             tileH <- unique(tt$ih)
             tileV <- unique(tt$iv)
         }
-        return(list( tile = tiles, tileH = tileH, tileV = tileV, extent = NULL, system = system, target=NULL ))
+        result <- list( tile = tiles, tileH = tileH, tileV = tileV, extent = NULL, system = system, target=NULL )
+        class(result) <- "MODISextent"
+        return(result)
     }
 
         
@@ -348,6 +346,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             }
         }
         result <- list(tile = unlist(tiles), tileH = tileH, tileV = tileV,extent = extent, system = system, target = target)
+        class(result) <- "MODISextent"        
         return(result)
    
     } else 
@@ -384,6 +383,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         tileV  <- unique(as.numeric(selected@data$v))
         result <- as.character(apply(selected@data,1,function(x) {paste("h",sprintf("%02d",x[2]),"v",sprintf("%02d",x[3]),sep="")}))
         result <- list(tile = result, tileH = tileH, tileV = tileV,extent = extent, system = system, target = target)
+        class(result) <- "MODISextent"
         return(result)
     }
 }
