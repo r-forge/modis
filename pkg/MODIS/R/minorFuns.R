@@ -275,7 +275,7 @@ return(unlist(res))
 }
 
 # TODO enhancement of SENSOR/PRODUCT detection capabilities! 
-# the metods below are based on the results of the strsplit().
+# the methods below are based on the results of strsplit().
 
 .defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
 {
@@ -385,6 +385,10 @@ listPather <- function(x,index)
 filesUrl <- function(url)
 {
     require(RCurl)
+    if (substr(url,nchar(url),nchar(url))!="/")
+    {
+       url <- paste(url,"/",sep="") 
+    }
     getlist <- getURL(url) 
     getlist <- strsplit(getlist, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
     
