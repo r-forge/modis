@@ -41,22 +41,28 @@
             
             string <- list()
             l=0
-            for (i in 1:length(tempString)){
-    
+            for (i in 1:length(tempString))
+            {
                 s <- strsplit(tempString[i],"\\.")[[1]]
             
-                if (length(s)>0) {
+                if (length(s)>0) 
+                {
                     tmp <- list()
-                        for (u in 1:length(s)){
-                            if (s[u] %in% c("DATE","YYYY","DDD")) {
-                                if (product$PRODUCT!="SRTM"){
+                        for (u in 1:length(s))
+                        {
+                            if (s[u] %in% c("DATE","YYYY","DDD")) 
+                            {
+                                if (product$PRODUCT!="SRTM")
+                                {
                                     tmp[[u]] <- s[u]
                                 }
-                            } else {
+                            } else 
+                            {
                                 tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
                             }
                         }
-                    if (length(tmp)>0){
+                    if (length(tmp)>0)
+                    {
                         l=l+1
                         string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                     }
