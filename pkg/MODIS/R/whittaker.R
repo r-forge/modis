@@ -295,8 +295,6 @@ return(t(out))
                 col.names=FALSE,row.names=FALSE)
         }
     }
-
-return(NULL)
 }
 
 
