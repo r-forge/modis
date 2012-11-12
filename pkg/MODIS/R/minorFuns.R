@@ -188,9 +188,14 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
         
             if (!quiet)
             {
-                cat("Checking availabillity of 'FWTools' (GDAL with HDF4 support for Windows):\n")    
+                cat("Checking availabillity of 'FWTools/OSGeos4W' (GDAL with HDF4 support for Windows):\n")    
             }
             gdalPath <- MODIS:::.getDef()$FWToolsPath
+            if (is.null(gdalPath))
+            {
+                gdalPath <- MODIS:::.getDef()$GDALpath
+            }
+            
             if (is.null(gdalPath))
             {
                 cmd <- 'gdalinfo --version'
@@ -200,20 +205,47 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             }
             gdal <- shell(cmd,intern=TRUE)
             
-            if (length(grep(x=gdal,pattern="FWTools"))==0)
+            if (length(grep(x=gdal,pattern="GDAL"))==0)
             {
-                cat("   'FWTools' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools'! You can get it from 'http://fwtools.maptools.org/'\nTrying to autodetect FWTools (this may take a little):\n")
+                cat("   'FWTools/OSGeos4W' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools' or 'OSGeos4W'! You can get one of them from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/'\nTrying to autodetect 'FWTools/OSGeos4W' (this may take a little):\n")
 
                 a <- dirname(list.files(path="\\.",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
-                a <- a[grep(a,pattern="FWTools")]
+                fwt <- a[grep(a,pattern="FWTools")]
+                osg <- a[grep(a,pattern="OSGeo4W")]
+                
+                # which is newer?
+                if (!is.null(fwt) & !is.null(osg))
+                {
+                    cat("Found an 'FWTools' and a 'OSGeo4W' installation, trying to fetch the newer GDAL verison\n")
+                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo",sep=""),winslash="/")))
+                    fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
+                    fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
+                    
+                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo",sep=""),winslash="/")))
+                    osgV <- shell(paste(osgP, "--version"),intern=TRUE)
+                    osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
+                    
+                    for (ug in 1:max(nchar(osgV),nchar(fwtV)))
+                    {
+                        osgT <- as.numeric(substr(osgV,ug,ug))
+                        fwtT <- as.numeric(substr(fwtV,ug,ug))
+                        
+                        if(isTRUE(osgT>fwtT))
+                        {
+                            a <- normalizePath(osg,winslash="/") 
+                            break   
+                        }
+                    }                 
+                    
+                }
                                 
                 if (length(a)==0)
                 {
-                    cat("No 'FWTools' installation found! In order to use it please solve this problem first.\n")
+                    cat("No 'FWTools/OSGeos4W' installation found! In order to use it please solve this problem first.\n")
                 } else 
                 {
-                    cat("Ok, 'FWTools' installation found! Please add the following line in the options file ('",normalizePath("~/.MODIS_Opts.R",winslash="/"),"', section: Windows specific):\n FWToolsPath <- '", normalizePath(a,winslash="/"),"'\n",sep="")
-                    read.table(normalizePath("~/.MODIS_Opts.R",winslash="/"))
+                    cat("Ok, please add the following line in the options file ('",normalizePath("~/.MODIS_Opts.R",winslash="/"),"', section: Windows specific):\n GDALpath <- '", normalizePath(a,winslash="/"),"'\n",sep="")
+                    #read.table(normalizePath("~/.MODIS_Opts.R",winslash="/"))
                 }
             } else 
             {
@@ -407,7 +439,7 @@ filesUrl <- function(url)
                         "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")==TRUE)-1
                         ]
                     })
-    return(data.frame(fileNames=fnames,fileSize=size))
+    return(data.frame(fileNames=basename(fnames),fileSize=size))
 }
 
 # create a stack file without file checks (extent etc)
