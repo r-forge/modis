@@ -29,11 +29,11 @@
     # Check collection
     if (!is.null(collection))
     {
-        product$CCC <- getCollection(product=product,collection=collection) 
+        product$CCC <- getCollection(product=product,collection=collection,localArcPath=localArcPath) 
     }
     if (length(product$CCC)==0)
     {
-        product$CCC <- getCollection(product=product) # if collection isn't provided, this gets the newest for the selected products.
+        product$CCC <- getCollection(product=product,localArcPath=localArcPath) # if collection isn't provided, this gets the newest for the selected products.
     }
 
     dates <- transDate(begin=begin,end=end)
@@ -56,7 +56,7 @@
     
         for(u in 1:length(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
+            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE,localArcPath=localArcPath)
         
             # test if the product is available on "LAADS" (default is LPDAAC!)
             if (server =="LAADS")

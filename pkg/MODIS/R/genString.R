@@ -23,7 +23,7 @@
     
     if(length(product$CCC)==0)
     {
-        product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
+        product$CCC <- getCollection(product=product$PRODUCT,collection=collection,localArcPath=localArcPath)[[1]]
     }
     
     if (!is.null(date)) 

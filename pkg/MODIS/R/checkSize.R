@@ -56,7 +56,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
             product    <- getProduct(avFiles[u],quiet=TRUE)
             fdate      <- MODIS:::.getPart(product,"DATE")
             collection <- MODIS:::.getPart(product,"CCC")
-            path       <- MODIS:::.genString(product)
+            path       <- MODIS:::.genString(product,localArcPath=localArcPath)
             
             Sinfo <- seq_along(path$remotePath)
             refFile <- rep(0,length(Sinfo))

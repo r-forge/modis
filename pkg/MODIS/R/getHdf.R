@@ -33,7 +33,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             rm(fname)
     
             product <- getProduct(x=HdfName[i],quiet=TRUE)    
-            path    <- MODIS:::.genString(product)
+            path    <- MODIS:::.genString(product, localArcPath=localArcPath)
             dir.create(path$localPath,recursive=TRUE,showWarnings=FALSE)
         
             if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) 
@@ -92,7 +92,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
         # check product
         product <- getProduct(x=product,quiet=TRUE)
         # check collection
-        product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
+        product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE,localArcPath=localArcPath)
         #########
     
         if (product$SENSOR[1]=="MODIS")
@@ -129,7 +129,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             ntiles <- length(tileID)
          
             ntiles <- length(tileID)
-            path   <- MODIS:::.genString("SRTM")
+            path   <- MODIS:::.genString("SRTM", loclArcPath=localArcPath)
         files  <- paste("srtm",tileID,".zip",sep="")
         dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
@@ -274,9 +274,8 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                         doy  <- sprintf("%03d",doy)
                         datu <- paste("A",year,doy,sep="")
                         mtr  <- rep(1,ntiles) # for file availability flaging
-    
-                        path <- .genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
-    
+                        path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1],localArcPath=localArcPath)
+                      
                         for(j in 1:ntiles)
                         {
     
@@ -327,7 +326,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                             if(!exists("ftpfiles")) 
                             {
                                 stop("Problems with FTP connections try a little later")
-                            } # TODO This breaks the entire job! But it schouldn't, better to jump to the next file...may it is local!
+                            } # TODO This breaks the entire job! But it schouldn't, better to jump to the next file...maybe it is local!
             
                             ftpfiles <- strsplit(ftpfiles, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
     

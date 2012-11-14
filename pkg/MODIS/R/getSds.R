@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getSds <- function(HdfName,SDSstring=NULL,method="gdal") 
+getSds <- function(HdfName,SDSstring=NULL,method="gdal",localArcPath=.getDef("localArcPath")) 
 {
 
     method <- tolower(method) 
@@ -11,7 +11,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     if (!file.exists(HdfName)) 
     {
         cat("Hm, I have to search for the file! Next time provide the full path and I'll be very fast!\n")
-        HdfName <- normalizePath(list.files(path=.getDef()$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
+        HdfName <- normalizePath(list.files(path=localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
     }
     
     HdfName <- HdfName[1]

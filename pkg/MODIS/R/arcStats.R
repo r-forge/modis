@@ -33,7 +33,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
 
     # product/dates/extent
     product <- getProduct(x=product,quiet=TRUE)
-    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
+    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE,localArcPath=localArcPath)
     tLimits <- transDate(begin=begin,end=end)
 
     if (extent[1]!="global")
@@ -51,7 +51,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
 
         for(u in seq_along(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
+            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,localArcPath=localArcPath)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   

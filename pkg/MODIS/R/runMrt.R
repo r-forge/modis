@@ -4,7 +4,6 @@
 
 runMrt <- function(ParaSource=NULL,...)
 {
-
     if (.checkTools(what="MRT",quiet=TRUE)$MRT!=1)
     {
         stop("MRT path not set or MRT not installed on your system!")
@@ -28,8 +27,13 @@ runMrt <- function(ParaSource=NULL,...)
         stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
     }
     
+    if (is.null(pm$localArcPath))
+    {
+        pm$localArcPath <- MODIS:::.getDef('localArcPath')
+    }
+    
     pm$product     <- getProduct(pm$product,quiet=TRUE)
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
+    pm$product$CCC <- getCollection(pm$product,collection=pm$collection,localArcPath=pm$localArcPath)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
     
     ################################
@@ -39,11 +43,6 @@ runMrt <- function(ParaSource=NULL,...)
     if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
     if (is.null(pm$stubbornness)) {pm$stubbornness <- "extreme"} 
     if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
-
-    if (is.null(pm$localArcPath))
-    {
-        pm$localArcPath <- MODIS:::.getDef('localArcPath')
-    }
 
     pm$localArcPath <- paste(strsplit(pm$localArcPath,"/")[[1]],collapse="/")
     dir.create(pm$localArcPath,showWarnings=FALSE)
@@ -67,32 +66,33 @@ runMrt <- function(ParaSource=NULL,...)
     if(!exists("testDir")) {stop("'outDirPath' not set properly!")} 
     ##############
 
-    if (is.null(pm$pixelsize)) 
+    if (is.null(pm$pixelSize)) 
     {
-        cat("No output 'pixelsize' specified, input size used!\n")
+        cat("No output 'pixelSize' specified, input size used!\n")
         pm$pixelsize <- "asIn"
     } else 
     {
-        cat("Resampling to pixelsize:", pm$pixelsize,"\n")
+        cat("Resampling to pixelSize:", pm$pixelSize,"\n")
     }
 
-    if (is.null(pm$resample)) 
+    if (is.null(pm$resamplingType)) 
     {
-        cat("No resampling method specified, using ",.getDef('resamplingType'),"!\n",sep="")
-        pm$resample <- .getDef("resamplingType")
+        cat("No resampling method specified, using ",MODIS:::.getDef('resamplingType'),"!\n",sep="")
+        pm$resample <- MODIS:::.getDef("resamplingType")
     } else 
     {    
-        cat("Resampling method:", pm$resample,"\n")
+        cat("Resampling method:", pm$resamplingType,"\n")
     }
 
     if (is.null(pm$outProj)) 
     {
-        cat("No output projection specified, using ", .getDef("outProj"),"!\n",sep="")
-        pm$outProj <- .getDef("outProj")
+        cat("No output projection specified, using ", MODIS:::.getDef("outProj"),"!\n",sep="")
+        pm$outProj <- MODIS:::.getDef("outProj")
     } else 
     {
         cat("Output projection:", pm$outProj,"\n")
-        if (pm$outProj=="UTM"){
+        if (pm$outProj=="UTM")
+        {
             if (!is.null(pm$zone)) 
             {
                 cat("No UTM zone specified used MRT autodetection.\n")            
@@ -144,7 +144,7 @@ runMrt <- function(ParaSource=NULL,...)
 
             ######################## along platform (TerraAqua)
 
-            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=pm$begin,end=pm$end)
+            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=pm$begin,end=pm$end,localArcPath=pm$localArcPath)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
     
@@ -168,7 +168,7 @@ runMrt <- function(ParaSource=NULL,...)
         
                         if (mos)
                         {
-                            # if not all files available switch "off" mosaicing and process single files. Problematic in areas with tiles outside land!
+                            # if not all files available switch "off" mosaicking and process single files. Problematic in areas with tiles outside land!
                             if (sum(file.exists(files)) < length(pm$extent$tile))
                             {
                                 mos <- FALSE
@@ -210,7 +210,7 @@ runMrt <- function(ParaSource=NULL,...)
                                 ### in subset
                                 paraname <- file.path(outDir,"/MRTgMosaic.prm",fsep="/") # create mosaic prm file
                                 filename = file(paraname, open="wt")
-                                write(paste(files,sep='',collapse=' '), filename)
+                                write(paste("\"",files,"\"",sep='',collapse=' '), filename)
                                 close(filename)
                         
                                 # run mosaic
@@ -218,7 +218,7 @@ runMrt <- function(ParaSource=NULL,...)
                                 {
                                     system(paste("mrtmosaic -i ",paraname," -o ",outDir,"/",TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
                                 } else {
-                                    shell(paste("mrtmosaic -i ",paraname," -o ",outDir,"\\\\",TmpMosNam," -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
+                                    shell(paste("mrtmosaic -i \"",paraname,"\" -o \"", normalizePath(outDir) ,"\\",TmpMosNam,"\" -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
                                 }
                                 unlink(paraname)
                                 Sys.sleep(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
@@ -240,15 +240,15 @@ runMrt <- function(ParaSource=NULL,...)
                             }
     
                             #### Write prm File
-                             paraname <- paste(outDir,"/MRTgResample.prm",sep="")
+                            paraname <- paste(outDir,"/MRTgResample.prm",sep="")
                             filename = file(paraname, open="wt")
 
                             if (mos)
                             {
-                                write(paste('INPUT_FILENAME = ',outDir,"/",TmpMosNam,sep=''), filename)
+                                write(paste('INPUT_FILENAME = "',outDir,"/",TmpMosNam,'"',sep=''), filename)
                             } else {
                                 write(paste('SPECTRAL_SUBSET = ( ',SDSstringIntern$SDSstring,' )',sep=''), filename)
-                                write(paste('INPUT_FILENAME = ',files[q],sep=''), filename)
+                                write(paste('INPUT_FILENAME = "',files[q],'"',sep=''), filename)
                             }
     
                             write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
@@ -260,10 +260,10 @@ runMrt <- function(ParaSource=NULL,...)
                             }
                             if (!is.null(pm$pixelSize))
                             {
-                                write(paste('OUTPUT_PIXELSIZE = ',pm$pixelSize,sep=''),filename) 
+                                write(paste('OUTPUT_PIXEL_SIZE = ',pm$pixelSize,sep=''),filename) 
                             }    
                             write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,'.tif',sep=''),filename) 
-                            write(paste('RESAMPLING_TYPE = ',pm$resample,sep=''),filename)
+                            write(paste('RESAMPLING_TYPE = ',pm$resamplingType,sep=''),filename)
                             write(paste('OUTPUT_PROJECTION_TYPE = ',pm$outProj,sep=''),filename)
     
                             if (pm$outProj=="UTM" && !is.null(pm$zone))
@@ -283,7 +283,7 @@ runMrt <- function(ParaSource=NULL,...)
                             {
                                 system(paste("resample -p ",paraname,sep=""))
                             } else {
-                                shell(paste("resample -p ",paraname,sep=""))
+                                shell(paste("resample -p \"",paraname,"\" -o \"",outDir,"/",basenam,'.tif',sep=""))
                             }
                             unlink(paraname)
     
