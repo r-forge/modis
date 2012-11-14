@@ -8,17 +8,22 @@ runGdal <- function(...)
         {
             stop("GDAL path not set (properly) or GDAL not installed on your system!")
         } else {
-            stop("FWTools path not set (properly) or FWTools (GDAL with hdf4 support on Windows) not installed on your system! see: 'http://fwtools.maptools.org/'")
+            stop("'FWTools'/'OSGeo4W' (GDAL with hdf4 support on Windows) path not set (properly) or not installed on your system! see: 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/'")
         }
     }
     
     pm <- list(...)
+
+    if (is.null(pm$localArcPath))
+    {
+        pm$localArcPath <- MODIS:::.getDef('localArcPath')
+    }
     
     # absolutly needed
     pm$product <- getProduct(pm$product,quiet=TRUE)
     
     # optional and if missing it is added here:
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
+    pm$product$CCC <- getCollection(pm$product,collection=pm$collection,localArcPath=pm$localArcPath)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
 
     ################################
@@ -26,12 +31,7 @@ runGdal <- function(...)
     if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
     if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
     if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
-    # if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
 
-    if (is.null(pm$localArcPath))
-    {
-        pm$localArcPath <- MODIS:::.getDef('localArcPath')
-    }
 
     pm$localArcPath <- paste(strsplit(pm$localArcPath,"/")[[1]],collapse="/")
     dir.create(pm$localArcPath,showWarnings=FALSE)
@@ -248,7 +248,8 @@ runGdal <- function(...)
     
                     for (i in seq_along(SDS[[1]]$SDSnames))
                     {
-                        outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),".",gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"),".tif",sep="")
+                        outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
+                        ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), ".tif",sep="")
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
@@ -265,8 +266,10 @@ runGdal <- function(...)
                                 } else 
                                 {
                                     
-                                    xy <- matrix(c(pm$extent$extent@xmin, pm$extent$extent@ymin, pm$extent$extent@xmin, pm$extent$extent@ymax, pm$extent$extent@xmax,
-                                        pm$extent$extent@ymax, pm$extent$extent@xmax, pm$extent$extent@ymin), ncol=2, nrow=4, byrow=TRUE)
+                                    xy <- matrix(c(pm$extent$extent@xmin, pm$extent$extent@ymin, pm$extent$extent@xmin,
+                                        pm$extent$extent@ymax, pm$extent$extent@xmax,
+                                        pm$extent$extent@ymax, pm$extent$extent@xmax, pm$extent$extent@ymin),
+                                        ncol=2, nrow=4, byrow=TRUE)
                                     colnames(xy) <- c("x","y")
 				                    xy <- as.data.frame(xy)
 				                    coordinates(xy) <- c("x","y")
@@ -282,7 +285,7 @@ runGdal <- function(...)
                             }
                         }
                         
-                        #### generate non-obligate GDAL arguments
+                        #### generate non-obligatory GDAL arguments
                         
                         # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
                         if(is.null(pm$blockSize))
@@ -345,8 +348,7 @@ runGdal <- function(...)
 
                             ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
                             ofile <- shortPathName(paste(normalizePath(outDir), '\\', outname,sep=''))
-                            # Fwtools doesn't support ' -overwrite'
-                            ov <- NULL 
+                            # GDAL < 1.8.0 doesn't support ' -overwrite' 
                             invisible(file.remove(ofile))
                             # 
                             
