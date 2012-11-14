@@ -9,12 +9,13 @@
 \description{
   This function just lists the names of the SDS of a spezified MODIS grid HDF file}
 
-\usage{getSds(HdfName,SDSstring,method="gdal")}
+\usage{getSds(HdfName,SDSstring,method="gdal",localArcPath = .getDef("localArcPath"))}
 
 \arguments{
   \item{HdfName}{Character. File name or better filename with path (faster) to extract SDS names.}
   \item{SDSstring}{Character. If missing (default), the return is the list of available SDS in \code{HdfName}. If Present sequence of \code{1} and \code{0} for extracting/not extracting SDS layers. I.e.: "11101", Consult the MRT manual for detailes}
   \item{method}{Character. Default \code{gdal}. Caution on Windows default 'GDAL' doesn't support HDF4 files. Install 'FWTools' or use \code{method=mrt} instead.} 
+  \item{localArcPath}{Character. Default \code{MODIS:::.getDef('localArcPath')}. Local path to look for and to download MODIS files.}
 } 
 
 \value{
