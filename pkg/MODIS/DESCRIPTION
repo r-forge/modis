@@ -1,5 +1,5 @@
 Package: MODIS
-Version: 0.6-20
+Version: 0.6-21
 Date: 15-November-2012
 Title: MODIS download and processing package. Processing functionalities for (multi-temporal) MODIS grid data.  
 Depends: R (>= 2.10), raster, bitops

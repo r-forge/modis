@@ -3,148 +3,174 @@
 # Licence GPL v3
 
 
-getCollection <- function(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE){
+getCollection <- function(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)
+{
 
-localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-dir.create(localArcPath,showWarnings=FALSE)
-# test local localArcPath
-try(testDir <- list.dirs(localArcPath),silent=TRUE)
-if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
+    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
+    dir.create(localArcPath,showWarnings=FALSE)
+    # test local localArcPath
+    try(testDir <- list.dirs(localArcPath),silent=TRUE)
+    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 
-auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
-dir.create(auxPATH,showWarnings=FALSE)
+    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+    dir.create(auxPATH,showWarnings=FALSE)
 
-####
-# checks for product
-if (missing(product)){stop("Please provide a valid product")}
-productN <- getProduct(x=product,quiet=TRUE)
-if (is.null(productN)) {stop("Unknown product")}
+    ####
+    # checks for product
+    if (missing(product))
+    {
+        stop("Please provide a valid product")
+    }
+    productN <- getProduct(x=product,quiet=TRUE)
+    if (is.null(productN)) 
+    {
+        stop("Unknown product")
+    }
 
-# load aux
-if (file.exists(file.path(auxPATH,"collections.txt",fsep="/"))) {
-	ftpdirs <- read.table(file.path(auxPATH,"collections.txt",fsep="/"),stringsAsFactors=TRUE)
-} else {
-	ftpdirs <- data.frame()
-}
+    # load aux
+    if (!file.exists(file.path(auxPATH,"collections.RData",fsep="/"))) # on the very first call use the delivered pre-updated version    
+    {
+        invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(auxPATH,"collections.RData",fsep="/")))
+        unlink(file.path(auxPATH,"collections.txt",fsep="/"))
+    }
+    load(file.path(auxPATH,"collections.RData",fsep="/"))
+    
+    # clean file
+    MODIS <- ftpdirs[,grep(colnames(ftpdirs),pattern="M.D")]
+    SRTM  <- ftpdirs[,grep(colnames(ftpdirs),pattern="SRTM")]
+    ftpdirs <- cbind(MODIS,SRTM)
 
-if(productN$PRODUCT[1]=="SRTM") { # TEMP! SRTM versions are added manually, no online check is performad for now!
-	if (sum(!productN$PRODUCT[1] %in% colnames(ftpdirs))>0) {
-		SRTM <- rep(NA,nrow(ftpdirs))
-		SRTM[1] <- 41	
-		ftpdirs <- cbind(ftpdirs,SRTM)
-		write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
-	}	
-}	else {
+    if (productN$SENSOR[1] !="C-Band-RADAR")
+    {    
+        if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) 
+        {
+	        if (! require(RCurl) ) 
+	        {
+	    	    stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+	        }
+		    sturheit <- .stubborn(level=stubbornness)
+
+    		for (i in 1:length(unique(productN$PF1))) 
+    		{		
+    		    ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
+    			cat("Updating collections from LP_DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
+    
+    			if(exists("dirs")) 
+    			{
+    			    rm(dirs)
+    			}
+    			for (g in 1:sturheit)
+    			{
+    			    try(dirs <- getURL(ftp),silent=TRUE)
+    				if(exists("dirs")){break}
+    			} 
+    
+    			if (!exists("dirs")) 
+    			{
+    				cat("FTP is not available, using stored information from previous calls (this should be mostly fine)\n")
+    			} else 
+    			{
+    				dirs <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
+    				dirs <- dirs[substr(dirs, 1, 1)=='l'] 
+    				dirs <- sapply(strsplit(dirs, "/"), function(x){x[length(x)]})	
+    			
+    				prod <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][1]})
+    				coll <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][2]})
+    		
+    				mtr  <- cbind(prod,coll)
+    				mtr  <- tapply(INDEX=mtr[,1],X=mtr[,2],function(x){x})
+    		
+    				maxrow <- max(nrow(ftpdirs),sapply(mtr,function(x)length(x)))
+    				
+    				basemtr <- matrix(NA,ncol=nrow(mtr), nrow = maxrow)
+    				colnames(basemtr) <- names(mtr)
+    		
+    				for(u in 1:ncol(basemtr)) 
+    				{
+    					basemtr[1:length(mtr[[u]]),u] <- mtr[[u]]
+    				}
+    				
+    				if (nrow(ftpdirs) < maxrow & nrow(ftpdirs) > 0) 
+    				{
+    					ftpdirs <- rbind(ftpdirs,as.data.frame(NA,nrow=(maxrow-nrow(ftpdirs)), ncol=ncol(ftpdirs)))
+    				}
+    					
+    				if (ncol(ftpdirs)==0)
+    				{ # relevant only for time
+    					ftpdirs <- data.frame(basemtr) # create new
+    				} else 
+    				{ # or update the available one
+    					indX    <- colnames(ftpdirs) %in% colnames(basemtr) 
+    					ftpdirs <- cbind(ftpdirs[,!indX],basemtr)
+    				}
+    			}
+    		}
+    	}
+    }
+    save(ftpdirs,file = file.path(auxPATH,"collections.RData",fsep="/"))
+    ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
+
+    if(length(ind)==1)
+    {
+	    res <- list(ftpdirs[,ind])
+	    names(res) <- colnames(ftpdirs)[ind]
+    } else if (length(ind)>=1) 
+    {
+	    res <- as.list(ftpdirs[,ind])
+    } else 
+    {
+	    stop("No data available, check product input?") # should not happen getProduct() should catch that before
+    }
+
+    res <- lapply(res, function(x){as.numeric(as.character(x[!is.na(x)]))})
+
+    if (!is.null(collection)) 
+    { # if collection is provided...return formatted collection or 'FALSE'
 	
-	if (forceCheck | sum(!productN$PRODUCT %in% colnames(ftpdirs))>0) {
-		if (! require(RCurl) ) {
-			stop("You need to install the 'RCurl' package: install.packages('RCurl')")
-		}
-		
-		sturheit <- .stubborn(level=stubbornness)
-
-		for (i in 1:length(unique(productN$PF1))) {		
-		
-			ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")
-			
-			cat("Updating collections from LP_DAAC for platform:",unique(productN$PLATFORM)[i],"\n")
-
-			if(exists("dirs")) {rm(dirs)}
-				for (g in 1:sturheit){
-					try(dirs <- getURL(ftp),silent=TRUE)
-					if(exists("dirs")){break}
-				} 
-
-			if (!exists("dirs")) {
-				cat("FTP is not available, using stored information from previous calls (this should be mostly fine)\n")
-			} else {
-			
-				dirs <- unlist(strsplit(dirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"})) # Is this enought? Mac? Solaris?....
-				dirs <- dirs[substr(dirs, 1, 1)=='l'] 
-				dirs <- sapply(strsplit(dirs, "/"), function(x){x[length(x)]})	
-			
-				prod <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][1]})
-				coll <- sapply(dirs,function(x){strsplit(x, "\\.")[[1]][2]})
-		
-				mtr  <- cbind(prod,coll)
-				mtr  <- tapply(INDEX=mtr[,1],X=mtr[,2],function(x){x})
-		
-				maxrow <- max(nrow(ftpdirs),sapply(mtr,function(x)length(x)))
-				
-				basemtr <- matrix(NA,ncol=nrow(mtr), nrow = maxrow)
-				colnames(basemtr) <- names(mtr)
-		
-				for(u in 1:ncol(basemtr)) {
-					basemtr[1:length(mtr[[u]]),u] <- mtr[[u]]
-				}
-				
-				if (nrow(ftpdirs) < maxrow & nrow(ftpdirs) > 0) {
-					ftpdirs <- rbind(ftpdirs,as.data.frame(NA,nrow=(maxrow-nrow(ftpdirs)), ncol=ncol(ftpdirs)))
-				}
-					
-				if (ncol(ftpdirs)==0){ # relevant only for time
-					ftpdirs <- data.frame(basemtr) # create new
-				} else { # or update the available one
-					indX    <- colnames(ftpdirs) %in% colnames(basemtr) 
-					ftpdirs <- cbind(ftpdirs[,!indX],basemtr)
-				}
-		
-			write.table(ftpdirs,file.path(auxPATH,"collections.txt",fsep="/"))
-			}
-		}
-	}
-}
-ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
-
-if(length(ind)==1){
-	res <- list(ftpdirs[,ind])
-	names(res) <- colnames(ftpdirs)[ind]
-} else if (length(ind)>=1) {
-	res <- as.list(ftpdirs[,ind])
-} else {
-	stop("No data available, check product input?") # should not happen getProduct() should catch that before
-}
-
-res <- lapply(res, function(x){as.numeric(as.character(x[!is.na(x)]))})
-
-if (!is.null(collection)) { # if collection is provided...return formatted collection or 'FALSE'
-	
-	isOk <- lapply(res,function(x){
-			if (as.numeric(collection) %in% x){
+	    isOk <- lapply(res,function(x)
+	    {
+		    if (as.numeric(collection) %in% x)
+		    {
 				as.numeric(collection)
-			} else {
+			} else 
+			{
 				FALSE		
 			}
 		})
 	
-	if (sum(isOk==FALSE)==length(isOk)) {
-		cat("Product(s) not awailable in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
-	return(invisible(isOk))
-	} else if (sum(isOk==FALSE)>0 & sum(isOk==FALSE)<length(isOk)){
-		cat("Not all the products in your input are available in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
-	}
+	    if (sum(isOk==FALSE)==length(isOk)) 
+	    {
+		    cat("Product(s) not awailable in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
+	        return(invisible(isOk))
+	    } else if (sum(isOk==FALSE)>0 & sum(isOk==FALSE)<length(isOk))
+	    {
+		    cat("Not all the products in your input are available in collection '", collection,"'. Try 'getCollection('", productN$request, "', newest=FALSE, forceCheck=TRUE)'\n", sep="")
+	    }
 
-	res <- isOk[isOk!=FALSE]
+	    res <- isOk[isOk!=FALSE]
 
-} else if (newest) {
-	if(!quiet) {cat("No Collection specified getting the newest for",productN$PRODUCT,"\n",sep=" ")}
+    } else if (newest) 
+    {
+	    if(!quiet) {cat("No Collection specified getting the newest for",productN$PRODUCT,"\n",sep=" ")}
 
-	res <- lapply(res,function(x){ #select the newest
-		x[order(sapply(x,function(c){		
-		s <- nchar(c)-1
-		if (s==0) {
-			c
-		} else {
-			c/as.numeric(paste(1,rep(0,s),sep=""))
-		}}),decreasing=TRUE)][1]
+	    res <- lapply(res,function(x)
+	    { #select the newest
+		    x[order(sapply(x,function(c){		
+		    s <- nchar(c)-1
+		    if (s==0) 
+		    {
+		    	c
+		    } else 
+		    {
+		    	c/as.numeric(paste(1,rep(0,s),sep=""))
+		    }}),decreasing=TRUE)][1]
 		})
-}
+    }   
 
-if (as=="character") {
-	res <- lapply(res,function(x){
-		sprintf("%03d",x)
-	})	
-}
+    if (as=="character") 
+    {
+	    res <- lapply(res,function(x){sprintf("%03d",x)})	
+    }
 return(res)
 }
 
