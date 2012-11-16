@@ -4,7 +4,7 @@
 
 runMrt <- function(ParaSource=NULL,...)
 {
-    if (.checkTools(what="MRT",quiet=TRUE)$MRT!=1)
+    if (MODIS:::.checkTools(what="MRT",quiet=TRUE)$MRT!=1)
     {
         stop("MRT path not set or MRT not installed on your system!")
     }
@@ -24,7 +24,7 @@ runMrt <- function(ParaSource=NULL,...)
     if(length(pm)==0)
     {
         ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"'or insert the needed parameters directly.",sep=""))
+        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"' or insert the needed parameters directly.",sep=""))
     }
     
     if (is.null(pm$localArcPath))
@@ -78,7 +78,7 @@ runMrt <- function(ParaSource=NULL,...)
     if (is.null(pm$resamplingType)) 
     {
         cat("No resampling method specified, using ",MODIS:::.getDef('resamplingType'),"!\n",sep="")
-        pm$resample <- MODIS:::.getDef("resamplingType")
+        pm$resamplingType <- MODIS:::.getDef("resamplingType")
     } else 
     {    
         cat("Resampling method:", pm$resamplingType,"\n")
