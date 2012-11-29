@@ -1,6 +1,31 @@
 # This file contains default values for the R package 'MODIS'.
-# version 0
+# version 0.6-23
 #########################
+# 1.) Path and archive structure defaults. Use single forward slashes "/":
+  
+# set path. All data will be stored below this directory. If it doesn't exist it is created. Should work also with a remote path like a samba share!
+localArcPath <- '~/MODIS_ARC' # Don't forget to call the function 'orgStruc()' after changing here!!
+  
+# set path, default output location for GDAL, FWTools/OSGeo4W, SSOAP, MRT processing results. If it doesn't exist it is created.
+outDirPath   <- '~/MODIS_ARC/PROCESSED'
+  
+#########################
+# 2.) Processing defaults:
+  
+resamplingType <- 'NN' # there are several layers that require NN (i.e. VI_Quality, Day of the year,...)!
+outProj        <- 'asIn'
+pixelSize      <- 'asIn'
+  
+#########################
+# Windows specific (run: "MODIS:::.checkTools()" for eventual inputs)
+  
+# Example:
+# GDALpath <- "C:/Programms/FWTools2.4.7/bin"
+  
+#########################
+# PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED FOR CHANGING (YET).
+#########################
+# define, local archive structure. USE 'placeholdes'!!
 # This file uses codified 'placeholders' for the creation of the local archive structure, or to define the path on an remote location. This 'placeholders' are than substituted from internal functions using the name of a EOS-file. Use 'placeholders' only for 'arcStructure'!!! Don't substitute the 'placeholdes' with a specific value.
 
 # Placeholders are:
@@ -20,41 +45,9 @@
 
 # Example: The file 'MOD13Q1.A2009017.h18v04.005.2009036150230.hdf', the localArcPath<- '~/MODIS_ARC' and arcStructure <-'/SENSOR/PRODUCT.CCC/DATE' on a UNIX system will generate the following structure: '/home/YOURUSER/MODIS_ARC/MODIS/MOD13Q1.005/2009.01.17/MOD13Q1.A2009017.h18v04.005.2009036150230.hdf'
 
-# Once you have modyfied values in sec 1. use the function 'orgStruc()' to re-organise your archive
-
 #########################
-# 1.) Path and archive structure defaults:
-  
-# set path. All data will be stored below this directory. If it doesn't exist it is created.
-localArcPath <- '~/MODIS_ARC' # Don't forget to call the function 'orgStruc()' after changing here!!
-  
-# set path, default output location for GDAL, FWT, SSOAP, MRT processing results. If it doesn't exist it is created.
-outDirPath   <- '~/MODIS_ARC/PROCESSED'
-  
-# define, local archive structure. USE 'placeholdes'!!
-arcStructure <- '/SENSOR/PRODUCT.CCC/DATE' # Don't forget to call the function 'orgStruc()' after changing here!!
-  
-#########################
-# 2.) Processing defaults:
-  
-resamplingType <- 'NN'
-outProj        <- 'GEOGRAPHIC'
-
-#########################
-# Windows Specific (run: 'MODIS:::.checkTools()' for inputs)
-
-# FWToolsPath <- "C:/Programms/FWTools2.4.7/bin"  
-
-#########################
-# PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED YET.
-# Example ftpstring
-# 3.) If you have a personal MODIS datapool within your LAN and you face  problems in the creation of an additional 'ftpstring' please contact one of us.
-# Use 'placeholders' only in 'variablepath'
-# Additional 'placeholders':
-# DATE1DATE2 period start/end (MERIS specific)
-# REGION (MERIS specific) MERIS date is stores in regions
-
-# ftpstring0 <- list(name='sitename',SENSOR='sensorname', basepath='/base/path',variablepath='/variable/path/',content=c('what data is awailable? 'images', 'metadata'!
+arcStructure <- "/SENSOR/PRODUCT.CCC/DATE" # Don't forget to call the function 'orgStruc()' after changing here!!
+################
   
 ftpstring1 <- list(name = "LPDAAC", SENSOR = "MODIS", basepath = "ftp://e4ftl01.cr.usgs.gov", variablepath = "/PF1/PRODUCT.CCC/DATE/", content = c("images", "metadata"))
   

@@ -16,14 +16,14 @@ runGdal <- function(...)
 
     if (is.null(pm$localArcPath))
     {
-        pm$localArcPath <- MODIS:::.getDef('localArcPath')
+        pm$localArcPath <- MODISpackageOpts$localArcPath
     }
     
     # absolutly needed
     pm$product <- getProduct(pm$product,quiet=TRUE)
     
     # optional and if missing it is added here:
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection,localArcPath=pm$localArcPath)
+    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
 
     ################################
@@ -33,11 +33,6 @@ runGdal <- function(...)
     if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
 
 
-    pm$localArcPath <- paste(strsplit(pm$localArcPath,"/")[[1]],collapse="/")
-    dir.create(pm$localArcPath,showWarnings=FALSE)
-    # test local localArcPath
-    try(testDir <- list.dirs(pm$localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
     # auxPath
     auxPATH <- file.path(pm$localArcPath,".auxiliaries",fsep="/")
     dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
@@ -45,7 +40,7 @@ runGdal <- function(...)
 
     if (is.null(pm$outDirPath))
     {
-        pm$outDirPath <- MODIS:::.getDef('outDirPath')
+        pm$outDirPath <- MODISpackageOpts$outDirPath
     }
     pm$outDirPath <- normalizePath(path.expand(pm$outDirPath), winslash = "/",mustWork=FALSE)
     pm$outDirPath <- paste(strsplit(pm$outDirPath,"/")[[1]],collapse="/")
@@ -204,7 +199,7 @@ runGdal <- function(...)
     
         for(u in 1:length(todo))
         {
-            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end,localArcPath=pm$localArcPath)
+            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
             
@@ -232,8 +227,7 @@ runGdal <- function(...)
                 { 
                     files <- unlist(
                                 getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
-                                tileH=pm$extent$tileH, tileV=pm$extent$tileV, stubbornness=pm$stubbornness,
-                                log=FALSE, localArcPath=pm$localArcPath)
+                                tileH=pm$extent$tileH, tileV=pm$extent$tileV, stubbornness=pm$stubbornness)
                              )
                     files <- files[basename(files)!="NULL"]
                     

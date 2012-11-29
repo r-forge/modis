@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-.getStruc <- function(product,collection=NULL,server="LPDAAC",begin=NULL,end=NULL,forceCheck=FALSE,wait=1, stubbornness=10,localArcPath=.getDef("localArcPath"))
+.getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=NULL, forceCheck=FALSE, wait=1, stubbornness=10)
 {
     server <- toupper(server)
     if(!server %in% c("LPDAAC","LAADS"))
@@ -13,14 +13,7 @@
 
     sturheit <- .stubborn(level=stubbornness)
 
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-    dir.create(localArcPath,recursive=TRUE,showWarnings=FALSE)    
-   
-    # test local localArcPath
-    try(testDir <- list.dirs(localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-
-    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
     dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
 
     #########################
@@ -29,11 +22,11 @@
     # Check collection
     if (!is.null(collection))
     {
-        product$CCC <- getCollection(product=product,collection=collection,localArcPath=localArcPath) 
+        product$CCC <- getCollection(product=product,collection=collection) 
     }
     if (length(product$CCC)==0)
     {
-        product$CCC <- getCollection(product=product,localArcPath=localArcPath) # if collection isn't provided, this gets the newest for the selected products.
+        product$CCC <- getCollection(product=product) # if collection isn't provided, this gets the newest for the selected products.
     }
 
     dates <- transDate(begin=begin,end=end)
@@ -56,7 +49,7 @@
     
         for(u in 1:length(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE,localArcPath=localArcPath)
+            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
         
             # test if the product is available on "LAADS" (default is LPDAAC!)
             if (server =="LAADS")
@@ -146,7 +139,8 @@
                             try(years <- getURL(startPath),silent=TRUE)
                             if(g < (sturheit/2)) {
                                 Sys.sleep(wait)
-                            } else {
+                            } else
+                            {
                                 if(once & (30 > wait)) {cat("Server problems, trying with 'wait=",max(30,wait),"\n")}
                                 once <- FALSE                        
                                 Sys.sleep(max(30,wait))
@@ -172,8 +166,13 @@
                             if(g < (sturheit/2))
                             {
                                 Sys.sleep(wait)
-                            } else {
-                                if(once & (30 > wait)) {cat("Server problems, trying with 'wait=",max(30,wait),"\n")}
+                            } else 
+                            {
+                                if(once & (30 > wait)) 
+                                {
+                                    cat("Server problems, trying with 'wait=",max(30,wait),"\n")
+                                }
+                                
                                 once <- FALSE                        
                                 Sys.sleep(max(30,wait))
                             }
@@ -185,7 +184,8 @@
                         cat("                          \r")                    
                         if(exists("p"))
                         {
-                            FtpDayDirs <- as.character(unlist(sapply(p, function(pb,l=0) {
+                            FtpDayDirs <- as.character(unlist(sapply(p, function(pb,l=0) 
+                            {
                                 pb <- unlist(strsplit(pb, if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
                                 pb <- pb[substr(pb, 1, 1)=='d'] 
                                 pb <- unlist(lapply(strsplit(pb, " "), function(x){x[length(x)]}))
@@ -199,13 +199,16 @@
                     {
                         cat("Couldn't get structure from",server,"server working with offline information!\n")
                         return(invisible(NULL))        
-                    } else {
+                    } else 
+                    {
     
                         rowdim <- max(nrow(ftpdirs),length(FtpDayDirs))
-                        if (todo[u] %in% colnames(ftpdirs)) { 
+                        if (todo[u] %in% colnames(ftpdirs)) 
+                        { 
                             coldim <- ncol(ftpdirs)
                             colnam <- colnames(ftpdirs)
-                        } else {
+                        } else 
+                        {
                             coldim <- ncol(ftpdirs) + 1
                             colnam <- c(colnames(ftpdirs),todo[u])
                         }

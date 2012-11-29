@@ -3,16 +3,10 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE,log=TRUE,localArcPath=.getDef("localArcPath")) 
+getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE) 
 {
 
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-    dir.create(localArcPath,showWarnings=FALSE)
-    # test local localArcPath
-    try(testDir <- list.dirs(localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-    
-    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
     
     sturheit <- MODIS:::.stubborn(level=stubbornness)
     wait <- as.numeric(wait)
@@ -33,7 +27,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             rm(fname)
     
             product <- getProduct(x=HdfName[i],quiet=TRUE)    
-            path    <- MODIS:::.genString(product, localArcPath=localArcPath)
+            path    <- MODIS:::.genString(product)
             dir.create(path$localPath,recursive=TRUE,showWarnings=FALSE)
         
             if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) 
@@ -92,7 +86,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
         # check product
         product <- getProduct(x=product,quiet=TRUE)
         # check collection
-        product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE,localArcPath=localArcPath)
+        product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
         #########
     
         if (product$SENSOR[1]=="MODIS")
@@ -111,8 +105,8 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             tLimits <- transDate(begin=begin,end=end)
             #########
             # getStruc
-            MODIS:::.getStruc(localArcPath=localArcPath,product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
-            #.getStruc(localArcPath=localArcPath,product=product,server="LAADS",begin=tLimits$begin,end=tLimits$end,wait=0)
+            MODIS:::.getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
+            #.getStruc(product=product,server="LAADS",begin=tLimits$begin,end=tLimits$end,wait=0)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
             #ftpdirs[[2]] <- read.table(file.path(auxPATH,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
@@ -129,7 +123,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             ntiles <- length(tileID)
          
             ntiles <- length(tileID)
-            path   <- MODIS:::.genString("SRTM", loclArcPath=localArcPath)
+            path   <- MODIS:::.genString("SRTM")
         files  <- paste("srtm",tileID,".zip",sep="")
         dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
@@ -274,7 +268,7 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                         doy  <- sprintf("%03d",doy)
                         datu <- paste("A",year,doy,sep="")
                         mtr  <- rep(1,ntiles) # for file availability flaging
-                        path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1],localArcPath=localArcPath)
+                        path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
                       
                         for(j in 1:ntiles)
                         {
@@ -417,12 +411,6 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
                         }
                     suboutput[[i]] <- paste(path$localPath,"/",dates[[l]][i,-1],sep="")                    
                     } # end i
-
-                    if (log) 
-                    { # write a log for each "PRODUCT.CCC" (todo[u])
-                        dir.create(file.path(localArcPath,"LOGS",fsep="/"),showWarnings=FALSE)    
-                        write.csv(dates[[l]],file=file.path(localArcPath,"LOGS",paste(todo[u],"_LOG.csv",sep=""),fsep="/"))
-                    }
         
                     output[[l]] <-  as.character(unlist(suboutput))
                     names(output)[l] <- todo[u]

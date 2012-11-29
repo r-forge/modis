@@ -4,6 +4,10 @@ tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"
 # save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes
 load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
+# Lazy load of package options
+MODISpackageOpts <- .getDef()
+
+
 # central setting for stubbornness 
 .stubborn <- function(level="high")
 {
@@ -132,10 +136,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     
         if(mrtH=="") 
         {
-            if (!quiet)
-            {
-                cat("  'MRT_HOME' not set/found! MRT is NOT enabled! See: 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
-            }
+            cat("  'MRT_HOME' not set/found! MRT is NOT enabled! See: 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
         } else 
         {
             if (!quiet)
@@ -144,10 +145,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             }
             if (mrtDD=="") 
             {
-                if (!quiet)
-                {
-                    cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled! You need to set the path, read in the MRT manual! 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
-                }
+               cat("  'MRT_DATA_DIR' not set/found! MRT is NOT enabled! You need to set the path, read in the MRT manual! 'https://lpdaac.usgs.gov/tools/modis_reprojection_tool'\n")
             } else 
             {
                 if (!quiet)
@@ -163,7 +161,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     if ("GDAL" %in% what)
     {
         GDAL <- 0
-
+ 
         if (.Platform$OS=="unix")
         {    
             if (!quiet)
@@ -185,38 +183,39 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
         
         } else 
         {
-        
             if (!quiet)
             {
-                cat("Checking availabillity of 'FWTools/OSGeos4W' (GDAL with HDF4 support for Windows):\n")    
+                cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
-            gdalPath <- MODIS:::.getDef()$FWToolsPath
-            if (is.null(gdalPath))
-            {
-                gdalPath <- MODIS:::.getDef()$GDALpath
-            }
-            
-            if (is.null(gdalPath))
+             
+            if (is.null(MODISpackageOpts$GDALpath))
             {
                 cmd <- 'gdalinfo --version'
             } else
             {
-                cmd <- file.path(shortPathName(gdalPath),'gdalinfo --version',fsep="\\")            
+                cmd <- file.path(shortPathName(MODISpackageOpts$GDALpath),'gdalinfo --version',fsep="\\")            
             }
             gdal <- shell(cmd,intern=TRUE)
             
             if (length(grep(x=gdal,pattern="GDAL"))==0)
             {
-                cat("   'FWTools/OSGeos4W' not found. In order to enable GDAL-functionalities (HDF4 support) on windows you need to install 'FWTools' or 'OSGeos4W'! You can get one of them from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/'\nTrying to autodetect 'FWTools/OSGeos4W' (this may take a little):\n")
+                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time):\n")
 
-                a <- dirname(list.files(path="\\.",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
+                a <- dirname(list.files(path="c:/",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
+
+                if (length(a)==0)
+                {
+                    stop("No 'FWTools/OSGeo4W' installation(s) found! In order to use related function please solve this problem first.\n")
+                }
+
                 fwt <- a[grep(a,pattern="FWTools")]
                 osg <- a[grep(a,pattern="OSGeo4W")]
                 
                 # which is newer?
                 if (!is.null(fwt) & !is.null(osg))
                 {
-                    cat("Found an 'FWTools' and a 'OSGeo4W' installation, trying to fetch the newer GDAL verison\n")
+                    cat("Found 'FWTools' and 'OSGeo4W' installation, trying to fetch the newer GDAL verison\n")
+
                     fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo",sep=""),winslash="/")))
                     fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
                     fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
@@ -227,26 +226,31 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                     
                     for (ug in 1:max(nchar(osgV),nchar(fwtV)))
                     {
-                        osgT <- as.numeric(substr(osgV,ug,ug))
-                        fwtT <- as.numeric(substr(fwtV,ug,ug))
+                        osgT <- substr(osgV,ug,ug)
+                        fwtT <- substr(fwtV,ug,ug)
                         
-                        if(isTRUE(osgT>fwtT))
+                        if (osgT!="." | fwtT!=".")
                         {
-                            a <- normalizePath(osg,winslash="/") 
-                            break   
+                            if(isTRUE(osgT>fwtT))
+                            {
+                                a <- normalizePath(osg,winslash="/") 
+                                break   
+                            }
+                        }
+                        if (ug==max(nchar(osgV),nchar(fwtV)))
+                        {
+                            a <- normalizePath(osg,winslash="/")                         
                         }
                     }                 
-                    
+                    if (length(a)==0)
+                    {
+                        cat("Could not determine the versions, using 'OSGeo4W' installation.\n")
+                        a <- osg
+                    }
                 }
-                                
-                if (length(a)==0)
-                {
-                    cat("No 'FWTools/OSGeos4W' installation found! In order to use it please solve this problem first.\n")
-                } else 
-                {
-                    cat("Ok, please add the following line in the options file ('",normalizePath("~/.MODIS_Opts.R",winslash="/"),"', section: Windows specific):\n GDALpath <- '", normalizePath(a,winslash="/"),"'\n",sep="")
-                    #read.table(normalizePath("~/.MODIS_Opts.R",winslash="/"))
-                }
+                
+                cat("Please copy the following line in the MODIS options file ('", normalizePath("~/.MODIS_Opts.R", winslash="/"), "', section: Windows specific):\n GDALpath <- '", normalizePath(a,winslash="/"), "'\n",sep="")
+                
             } else 
             {
                 if (!quiet)
@@ -455,5 +459,16 @@ fastStack <- function(files)
 }
  
 
+#http://ryouready.wordpress.com/2008/12/18/generate-random-string-name/
+makeRandomString <- function(n=1, lengh=12)
+{
+    randomString <- c(1:n) # initialize vector
+    for (i in 1:n)
+    {
+        randomString[i] <- paste(sample(c(0:9, letters, LETTERS),
+        lengh, replace=TRUE),collapse="")
+    }   
+    return(randomString)
+}
 
 

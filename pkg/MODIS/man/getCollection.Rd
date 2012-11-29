@@ -9,7 +9,7 @@
 
 \description{Handles the input of a MODIS product collection.}
 
-\usage{getCollection(product, collection=NULL, newest=TRUE, localArcPath=.getDef("localArcPath"), 
+\usage{getCollection(product, collection=NULL, newest=TRUE, 
 forceCheck=FALSE, as="character", stubbornness="high", quiet=TRUE)}
 
 \arguments{
@@ -18,8 +18,6 @@ forceCheck=FALSE, as="character", stubbornness="high", quiet=TRUE)}
   \item{collection}{If provided the function only checks if the collection exists and returns the collection number formatted on base of the \code{as} parameter or a \code{FALSE} in case the collection doesn't exists. The check is performed on the primary dataseouce 'LP DAAC' \url{https://lpdaac.usgs.gov/}.}
     
   \item{newest}{Logical. Default \code{TRUE}, return only the number of the newest collection. or \code{FALSE} all available collections}
-
-  \item{localArcPath}{Character. Default \code{MODIS:::.getDef("localArcPath")}. Path to data archive, will be removed in near future!}
  
   \item{forceCheck}{Logical. Default \code{FALSE}, if \code{TRUE} the function connects to the 'LP DAAC'-FTP and gets available collections. Since the collections doesn't change very frequently this check once done it is rarely needed.}
 

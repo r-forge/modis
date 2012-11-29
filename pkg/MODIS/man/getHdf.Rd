@@ -16,8 +16,7 @@
 }
 
 \usage{getHdf(HdfName, product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL,
- dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE, 
- log=TRUE, localArcPath=.getDef("localArcPath"))}
+ dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE)}
 
 \arguments{
 
@@ -46,10 +45,6 @@
   \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
   \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}, if \code{TRUE} the \code{getHdf()} becomes really boring.}
-  
- \item{log}{Logical. Default \code{TRUE}, a log file is generated in \code{localArcPath}}
-
-  \item{localArcPath}{Character. Default \code{MODIS:::.getDef('localArcPath')}. Local path to look for and to download MODIS files.}
 
 }
 

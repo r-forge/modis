@@ -38,7 +38,7 @@ Specifying input parameters this function, gets MODIS grid data from archive (FT
 }
 }
 \author{
-  Matteo Mattiuzzi
+  Matteo Mattiuzzi and Forrest Stevens
 }
 
 \seealso{
@@ -53,7 +53,7 @@ You can obtain MRT-grid after registration from: \url{https://lpdaac.usgs.gov/to
 \dontrun{
 runMrt()
 # You can open the file specified by 'runMrt()' and modify it or test it!
-runMrt(ParaSource="OutputOf'runMrt()'")
+# runMrt(ParaSource="OutputOf'runMrt()'")
 }
 }
 

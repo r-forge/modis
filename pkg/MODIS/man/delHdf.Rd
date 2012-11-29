@@ -10,7 +10,7 @@ Delete MODIS grid files to reduce the local storage.
 }
 
 \usage{delHdf(product, collection=NULL, extent="global", tileV=NULL, tileH=NULL, begin=NULL, end=NULL,
-ask=TRUE,localArcPath=MODIS:::.getDef('localArcPath'))}
+ask=TRUE)}
 
 \arguments{
 
@@ -29,8 +29,6 @@ ask=TRUE,localArcPath=MODIS:::.getDef('localArcPath'))}
   \item{end}{End date, default is to the most recent. Every file \code{'<='} than this date down to \code{begin} will be deleted  See: \code{?transDate} for formatting.}
 
   \item{ask}{Default \code{TRUE}. Should the function, after the checking ask for deletion?}
-
-  \item{localArcPath}{Character. Default \code{MODIS:::.getDef('localArcPath')}. Local path to look for and to download MODIS files.}
 }
 
 \value{

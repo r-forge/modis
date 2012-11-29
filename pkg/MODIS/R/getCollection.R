@@ -3,16 +3,11 @@
 # Licence GPL v3
 
 
-getCollection <- function(product,collection=NULL,newest=TRUE,localArcPath=.getDef("localArcPath"),forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)
+getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)
 {
 
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-    dir.create(localArcPath,showWarnings=FALSE)
-    # test local localArcPath
-    try(testDir <- list.dirs(localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
 
-    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
     dir.create(auxPATH,showWarnings=FALSE)
 
     ####

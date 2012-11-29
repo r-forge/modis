@@ -4,7 +4,7 @@
 
 # todo: "inOne" for T+A in one png
 
-arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL,asMap=TRUE,outName=NULL,outDir=MODIS:::.getDef("outDirPath"),localArcPath=MODIS:::.getDef("localArcPath"))
+arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE, outName=NULL, outDir=MODIS:::.getDef("outDirPath"))
 {  
 
     if (!(require(rgdal)))
@@ -25,15 +25,12 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
     }
                 
     # pathes
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-    dir.create(localArcPath,showWarnings=FALSE)
-    try(testDir <- list.dirs(localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+
+    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
 
     # product/dates/extent
     product <- getProduct(x=product,quiet=TRUE)
-    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE,localArcPath=localArcPath)
+    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
     tLimits <- transDate(begin=begin,end=end)
 
     if (extent[1]!="global")
@@ -41,7 +38,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
         ext <- getTile(extent=extent)
     }
 
-    MODIS:::.getStruc(localArcPath=localArcPath,product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
+    MODIS:::.getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
@@ -51,7 +48,7 @@ arcStats <- function(product,collection=NULL,extent="global",begin=NULL,end=NULL
 
         for(u in seq_along(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,localArcPath=localArcPath)$localPath
+            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   

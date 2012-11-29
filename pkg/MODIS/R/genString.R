@@ -4,11 +4,8 @@
 
 # 'date' is an EXISTING date! result from .getStruc() and passed as single date! For format see ?transDate
 
-.genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, localArcPath=.getDef('localArcPath'))
+.genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, localArcPath=.getDef("localArcPath"))
 {
-    opts <- MODIS:::.getDef()
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE) # for windows
-    
     if (missing(x)) 
     {
         stop("'x' must be a file name or a product name!")
@@ -23,7 +20,7 @@
     
     if(length(product$CCC)==0)
     {
-        product$CCC <- getCollection(product=product$PRODUCT,collection=collection,localArcPath=localArcPath)[[1]]
+        product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
     }
     
     if (!is.null(date)) 
@@ -36,7 +33,7 @@
         
         if (local) 
         {
-            struc <- opts$arcStruc
+            struc <- MODISpackageOpts$arcStructure
             tempString <- strsplit(struc,"/")[[1]]
             
             string <- list()
@@ -68,11 +65,11 @@
                     }
                 }
             }
-        localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+        localPath <- path.expand(paste(MODISpackageOpts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
         }
         if (remote) 
         {
-            namesFTP <- names(opts)
+            namesFTP <- names(MODISpackageOpts)
             Hmany <- grep(namesFTP,pattern="^ftpstring*.")
             
             remotePath <- list()
@@ -80,7 +77,7 @@
             for (e in Hmany)
             {
        
-                stringX <- opts[[e]]
+                stringX <- MODISpackageOpts[[e]]
                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {
@@ -132,7 +129,7 @@
             
         if (local) 
         {
-            struc <- opts$arcStruc
+            struc <- MODISpackageOpts$arcStructure
             tempString <- strsplit(struc,"/")[[1]]
         
             string <- list()
@@ -152,7 +149,7 @@
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
             }    
-        localPath <- path.expand(paste(localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+        localPath <- path.expand(paste(MODISpackageOpts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
         }
 
         if (remote) 
@@ -162,14 +159,14 @@
                 stop("Parameter 'what' must be 'images' or 'metadata'")
             }
                      
-            namesFTP <- names(opts)
+            namesFTP <- names(MODISpackageOpts)
             Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
         
             remotePath <- list()
             n = 0
             for (e in Hmany)
             {
-                stringX <- opts[[e]]
+                stringX <- MODISpackageOpts[[e]]
                 
                 # if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)

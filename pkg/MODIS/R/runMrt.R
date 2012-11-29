@@ -1,4 +1,4 @@
-# Author: Matteo Mattiuzzi, matteo.mattiuzzi@boku.ac.at
+# Author: Matteo Mattiuzzi and Forrest Stevens
 # Date : August 2011
 # Licence GPL v3
 
@@ -29,11 +29,11 @@ runMrt <- function(ParaSource=NULL,...)
     
     if (is.null(pm$localArcPath))
     {
-        pm$localArcPath <- MODIS:::.getDef('localArcPath')
+        pm$localArcPath <- MODISpackageOpts$localArcPath
     }
     
     pm$product     <- getProduct(pm$product,quiet=TRUE)
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection,localArcPath=pm$localArcPath)
+    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
     tLimits        <- transDate(begin=pm$begin,end=pm$end)
     
     ################################
@@ -41,22 +41,17 @@ runMrt <- function(ParaSource=NULL,...)
     if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
     if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
     if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
-    if (is.null(pm$stubbornness)) {pm$stubbornness <- "extreme"} 
+    if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
     if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
 
     pm$localArcPath <- paste(strsplit(pm$localArcPath,"/")[[1]],collapse="/")
-    dir.create(pm$localArcPath,showWarnings=FALSE)
-    # test local localArcPath
-    try(testDir <- list.dirs(pm$localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-    # auxPath
     auxPATH <- file.path(pm$localArcPath,".auxiliaries",fsep="/")
     dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
     #################
 
     if (is.null(pm$outDirPath))
     {
-        pm$outDirPath <- MODIS:::.getDef('outDirPath')
+        pm$outDirPath <- MODISpackageOpts$outDirPath
     }
     pm$outDirPath <- normalizePath(path.expand(pm$outDirPath), winslash = "/",mustWork=FALSE)
     pm$outDirPath <- paste(strsplit(pm$outDirPath,"/")[[1]],collapse="/")
@@ -69,7 +64,7 @@ runMrt <- function(ParaSource=NULL,...)
     if (is.null(pm$pixelSize)) 
     {
         cat("No output 'pixelSize' specified, input size used!\n")
-        pm$pixelsize <- "asIn"
+        pm$pixelsize <- MODISpackageOpts$pixelSize
     } else 
     {
         cat("Resampling to pixelSize:", pm$pixelSize,"\n")
@@ -77,8 +72,8 @@ runMrt <- function(ParaSource=NULL,...)
 
     if (is.null(pm$resamplingType)) 
     {
-        cat("No resampling method specified, using ",MODIS:::.getDef('resamplingType'),"!\n",sep="")
-        pm$resamplingType <- MODIS:::.getDef("resamplingType")
+        cat("No resampling method specified, using ",MODISpackageOpts$resamplingType,"!\n",sep="")
+        pm$resamplingType <- MODISpackageOpts$resamplingType
     } else 
     {    
         cat("Resampling method:", pm$resamplingType,"\n")
@@ -86,8 +81,8 @@ runMrt <- function(ParaSource=NULL,...)
 
     if (is.null(pm$outProj)) 
     {
-        cat("No output projection specified, using ", MODIS:::.getDef("outProj"),"!\n",sep="")
-        pm$outProj <- MODIS:::.getDef("outProj")
+        cat("No output projection specified, using ", MODISpackageOpts$outProj,"!\n",sep="")
+        pm$outProj <- MODISpackageOpts$outProj
     } else 
     {
         cat("Output projection:", pm$outProj,"\n")
@@ -160,7 +155,7 @@ runMrt <- function(ParaSource=NULL,...)
             ######################### along begin -> end date
                 for (l in 1:length(avDates))
                 { 
-                    files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness,log=FALSE,localArcPath=pm$localArcPath))
+                    files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness))
 
                     if (length(files)!=0){
     
@@ -206,7 +201,7 @@ runMrt <- function(ParaSource=NULL,...)
                             
                             if (mos)
                             {
-                                TmpMosNam <- paste("TmpMosaic",round(runif(1,1,1000000)),".hdf",sep="")
+                                TmpMosNam <- paste("TmpMosaic",MODIS:::makeRandomString(),".hdf",sep="")
                                 ### in subset
                                 paraname <- file.path(outDir,"/MRTgMosaic.prm",fsep="/") # create mosaic prm file
                                 filename = file(paraname, open="wt")

@@ -10,7 +10,7 @@ In the same manner as \code{getHdf()}, this function quantifies the availability
 }
 
 \usage{arcStats(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE,
-outName=NULL, outDir=MODIS:::.getDef("outDirPath"), localArcPath=MODIS:::.getDef("localArcPath"))}
+outName=NULL, outDir=MODIS:::.getDef("outDirPath"))}
 
 \arguments{
 
@@ -29,11 +29,6 @@ outName=NULL, outDir=MODIS:::.getDef("outDirPath"), localArcPath=MODIS:::.getDef
   \item{outName}{Character. Default is the 'product.collection.YYYYMMDDHHMMSS.png/csv' of the function call or if aplicable 'product.collection.extent.YYYYMMDDHHMMSS.png/csv'}  
 
   \item{outDir}{Character. Default \code{outDir=MODIS:::.getDef("outDirPath")}. Path for saving results}
-
-  \item{localArcPath}{Character. Default \code{MODIS:::.getDef('localArcPath')}. Local path to look for and to download MODIS files.}
-
-
-
 }
 
 \value{

@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL,begin=NULL,end=NULL,ask=TRUE,localArcPath=MODIS:::.getDef('localArcPath'))
+delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL,begin=NULL,end=NULL,ask=TRUE)
 {
     if (!ask)
     {
@@ -12,15 +12,12 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
     
     summaries <- 0
    
-    localArcPath <- normalizePath(localArcPath,"/",mustWork=FALSE)
-    dir.create(localArcPath,showWarnings=FALSE)
-    try(testDir <- list.dirs(localArcPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-    auxPATH <- file.path(localArcPath,".auxiliaries",fsep="/")
+
+    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
 
     # product/dates/extent
-    product <- getProduct(x=product,quiet=TRUE)
-    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE,localArcPath=localArcPath)
+    product     <- getProduct(x=product,quiet=TRUE)
+    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
     
     info <-list()
     for (z in seq_along(product$PRODUCT))
@@ -71,7 +68,7 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
         
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,localArcPath=localArcPath)$localPath
+                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     allLocal <- list.files(path,recursive=TRUE)
@@ -89,7 +86,7 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
             
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,localArcPath=localArcPath)$localPath
+                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     
