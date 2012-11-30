@@ -58,7 +58,6 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     
     } else if (method=="mrt")
     {
-    
         if (.Platform$OS=="unix")
         {
             sdsRaw <- system(paste("sdslist",HdfName,sep=" "),intern=TRUE)
@@ -66,12 +65,8 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
         }else if (.Platform$OS=="windows")
         {
             sdsRaw <- shell(gsub(fsep,"\\\\",paste('sdslist "',HdfName,'"',sep="")),intern=TRUE)
-    
-        } else 
-        {
-            stop(cat("What OS have you? Please tell me so I can fix this.\n")) 
         }
-
+        
         sds <- list()
         for (i in 1:length(sdsRaw))
         {
@@ -79,6 +74,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
         }
         sds <- sdsRaw[unlist(sds)]
         sds <- unlist(lapply(sds,function(x){strsplit(x,", ")[[1]][2]}))
+
     }
     
     if (!is.null(SDSstring))

@@ -78,31 +78,44 @@ runMrt <- function(ParaSource=NULL,...)
     {    
         cat("Resampling method:", pm$resamplingType,"\n")
     }
-
+    
     if (is.null(pm$outProj)) 
     {
-        cat("No output projection specified, using ", MODISpackageOpts$outProj,"!\n",sep="")
-        pm$outProj <- MODISpackageOpts$outProj
-    } else 
+        pm$outProj <- MODISpackageOpts$outProj 
+    }    
+    if (pm$outProj=="asIn")
     {
-        cat("Output projection:", pm$outProj,"\n")
-        if (pm$outProj=="UTM")
+        if(as.numeric(pm$product$CCC)>=4)
         {
-            if (!is.null(pm$zone)) 
-            {
-                cat("No UTM zone specified used MRT autodetection.\n")            
-            } else 
-            {
-                cat("Using UTM zone:", pm$zone,"\n")
-            }
+             pm$outProj <- "SIN"                    
+        } else 
+        {
+            pm$outProj <- "ISIN"        
+        }
+        cat("No output projection specified, no reprojection performed!\n",sep="")
+    }   else
+    {
+        cat("Output projection specified:", pm$outProj,"!\n",sep="")
+    }
+    
+    if (pm$outProj=="UTM")
+    {
+        if (!is.null(pm$zone)) 
+        {
+            cat("No UTM zone specified used MRT autodetection.\n")            
+        } else 
+        {
+            cat("Using UTM zone:", pm$zone,"\n")
         }
     }
+    
 
     if (is.null(pm$datum)) 
     {
         cat("No Datum specified, using WGS84!\n")
         pm$datum <- "WGS84"
     }
+    
     if (is.null(pm$projPara)) 
     {
         cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
@@ -156,9 +169,9 @@ runMrt <- function(ParaSource=NULL,...)
                 for (l in 1:length(avDates))
                 { 
                     files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness))
-
-                    if (length(files)!=0){
-    
+                    
+                    if (length(files)!=0)
+                    {
                         mos <- pm$mosaic
         
                         if (mos)
@@ -259,8 +272,9 @@ runMrt <- function(ParaSource=NULL,...)
                             }    
                             write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,'.tif',sep=''),filename) 
                             write(paste('RESAMPLING_TYPE = ',pm$resamplingType,sep=''),filename)
+                            
                             write(paste('OUTPUT_PROJECTION_TYPE = ',pm$outProj,sep=''),filename)
-    
+                            
                             if (pm$outProj=="UTM" && !is.null(pm$zone))
                             {
                                 write(paste('UTM_ZONE = ',pm$zone,sep=''),filename)
