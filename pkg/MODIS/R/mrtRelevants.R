@@ -2,14 +2,17 @@ doHdflist <- function(HdfName)
 {
     if (.Platform$OS=="unix")
     {
-        sdsRaw <- system(paste("hdflist",HdfName,sep=" "),intern=TRUE)
-    
+        sdsRaw <- system(paste("hdflist ",HdfName),intern=TRUE)    
     } else if (.Platform$OS=="windows")
     {
-        sdsRaw <- shell(gsub(fsep,"\\\\",paste('hdflist "',HdfName,'"',sep="")),intern=TRUE)
+        sdsRaw <- shell(paste('hdflist',shQuote(HdfName)),intern=TRUE)
     }
     p0 <- grep(pattern="numbertypes",x=sdsRaw)
     projCode <- grep(pattern="projcode",x=sdsRaw)
+
+    projCode <- lapply(projCode,function(x){strsplit(x," ")[[1]][2]})
+    names(projCode) <- c("projcode","zonecode","spheriod")    
+
     projparm <- grep(pattern="projparm",x=sdsRaw)
     
     sds <- list()
