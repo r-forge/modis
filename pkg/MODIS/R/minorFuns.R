@@ -188,12 +188,12 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                 cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
              
-            if (is.null(MODISpackageOpts$GDALpath))
+            if (is.null(MODIS:::MODISpackageOpts$GDALpath))
             {
                 cmd <- 'gdalinfo --version'
             } else
             {
-                cmd <- file.path(shortPathName(MODISpackageOpts$GDALpath),'gdalinfo --version',fsep="\\")            
+                cmd <- file.path(shortPathName(MODIS:::MODISpackageOpts$GDALpath),'gdalinfo --version',fsep="\\")            
             }
             gdal <- shell(cmd,intern=TRUE)
             
@@ -216,11 +216,11 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                 {
                     cat("Found 'FWTools' and 'OSGeo4W' installation, trying to fetch the newer GDAL verison\n")
 
-                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo",sep=""),winslash="/")))
+                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
                     fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
                     fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
                     
-                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo",sep=""),winslash="/")))
+                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
                     osgV <- shell(paste(osgP, "--version"),intern=TRUE)
                     osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
                     
