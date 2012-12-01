@@ -331,7 +331,7 @@ runGdal <- function(...)
                             
                         } else 
                         {
-                            gdalPath <- MODIS:::.getDef()$FWToolsPath
+                            gdalPath <- MODIS:::.getDef()$GDALpath
                             if(!is.null(gdalPath))
                             {
                                 cmd <- file.path(shortPathName(gdalPath),"gdalwarp",fsep="\\")
