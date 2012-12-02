@@ -6,7 +6,7 @@
 \title{Visualise local available MODIS hdf data}
 
 \description{
-In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview of locally available hdf files. 
+In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview (plot or/and talbe) of locally available hdf files. 
 }
 
 \usage{arcStats(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE,

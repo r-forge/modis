@@ -1,7 +1,7 @@
 # This file contains default values for the R package 'MODIS'.
 # version 0.6-23
 #########################
-# 1.) Path and archive structure defaults. Use single forward slashes "/":
+# 1.) Path and archive structure defaults. Use single forward slashes "/"):
   
 # set path. All data will be stored below this directory. If it doesn't exist it is created. Should work also with a remote path like a samba share!
 localArcPath <- '~/MODIS_ARC' # Don't forget to call the function 'orgStruc()' after changing here!!
@@ -17,10 +17,12 @@ outProj        <- 'asIn'
 pixelSize      <- 'asIn'
   
 #########################
-# Windows specific (run: "MODIS:::.checkTools()" for eventual inputs)
+# Windows specific section:
+# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory; (USE EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\")
+# Or run: "MODIS:::.checkTools()" for autodetection.
   
-# Example:
-# GDALpath <- "C:/Programms/FWTools2.4.7/bin"
+# Example :
+# GDALpath <- "C:/OSGeo4W/bin"
   
 #########################
 # PLEASE DON'T MODIFY BELOW HERE, NOT IMPLEMENTED FOR CHANGING (YET).

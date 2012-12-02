@@ -187,7 +187,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             {
                 cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
-             
+            # if GDALpath is not set, try if it is already in the system settings
             if (is.null(MODIS:::MODISpackageOpts$GDALpath))
             {
                 cmd <- 'gdalinfo --version'

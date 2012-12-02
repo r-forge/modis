@@ -20,7 +20,7 @@ makeOpts <- function(changeStruc=FALSE)
     write('# version 0.6-23', filename)
     write('#########################', filename)
     
-    write('# 1.) Path and archive structure defaults. Use single forward slashes "/":', filename)	
+    write('# 1.) Path and archive structure defaults. Use single forward slashes "/"):', filename)	
     write('  ', filename)
     
     write('# set path. All data will be stored below this directory. If it doesn\'t exist it is created. Should work also with a remote path like a samba share!',filename)	
@@ -42,11 +42,12 @@ makeOpts <- function(changeStruc=FALSE)
     write('  ', filename)	
     write('#########################', filename)
     
-    write('# Windows specific (run: "MODIS:::.checkTools()" for eventual inputs)', filename)
+    write('# Windows specific section:', filename)
+    write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory; (USE EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\")', filename)
+    write('# Or run: "MODIS:::.checkTools()" for autodetection.', filename)
     write('  ', filename)
-    
-    write('# Example:', filename)
-    write('# GDALpath <- "C:/Programms/FWTools2.4.7/bin"', filename)
+    write('# Example :', filename)
+    write('# GDALpath <- "C:/OSGeo4W/bin"', filename)
     
     if (!is.null(opt$GDALpath))
     {
@@ -88,5 +89,6 @@ makeOpts <- function(changeStruc=FALSE)
         warning("'arcStructure' has been removed from user settings and has been changed to the package default ('/SENSOR/PRODUCT.CCC/DATE'). Please just run 'orgStruc()' to re-organise your MODIS archive accordingly!")
     }
 }   
+
 
 
