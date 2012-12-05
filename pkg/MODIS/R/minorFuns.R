@@ -4,9 +4,8 @@ tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"
 # save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes
 load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
-# Lazy load of package options
-MODISpackageOpts <- .getDef()
-
+# lazy load gdal EPSG
+EPSGinfo <- rgdal:::make_EPSG()
 
 # central setting for stubbornness 
 .stubborn <- function(level="high")
@@ -114,7 +113,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
 }
 
 
-.checkTools <- function(what=c("MRT","GDAL"),quiet=FALSE)
+.checkTools <- function(what=c("MRT","GDAL"), quiet=FALSE)
 {
     what<-toupper(what)
     iw <- options()$warn 
@@ -187,7 +186,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             {
                 cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
-            # if GDALpath is not set, try if it is already in the system settings
+            # if GDALpath is not set manually, try if it is already in the system settings
             if (is.null(MODIS:::MODISpackageOpts$GDALpath))
             {
                 cmd <- 'gdalinfo --version'
@@ -199,8 +198,10 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             
             if (length(grep(x=gdal,pattern="GDAL"))==0)
             {
-                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time):\n")
-
+                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\n
+                    \n")
+                   
+                #Trying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time):
                 a <- dirname(list.files(path="c:/",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
 
                 if (length(a)==0)
@@ -445,19 +446,6 @@ filesUrl <- function(url)
                     })
     return(data.frame(fileNames=basename(fnames),fileSize=size))
 }
-
-# create a stack file without file checks (extent etc)
-# suggested by Robert J. Hijmans 
-
-fastStack <- function(files)
-{
-    r  <- raster(files[1])
-    ln <- extension(basename(files), '')
-    s  <- stack(raster(r))
-    s@layers <- sapply(seq_along(files), function(x){ r@file@name = files[x]; r@data@names=ln[x]; r@data@haveminmax=FALSE ; r })
-    return(s)
-}
- 
 
 #http://ryouready.wordpress.com/2008/12/18/generate-random-string-name/
 makeRandomString <- function(n=1, lengh=12)

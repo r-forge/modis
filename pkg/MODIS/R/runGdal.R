@@ -156,10 +156,10 @@ runGdal <- function(...)
         } 
     }
         
-    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | is.numeric(pm$outProj))
+    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | !is.na(as.numeric(pm$outProj)))
     {
         require(rgdal)
-        epsg <- make_EPSG()
+        epsg <- EPSGinfo
         
         outProj <- strsplit(as.character(pm$outProj),":")[[1]]
         outProj <- as.numeric(outProj[length(outProj)])

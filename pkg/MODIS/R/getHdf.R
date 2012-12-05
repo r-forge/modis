@@ -3,19 +3,17 @@
 # Licence GPL v3
   
 
-getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,extent=NULL,collection=NULL,dlmethod="auto",stubbornness="high",quiet=FALSE,wait=1,checkSize=FALSE) 
+getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE) 
 {
 
-    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
+    opts <- doOptions(...)
     
     sturheit <- MODIS:::.stubborn(level=stubbornness)
     wait <- as.numeric(wait)
     
     # TODO HdfName as regex
-    
     if (!missing(HdfName))
     { 
-    
         HdfName <- unlist(HdfName)
         dates <- list()
         
@@ -108,8 +106,8 @@ getHdf <- function(HdfName,product,begin=NULL,end=NULL,tileH=NULL,tileV=NULL,ext
             MODIS:::.getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
             #.getStruc(product=product,server="LAADS",begin=tLimits$begin,end=tLimits$end,wait=0)
             ftpdirs <- list()
-            ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
-            #ftpdirs[[2]] <- read.table(file.path(auxPATH,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            #ftpdirs[[2]] <- read.table(file.path(opts$auxPath,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
 
         } else if (product$SENSOR=="C-Band-RADAR")
         {
