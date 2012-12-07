@@ -4,157 +4,148 @@
 
 runMrt <- function(ParaSource=NULL,...)
 {
-    if (MODIS:::.checkTools(what="MRT",quiet=TRUE)$MRT!=1)
+    
+    opts <- combineOptions(...)
+    if (opts$mrtPath)
     {
         stop("MRT path not set or MRT not installed on your system!")
     }
 
     # Collect parameters from any possible source
-    if (!is.null(ParaSource))
+#    if (!is.null(ParaSource))
+#    {
+#        fe  <- new.env()
+#        eval(parse(ParaSource),envir=fe)
+#        sp <- as.list(fe)
+#        dp <- list(...)
+#        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
+#    } else {
+#        pm <- list(...)
+#    } 
+#
+#    if(length(pm)==0)
+#    {
+#        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
+#        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"' or insert the needed parameters directly.",sep=""))
+#    }
+        
+    opts$product     <- getProduct(opts$product,quiet=TRUE)
+    opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
+    tLimits          <- transDate(begin=opts$begin,end=opts$end)
+    
+    if (is.null(opts$localArcPath))
     {
-        fe  <- new.env()
-        eval(parse(ParaSource),envir=fe)
-        sp <- as.list(fe)
-        dp <- list(...)
-        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
-    } else {
-        pm <- list(...)
-    } 
+        opts$localArcPath <- opts$localArcPath
+    }
+    MODIS:::setPath(opts$localArcPath)
 
-    if(length(pm)==0)
+    if (is.null(opts$outDirPath))
     {
-        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"' or insert the needed parameters directly.",sep=""))
+        opts$outDirPath <- opts$outDirPath
     }
-    
-    if (is.null(pm$localArcPath))
-    {
-        pm$localArcPath <- MODISpackageOpts$localArcPath
-    }
-    
-    pm$product     <- getProduct(pm$product,quiet=TRUE)
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
-    tLimits        <- transDate(begin=pm$begin,end=pm$end)
-    
+    MODIS:::setPath(opts$outDirPath)
+        
     ################################
     # Some defaults:
-    if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
-    if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
-    if (is.null(pm$mosaic))   {pm$mosaic <- TRUE} 
-    if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
-    if (is.null(pm$anonym))   {pm$anonym <- TRUE} 
+    if (is.null(opts$quiet))    {opts$quiet <- FALSE} 
+    if (is.null(opts$mosaic))   {opts$mosaic <- TRUE} 
+    if (is.null(opts$anonym))   {opts$anonym <- TRUE} 
 
-    pm$localArcPath <- paste(strsplit(pm$localArcPath,"/")[[1]],collapse="/")
-    auxPATH <- file.path(pm$localArcPath,".auxiliaries",fsep="/")
-    dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
-    #################
 
-    if (is.null(pm$outDirPath))
-    {
-        pm$outDirPath <- MODISpackageOpts$outDirPath
-    }
-    pm$outDirPath <- normalizePath(path.expand(pm$outDirPath), winslash = "/",mustWork=FALSE)
-    pm$outDirPath <- paste(strsplit(pm$outDirPath,"/")[[1]],collapse="/")
-    dir.create(pm$outDirPath,showWarnings=FALSE,recursive=TRUE)
-    # test local outDirPath
-    try(testDir <- list.dirs(pm$outDirPath),silent=TRUE)
-    if(!exists("testDir")) {stop("'outDirPath' not set properly!")} 
-    ##############
-
-    if (is.null(pm$pixelSize)) 
+    if (is.null(opts$pixelSize)) 
     {
         cat("No output 'pixelSize' specified, input size used!\n")
-        pm$pixelsize <- MODISpackageOpts$pixelSize
+        opts$pixelsize <- opts$pixelSize
     } else 
     {
-        cat("Resampling to pixelSize:", pm$pixelSize,"\n")
+        cat("Resampling to pixelSize:", opts$pixelSize,"\n")
     }
 
-    if (is.null(pm$resamplingType)) 
+    if (is.null(opts$resamplingType)) 
     {
-        cat("No resampling method specified, using ",MODISpackageOpts$resamplingType,"!\n",sep="")
-        pm$resamplingType <- MODISpackageOpts$resamplingType
+        cat("No resampling method specified, using ",opts$resamplingType,"!\n",sep="")
+        opts$resamplingType <- opts$resamplingType
     } else 
     {    
-        cat("Resampling method:", pm$resamplingType,"\n")
+        cat("Resampling method:", opts$resamplingType,"\n")
     }
     
-    if (is.null(pm$outProj)) 
+    if (is.null(opts$outProj)) 
     {
-        pm$outProj <- MODISpackageOpts$outProj 
+        opts$outProj <- opts$outProj 
     }    
-    if (pm$outProj=="asIn")
+    if (opts$outProj=="asIn")
     {
-        if(as.numeric(pm$product$CCC)>=4)
+        if(as.numeric(opts$product$CCC)>=4)
         {
-             pm$outProj <- "SIN"                    
+             opts$outProj <- "SIN"                    
         } else 
         {
-            pm$outProj <- "ISIN"        
+            opts$outProj <- "ISIN"        
         }
         cat("No output projection specified, no reprojection performed!\n",sep="")
     }   else
     {
-        cat("Output projection specified:", pm$outProj,"!\n",sep="")
+        cat("Output projection specified:", opts$outProj,"!\n",sep="")
     }
     
-    if (pm$outProj=="UTM")
+    if (opts$outProj=="UTM")
     {
-        if (!is.null(pm$zone)) 
+        if (!is.null(opts$zone)) 
         {
             cat("No UTM zone specified used MRT autodetection.\n")            
         } else 
         {
-            cat("Using UTM zone:", pm$zone,"\n")
+            cat("Using UTM zone:", opts$zone,"\n")
         }
     }
     
 
-    if (is.null(pm$datum)) 
+    if (is.null(opts$datum)) 
     {
         cat("No Datum specified, using WGS84!\n")
-        pm$datum <- "WGS84"
+        opts$datum <- "WGS84"
     }
     
-    if (is.null(pm$projPara)) 
+    if (is.null(opts$projPara)) 
     {
         cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
-        # pm$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+        # opts$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
     } else 
     {
-        cat("Output projection parameters specified!\nUsing:",pm$projPara,"\n")
+        cat("Output projection parameters specified!\nUsing:",opts$projPara,"\n")
     }
 
-    for (z in 1:length(pm$product$PRODUCT))
+    for (z in 1:length(opts$product$PRODUCT))
     {
             
-        if (pm$product$TYPE[z]=="CMG") 
+        if (opts$product$TYPE[z]=="CMG") 
         {
             tileID="GLOBAL"
             ntiles=1 
         } else 
         {
-            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
-            ntiles    <- length(pm$extent$tile)
+            opts$extent <- getTile(extent=opts$extent,tileH=opts$tileH,tileV=opts$tileV,buffer=opts$buffer)
+            ntiles    <- length(opts$extent$tile)
         }
     
-        todo <- paste(pm$product$PRODUCT[z],".",pm$product$CCC[[pm$product$PRODUCT[z]]],sep="")    
+        todo <- paste(opts$product$PRODUCT[z],".",opts$product$CCC[[opts$product$PRODUCT[z]]],sep="")    
     
         for(u in 1:length(todo))
         {
-            if (is.null(pm$job))
+            if (is.null(opts$job))
             {
-                pm$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
-                cat("No 'job' name specified, generated (date/time based)):",pm$job,"\n")
+                opts$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
+                cat("No 'job' name specified, generated (date/time based)):",opts$job,"\n")
             }
-            outDir <- file.path(pm$outDirPath,pm$job,fsep="/")
+            outDir <- file.path(opts$outDirPath,opts$job,fsep="/")
             dir.create(outDir)
 
             ######################## along platform (TerraAqua)
 
-            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=pm$begin,end=pm$end)
+            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
             ftpdirs <- list()
-            ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
     
             avDates <- ftpdirs[[1]][,todo[u]]
             avDates <- avDates[!is.na(avDates)]            
@@ -168,16 +159,16 @@ runMrt <- function(ParaSource=NULL,...)
             ######################### along begin -> end date
                 for (l in 1:length(avDates))
                 { 
-                    files <- unlist(getHdf(product=pm$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=pm$extent$tileH,tileV=pm$extent$tileV,stubbornness=pm$stubbornness))
+                    files <- unlist(getHdf(product=opts$product$PRODUCT[z],collection=strsplit(todo[u],"\\.")[[1]][2],begin=avDates[l],end=avDates[l],tileH=opts$extent$tileH,tileV=opts$extent$tileV,stubbornness=opts$stubbornness))
                     
                     if (length(files)!=0)
                     {
-                        mos <- pm$mosaic
+                        mos <- opts$mosaic
         
                         if (mos)
                         {
                             # if not all files available switch "off" mosaicking and process single files. Problematic in areas with tiles outside land!
-                            if (sum(file.exists(files)) < length(pm$extent$tile))
+                            if (sum(file.exists(files)) < length(opts$extent$tile))
                             {
                                 mos <- FALSE
                             } else {
@@ -199,15 +190,15 @@ runMrt <- function(ParaSource=NULL,...)
                         {
                             w <- options("warn")
                             options(warn=-1)
-                            if (is.null(pm$SDSstring))
+                            if (is.null(opts$SDSstring))
                             {
-                                pm$SDSstring <- rep(1,length(getSds(HdfName=files[q],method="mrt")$SDSnames))
+                                opts$SDSstring <- rep(1,length(getSds(HdfName=files[q],method="mrt")$SDSnames))
                             }    
                 
-                            SDSstringIntern <- getSds(HdfName=files[q],SDSstring=pm$SDSstring,method="mrt")
+                            SDSstringIntern <- getSds(HdfName=files[q],SDSstring=opts$SDSstring,method="mrt")
                             options(warn=w$warn)
                             
-                            if (!pm$quiet && u == 1 && l == 1)
+                            if (!opts$quiet && u == 1 && l == 1)
                             {
                                 cat("\n#############################\nExtracing SDS:",SDSstringIntern$SDSnames,"#############################\n",sep="\n")
                             }
@@ -242,9 +233,9 @@ runMrt <- function(ParaSource=NULL,...)
                                 basenam <- paste(strsplit(basenam,"\\.")[[1]][c(1,2,3,4)],collapse=".")    
                             }
         
-                            if (!pm$anonym)
+                            if (!opts$anonym)
                             {   
-                                basenam <- paste(basenam,pm$job,sep=".")
+                                basenam <- paste(basenam,opts$job,sep=".")
                             }
     
                             #### Write prm File
@@ -261,31 +252,31 @@ runMrt <- function(ParaSource=NULL,...)
     
                             write('SPATIAL_SUBSET_TYPE = INPUT_LAT_LONG',filename)
     
-                            if (!is.null(pm$extent$extent))
+                            if (!is.null(opts$extent$extent))
                             {
-                                write(paste('SPATIAL_SUBSET_UL_CORNER = (',pm$extent$extent@ymax,' ',pm$extent$extent@xmin,')',sep=''),filename)
-                                write(paste('SPATIAL_SUBSET_LR_CORNER = (',pm$extent$extent@ymin,' ',pm$extent$extent@xmax,')',sep=''),filename)
+                                write(paste('SPATIAL_SUBSET_UL_CORNER = (',opts$extent$extent@ymax,' ',opts$extent$extent@xmin,')',sep=''),filename)
+                                write(paste('SPATIAL_SUBSET_LR_CORNER = (',opts$extent$extent@ymin,' ',opts$extent$extent@xmax,')',sep=''),filename)
                             }
-                            if (!is.null(pm$pixelSize))
+                            if (!is.null(opts$pixelSize))
                             {
-                                write(paste('OUTPUT_PIXEL_SIZE = ',pm$pixelSize,sep=''),filename) 
+                                write(paste('OUTPUT_PIXEL_SIZE = ',opts$pixelSize,sep=''),filename) 
                             }    
                             write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,'.tif',sep=''),filename) 
-                            write(paste('RESAMPLING_TYPE = ',pm$resamplingType,sep=''),filename)
+                            write(paste('RESAMPLING_TYPE = ',opts$resamplingType,sep=''),filename)
                             
-                            write(paste('OUTPUT_PROJECTION_TYPE = ',pm$outProj,sep=''),filename)
+                            write(paste('OUTPUT_PROJECTION_TYPE = ',opts$outProj,sep=''),filename)
                             
-                            if (pm$outProj=="UTM" && !is.null(pm$zone))
+                            if (opts$outProj=="UTM" && !is.null(opts$zone))
                             {
-                                write(paste('UTM_ZONE = ',pm$zone,sep=''),filename)
+                                write(paste('UTM_ZONE = ',opts$zone,sep=''),filename)
                             }
         
-                            if (!is.null(pm$projPara))
+                            if (!is.null(opts$projPara))
                             {
-                                write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',pm$projPara,' )',sep=''),filename)
+                                write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',opts$projPara,' )',sep=''),filename)
                             }
         
-                            write(paste('DATUM =', pm$datum,sep=''),filename)
+                            write(paste('DATUM =', opts$datum,sep=''),filename)
                             close(filename)
     
                             if (.Platform$OS=="unix")

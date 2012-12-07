@@ -23,7 +23,6 @@ checkResamplingType <- function(resamplingType,tool,quiet=FALSE)
     if (!tool %in% c("GDAL","MRT"))
     {
         stop("Unknown 'tool'. Allowed are 'MRT' or 'GDAL'")
-        
     }
     
     if (resamplingType %in% c("nn","cc","bil") & tool=="GDAL")

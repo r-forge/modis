@@ -9,7 +9,7 @@ runGdal <- function(...)
     
     # optional and if missing it is added here:
     opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
-    tLimits        <- transDate(begin=opts$begin,end=opts$end)
+    tLimits          <- transDate(begin=opts$begin,end=opts$end)
 
     ################################
     # Some defaults:
