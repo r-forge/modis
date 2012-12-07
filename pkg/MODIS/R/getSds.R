@@ -33,14 +33,13 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
             sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
         } else if (.Platform$OS=="windows")
         {
-            gdalPath <- MODIS:::.getDef()$FWToolsPath
-            if (is.null(gdalPath))
+            if (is.null(opts$gdalPath))
             {
                 cmd <- paste('gdalinfo ', shortPathName(HdfName),sep="")
             } else
             {
-                gdalPath <- shortPathName(gdalPath)
-                cmd <- shQuote(paste(gdalPath,'\\gdalinfo ', shortPathName(HdfName),sep=""),type="cmd")            
+                gdalPath <- shortPathName(opts$gdalPath)
+                cmd <- shQuote(paste(opts$gdalPath,'\\gdalinfo ', shortPathName(HdfName),sep=""),type="cmd")            
             }
              
             sdsRaw <- shell(cmd,intern=TRUE)
