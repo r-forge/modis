@@ -30,7 +30,14 @@ runGdal <- function(...)
     } else 
     {
         cat("pixelSize      = ",opts$pixelSize,"\n")
-        tr <- paste(" -tr", opts$pixelSize, opts$pixelSize,collapse=" ")                      
+        
+        if(opts$pixelSize=="asIn")
+        {
+            tr <- NULL
+        } else
+        {
+            tr <- paste(" -tr", opts$pixelSize, opts$pixelSize,collapse=" ")                      
+        }
     }
     
     opts$resamplingType <- checkResamplingType(opts$resamplingType, tool="gdal")
@@ -60,9 +67,9 @@ runGdal <- function(...)
         cat("Output projection specified by raster* object: ")
     } else 
     {
-        cat("outProj       = ")
+        cat("outProj        = ")
     }
-    opts$outProj <- checkOutProj(opts$outProj,tool="gdal")
+    opts$outProj <- MODIS:::checkOutProj(opts$outProj,tool="gdal")
     cat(opts$outProj,"\n")
         
     t_srs <- paste(' -t_srs \"',opts$outProj,'\"',sep='')
@@ -101,6 +108,9 @@ runGdal <- function(...)
                 {
                     opts$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
                     cat("No 'job' name specified, generated (date/time based)):",paste(opts$outDirPath,opts$job,sep="/"),"\n")
+                } else
+                {
+                    cat("'job' name     =")
                 }
                 outDir <- file.path(opts$outDirPath,opts$job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)

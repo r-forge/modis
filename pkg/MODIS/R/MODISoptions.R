@@ -85,6 +85,9 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     if(!missing(outDirPath))
     {
         opt$outDirPath <- outDirPath    
+    } else if (is.null(opt$outDirPath))
+    {
+        opt$outDirPath <- file.path(opts$localArcPath,"PROCESSED",fsep="/")
     }
     opt$outDirPath <- setPath(opt$outDirPath)
     write(paste('outDirPath   <- \'',setPath(opt$outDirPath),'\'',sep=''),filename)

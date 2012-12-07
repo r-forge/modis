@@ -99,7 +99,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     {
         return("asIn")    
     }
-    # this is here becaus we could think in a conversoin between GDAL and MRT inputs!
+    # this is here because we could think in a conversoin between GDAL and MRT inputs! (the possible once)
     MRTprojs <- matrix(byrow=T,ncol=2,
         c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
           "IGH", "Interrupted Goode Homolosine", "HAM", "Hammer", "ISIN", "Integerized Sinusoidal", 
@@ -110,27 +110,13 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     
     if (tool=="GDAL") # EPRS:xxxx or xxxx or "+proj=sin...." 
     { # EPSGinfo is lazy loaded (see: minorFuns.R)
-        if (substring(outProj,1,1)=="+") 
+        if(!inherits(outProj,"CRS"))
         {
-            if(length(grep(EPSGinfo$prj4,pattern=outProj))==0)
-            {
-                stop("'EPSG' code is not valid, plesae check!")
-            } else
-            {
-                return(outProj)
-            }
-        }
-        outProj <- as.numeric(gsub(outProj,pattern="EPSG:",replacement=""))
-        ind <- which(EPSGinfo$code==outProj) 
-        
-        if (length(ind)==0)
-        {
-            stop("checkOptProj Error: 'EPSG' information is not valid, please check CRS string!")
-        } else
-        {
-            return(EPSGinfo$prj4[ind])
+            outProj <- CRS(gsub(outProj,pattern="^EPSG:",replacement="+init=epsg:"))@projargs
+            return(outProj)
         }    
     }
+    
     if (tool == "MRT")
     {
         ind <- grep(MRTprojs,pattern=outProj,ignore.case=TRUE)

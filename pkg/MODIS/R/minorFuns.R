@@ -5,14 +5,17 @@ tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"
 load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
 # lazy load gdal EPSG
-EPSGinfo <- rgdal:::make_EPSG()
-
+if (require(rgdal))
+{
+    EPSGinfo <- make_EPSG() # if rgdal, make it new!
+} else
+{
+    load(system.file("external", "EPSGinfo.RData",package="MODIS"))
+}
+ 
 # lazy load of FTP information
-# save(MODIS_FTPinfo,file="~/MODIS_ftpinfo.RData") # in chase of changes
-MODIS_FTPinfo <- new.env()
-eval(parse(file.path(find.package("MODIS"), "external", "MODIS_FTPinfo.R")),envir=MODIS_FTPinfo) 
-MODIS_FTPinfo <- as.list(MODIS_FTPinfo)
-
+# save(MODIS_FTPinfo,file="~/MODIS_FTPinfo.RData") # in chase of changes
+load(system.file("external", "MODIS_FTPinfo.RData",package="MODIS")) 
 
 # central setting for stubbornness 
 .stubborn <- function(level="high")

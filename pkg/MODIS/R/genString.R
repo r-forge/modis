@@ -158,7 +158,7 @@
                 stop("Parameter 'what' must be 'images' or 'metadata'")
             }
                      
-            namesFTP <- names(names(MODIS_FTPinfo))
+            namesFTP <- names(MODIS_FTPinfo)
             Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
         
             remotePath <- list()
