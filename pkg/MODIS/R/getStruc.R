@@ -10,11 +10,10 @@
     {
         stop(".getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
     }
-
-    sturheit <- .stubborn(level=stubbornness)
-
-    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
-    dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
+    
+    opts <- combineOptions()
+    
+    sturheit <- .stubborn(level=opts$stubbornness)
 
     #########################
     # Check Platform and product
@@ -34,12 +33,12 @@
     ########################
 
     # load aux
-    if (!file.exists(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/")))
+    if (!file.exists(file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/")))
     {
-        invisible(file.copy(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep="")),file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/")))
+        invisible(file.copy(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep="")),file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/")))
     }
 
-    ftpdirs <- read.table(file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
+    ftpdirs <- read.table(file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
     good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
     ftpdirs <- ftpdirs[,good] # remove wrong cols
     
@@ -226,7 +225,7 @@
                         mtr[,todo[u]] <- replace(mtr[,todo[u]], 1:length(FtpDayDirs),FtpDayDirs)
                         ftpdirs <- mtr
             
-                        write.table(ftpdirs,file.path(auxPATH,paste(server,"_ftp.txt",sep=""),fsep="/"))
+                        write.table(ftpdirs,file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/"))
                     }
                 }
             }

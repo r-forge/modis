@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL,begin=NULL,end=NULL,ask=TRUE)
+delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=NULL, begin=NULL, end=NULL, ask=TRUE,...)
 {
     if (!ask)
     {
@@ -12,8 +12,7 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
     
     summaries <- 0
    
-
-    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
+    opts <- combineOptions(...)
 
     # product/dates/extent
     product     <- getProduct(x=product,quiet=TRUE)
@@ -68,7 +67,7 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
         
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
+                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     allLocal <- list.files(path,recursive=TRUE)
@@ -86,7 +85,7 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
             
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
+                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     
@@ -141,7 +140,8 @@ delHdf <- function(product,collection=NULL,extent="global",tileV=NULL,tileH=NULL
                                     options(warn=-2)
                                     try(xxx <- invisible(system(paste("rmdir -p --ignore-fail-on-non-empty ", dirs[i],sep=""),intern=TRUE)),silent=TRUE)
                                     options(warn=warn)
-                                } else { # work arount for rmdir -p on windows/MAC(?)
+                                } else 
+                                { # work arount for rmdir -p on Windows
                                     
                                     unlink(dirs[i],recursive=TRUE)
                                     secPath <- strsplit(dirs[i],"/")[[1]]

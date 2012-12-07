@@ -15,8 +15,7 @@
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(HdfName, product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL,
- dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE)}
+\usage{getHdf(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=1, checkSize=FALSE, ...)}
 
 \arguments{
 
@@ -35,16 +34,14 @@
   \item{extent}{see \code{'extent'} in \code{?getTile}.}
 
   \item{collection}{Character or integer. (Ignored if \code{HdfName} is provided.) Refers to the MODIS product collection-version. Often '005', but see MODIS pages or run \code{?getCollection} for more information.} 
-
-  \item{dlmethod}{Default \code{auto}. Argument passed to \code{?download.file}}
-
-  \item{stubbornness}{Default \code{veryhigh}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is welcome!} 
   
   \item{checkSize}{Logical. Default \code{FALSE}, MODIS-XML files are not downloaded and the "checkSum" is not done. If \code{TRUE} MODIS-HDF and corresponding MODIS-XML files are checked and downloaded and the filesize is checked. This takes more time than using \code{FALSE} but gives more security of data integrity. You can also run \code{?getXml} in a separate run, this function checks the MODIS archive for data integrity.}
     
   \item{wait}{Numeric. Default \code{1}. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
   \item{quiet}{Logical. Refers to all internal \code{download.file()} actions. Default \code{FALSE}, if \code{TRUE} the \code{getHdf()} becomes really boring.}
+
+  \item{...}{Arguments found in MODISoptions, sections 'STORAGE' and 'DOWNLOAD'}
 
 }
 

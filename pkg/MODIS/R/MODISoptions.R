@@ -72,8 +72,11 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!missing(localArcPath))
     {
-        opt$localArcPath < localArcPath
+        opt$localArcPath <- localArcPath
     }
+    
+    opt$localArcPath <- setPath(opt$localArcPath)
+    
     write(paste('localArcPath <- \'',opt$localArcPath,'\' # If you already have downloaded some files, don\'t forget to call the function \'orgStruc()\' after changing here!!', sep=''), filename)    
     write('  ', filename)
           
@@ -83,7 +86,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         opt$outDirPath <- outDirPath    
     }
-    write(paste('outDirPath   <- \'',opt$outDirPath,'\'',sep=''),filename)
+    opt$outDirPath <- setPath(opt$outDirPath)
+    write(paste('outDirPath   <- \'',setPath(opt$outDirPath),'\'',sep=''),filename)
           
     write('  ', filename)
   
@@ -118,7 +122,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!missing(resamplingType))
     {
-        opt$resamplingType <- resamlingType    
+        opt$resamplingType <- resamplingType    
     } 
     write(paste('resamplingType <- \'',opt$resamplingType,'\' # There are several layers that require "near" (i.e. VI_Quality, Day of the year,...)!',sep=''), filename)
     
@@ -140,7 +144,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('#########################', filename)
   
     write('# 4.) Windows specific section:', filename)
-    write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory; (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\")', filename)
+    write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL instllation (location of "gdalinfo"); (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\")', filename)
     write('# Or run: "MODIS:::.checkTools()" for autodetection.', filename)
     write('# Example :', filename)
     write('# gdalPath <- "C:/OSGeo4W/bin"', filename)
@@ -158,24 +162,54 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         opt$gdalPath <- opt$GDALpath
         write(paste('gdalPath <- "',opt$gdalPath,'"',sep=''), filename)
     }
-    
+   
     write('  ', filename)	
     close(filename)
+
+    # checks if the pointed GDAL supports HDF4 
+        
+    if (checkGdalDriver(opt$gdalPath)) 
+    { 
+        gdal <- 'enabled'
+    } else 
+    {
+        gdal <- 'disabled. Use "MODIS:::.checkTools("GDAL")" for more information!'
+    }
     
+    if(MODIS:::.checkTools(what="MRT",quiet=TRUE)$MRT==1)
+    {
+        mrt <- 'enabled'
+        opt$mrtPath <- TRUE
+    } else
+    {
+        mrt <- "disabled. Use MODIS:::.checkTools('MRT') for more information!"
+        opt$mrtPath <- FALSE
+    }
+    opt$auxPath <- paste(opt$localArcPath,"/.auxiliaries",sep="")
     if (print) 
     {
+        cat('\nSTORAGE\n')
         cat('localArcPath  :', opt$localArcPath, '\n' )
         cat('outDirPath    :', opt$outDirPath, '\n')
-        cat('auxPath       :', paste(opt$localArcPath,"/.auxiliaries",sep=""), '\n')
+        cat('auxPath       :', opt$auxPath , '\n\n')
+        cat('DOWNLOAD\n')
         cat('dlmethod      :', opt$dlmethod,'\n')
-        cat('stubbornness  :', opt$stubbornness,'\n')
-        cat('gdalPath      :', opt$gdalPath, '\n')
+        cat('stubbornness  :', opt$stubbornness,'\n\n')
+        cat('PROCESSING\n')
+        cat('GDAL          :', gdal, '\n')
+        cat('MRT           :', mrt, '\n')
         cat('pixelSize     :', opt$pixelSize, '\n')
         cat('outProj       :', opt$outProj, '\n')
-        cat('resamplingType:', opt$resamplingType, '\n')
+        cat('resamplingType:', opt$resamplingType, '\n\n')
     }
+    
+    # set the options
+    for (i in seq_along(opt))
+    {
+        eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
+    }
+    options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
+    
 }   
 
 
-
-MODISoptions()

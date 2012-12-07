@@ -7,15 +7,22 @@ load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 # lazy load gdal EPSG
 EPSGinfo <- rgdal:::make_EPSG()
 
+# lazy load of FTP information
+# save(MODIS_FTPinfo,file="~/MODIS_ftpinfo.RData") # in chase of changes
+MODIS_FTPinfo <- new.env()
+eval(parse(file.path(find.package("MODIS"), "external", "MODIS_FTPinfo.R")),envir=MODIS_FTPinfo) 
+MODIS_FTPinfo <- as.list(MODIS_FTPinfo)
+
+
 # central setting for stubbornness 
 .stubborn <- function(level="high")
 {
     if (is.numeric(level)) 
     {
-        sturheit <- level    
+        level    
     } else 
     {
-        sturheit <- c(5,50,100,1000,10000)[which(level==c("low","medium","high","veryhigh","extreme"))]
+        c(5,15,50,100,1000)[which(level==c("low","medium","high","veryhigh","extreme"))]
     }
 }
 
@@ -115,8 +122,8 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
 
 .checkTools <- function(what=c("MRT","GDAL"), quiet=FALSE)
 {
-    what<-toupper(what)
-    iw <- options()$warn 
+    what <-toupper(what)
+    iw   <- options()$warn 
     options(warn=-1)
     
     MRT  <- NULL

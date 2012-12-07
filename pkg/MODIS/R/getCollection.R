@@ -3,12 +3,11 @@
 # Licence GPL v3
 
 
-getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character",stubbornness="high",quiet=TRUE)
+getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character",quiet=TRUE)
 {
 
-
-    auxPATH <- file.path(MODISpackageOpts$localArcPath,".auxiliaries",fsep="/")
-    dir.create(auxPATH,showWarnings=FALSE)
+    opts <- combineOptions()
+    opts$auxPath <- MODIS:::setPath(opts$auxPath)
 
     ####
     # checks for product
@@ -23,12 +22,12 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
     }
 
     # load aux
-    if (!file.exists(file.path(auxPATH,"collections.RData",fsep="/"))) # on the very first call use the delivered pre-updated version    
+    if (!file.exists(file.path(opts$auxPath,"collections.RData",fsep="/"))) # on the very first call use the delivered pre-updated version    
     {
-        invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(auxPATH,"collections.RData",fsep="/")))
-        unlink(file.path(auxPATH,"collections.txt",fsep="/"))
+        invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(opts$auxPath,"collections.RData",fsep="/")))
+        unlink(file.path(opts$auxPath,"collections.txt",fsep="/"))
     }
-    load(file.path(auxPATH,"collections.RData",fsep="/"))
+    load(file.path(opts$auxPath,"collections.RData",fsep="/"))
     
     # clean file
     MODIS <- ftpdirs[,grep(colnames(ftpdirs),pattern="M.D")]
@@ -43,7 +42,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 	        {
 	    	    stop("You need to install the 'RCurl' package: install.packages('RCurl')")
 	        }
-		    sturheit <- .stubborn(level=stubbornness)
+		    sturheit <- .stubborn(level=opts$stubbornness)
 
     		for (i in 1:length(unique(productN$PF1))) 
     		{		
@@ -102,7 +101,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
     		}
     	}
     }
-    save(ftpdirs,file = file.path(auxPATH,"collections.RData",fsep="/"))
+    save(ftpdirs,file = file.path(opts$auxPath,"collections.RData",fsep="/"))
     ind <- which(colnames(ftpdirs)%in%productN$PRODUCT)
 
     if(length(ind)==1)

@@ -7,11 +7,13 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
 
     method <- tolower(method) 
     fsep <- .Platform$file.sep
-
+    
+    opts <- combineOptions()
+    
     if (!file.exists(HdfName)) 
     {
         cat("Hm, I have to search for the file! Next time provide the full path and I'll be very fast!\n")
-        HdfName <- normalizePath(list.files(path=MODISpackageOpts$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
+        HdfName <- normalizePath(list.files(path=opts$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
     }
     
     HdfName <- HdfName[1]

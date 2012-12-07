@@ -23,6 +23,7 @@ export("orgTime")
 export("smooth.spline.raster")
 export("whittaker.raster")
 export("makeWeights")
+export("MODISoptions")
 
 exportPattern(".+WS$")
 

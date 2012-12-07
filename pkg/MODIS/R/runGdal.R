@@ -1,207 +1,89 @@
 
 runGdal <- function(...)
 {
+     
+    opts <- combineOptions(...)
 
-    if (MODIS:::.checkTools(what="GDAL",quiet=TRUE)$GDAL!=1)
-    {
-        if (.Platform$OS == "unix")
-        {
-            stop("GDAL path not set (properly) or GDAL not installed on your system!")
-        } else {
-            stop("'FWTools'/'OSGeo4W' (GDAL with hdf4 support on Windows) path not set (properly) or not installed on your system! see: 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/'")
-        }
-    }
-    
-    pm <- list(...)
-
-    if (is.null(pm$localArcPath))
-    {
-        pm$localArcPath <- MODISpackageOpts$localArcPath
-    }
-    
     # absolutly needed
-    pm$product <- getProduct(pm$product,quiet=TRUE)
+    opts$product <- getProduct(opts$product,quiet=TRUE)
     
     # optional and if missing it is added here:
-    pm$product$CCC <- getCollection(pm$product,collection=pm$collection)
-    tLimits        <- transDate(begin=pm$begin,end=pm$end)
+    opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
+    tLimits        <- transDate(begin=opts$begin,end=opts$end)
 
     ################################
     # Some defaults:
-    if (is.null(pm$quiet))    {pm$quiet <- FALSE} 
-    if (is.null(pm$dlmehtod)) {pm$dlmehtod <- "auto"} 
-    if (is.null(pm$stubbornness)) {pm$stubbornness <- "high"} 
-
-
-    # auxPath
-    auxPATH <- file.path(pm$localArcPath,".auxiliaries",fsep="/")
-    dir.create(auxPATH,recursive=TRUE,showWarnings=FALSE)
-    #################
-
-    if (is.null(pm$outDirPath))
-    {
-        pm$outDirPath <- MODISpackageOpts$outDirPath
-    }
-    pm$outDirPath <- normalizePath(path.expand(pm$outDirPath), winslash = "/",mustWork=FALSE)
-    pm$outDirPath <- paste(strsplit(pm$outDirPath,"/")[[1]],collapse="/")
-    dir.create(pm$outDirPath,showWarnings=FALSE,recursive=TRUE)
-    # test local outDirPath
-    try(testDir <- list.dirs(pm$outDirPath),silent=TRUE)
-    if(!exists("testDir")) 
-    {
-        stop("'outDirPath' not set properly!")
-    } 
-    ##############
+    if (is.null(opts$quiet))    {opts$quiet <- FALSE} 
 
     #### settings with messages
 
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
+    opts$extent <- getTile(extent=opts$extent,tileH=opts$tileH,tileV=opts$tileV,buffer=opts$buffer)
     
     tr <- NULL
     
-    # was wrong in doc and code!
-    if (!is.null(pm$pixelsize)) 
+    if (!is.null(opts$extent$target$resolution[[1]]))
     {
-        pm$pixelSize <- pm$pixelsize
-        warning("Please, next time use 'pixelSize' instead of 'pixelsize'")
-    }
-    
-    if (is.null(pm$pixelSize))
-    {
-
-        if (!is.null(pm$extent$target$resolution[[1]]))
-        {
-            tr <- paste(" -tr", paste(pm$extent$target$resolution, collapse=" "))
-            cat("Output pixelSize specified by raster* object:", paste(pm$extent$target$resolution,collapse=" "),"\n")            
-        } else
-        {
-            cat("No output 'pixelSize' specified, input size used!\n")
-        }
-    
+        tr <- paste(" -tr", paste(opts$extent$target$resolution, collapse=" "))
+        cat("Output pixelSize specified by raster* object:", paste(opts$extent$target$resolution,collapse=" "),"\n")            
     } else 
     {
+        cat("pixelSize      = ",opts$pixelSize,"\n")
+        tr <- paste(" -tr", opts$pixelSize, opts$pixelSize,collapse=" ")                      
+    }
     
-        cat("Output 'pixelSize' specified:",pm$pixelSize,"\n")
-        tr <- paste(" -tr", pm$pixelSize, pm$pixelSize,collapse=" ")                      
+    opts$resamplingType <- checkResamplingType(opts$resamplingType, tool="gdal")
+    cat("resamplingType = ", opts$resamplingType,"\n")
+    rt <- paste(" -r",opts$resamplingType)
     
+    # some support for mrt-style settings
+    if (opts$outProj == "GEOGRAPHIC")
+    {
+        opts$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+    }
+    
+    if (opts$outProj == "asIn")
+    {
+        if (opts$product$SENSOR=="MODIS")
+        {
+            opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
+        } else if (opts$product$SENSOR=="SRTM")
+        {
+            opts$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+        } 
     }
 
-    if (is.null(pm$resamplingType))
+    if (!is.null(opts$extent$target$t_srs))
     {
-        pm$resamplingType <- MODIS:::.getDef("resamplingType")
-
-        if (toupper(pm$resamplingType) == "NN")
-        {
-            rt <- "near"
-        } else
-        {
-            rt <- tolower(pm$resamplingType)
-        }
-        
-        if (!rt %in% c("near", "bilinear","cubic","cubicspline","lanczos"))  
-        {
-            stop('"resamplingType" must be one of: "near","bilinear","cubic","cubicspline","lanczos"')
-        }
-        
-        cat("No 'resamplingType' specified, using default: ",rt,"\n",sep="")
+        opts$outProj <- opts$extent$target$t_srs
+        cat("Output projection specified by raster* object: ")
     } else 
-    {    
-
-        if (toupper(pm$resamplingType) == "NN")
-        {
-            rt <- "near"
-        } else
-        {
-            rt <- tolower(pm$resamplingType)
-        }
-        
-        if (!rt %in% c("near", "bilinear", "cubic", "cubicspline", "lanczos"))
-        {
-            stop("'resamplingType' must be one of: 'near','bilinear','cubic','cubicspline','lanczos'")
-        }
-        cat("Resampling method: ", rt,"\n")
+    {
+        cat("outProj       = ")
     }
-    rt <- paste(" -r",rt)
+    opts$outProj <- checkOutProj(opts$outProj,tool="gdal")
+    cat(opts$outProj,"\n")
+        
+    t_srs <- paste(' -t_srs \"',opts$outProj,'\"',sep='')
     
-    if (is.null(pm$outProj))
-    {
-
-        if (!is.null(pm$extent$target$t_srs))
-        {
-            pm$outProj <- pm$extent$target$t_srs
-            cat("Output projection specified by raster* object: '", pm$outProj,"'\n",sep="")
-        } else 
-        {
-            pm$outProj <- MODIS:::.getDef("outProj")
-            cat("No 'outProj' specified, using ", pm$outProj,"\n",sep="")
-        }
-
-    }
-    # some support of mrt setting
-    if (pm$outProj=="GEOGRAPHIC")
-    {
-        pm$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-    }
-    
-    if (pm$outProj=="asIn")
-    {
-        if (pm$product$SENSOR=="MODIS")
-        {
-            pm$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
-        } else if (pm$product$SENSOR=="SRTM")
-        {
-            pm$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-        } 
-    }
-        
-    if (length(grep(pm$outProj,pattern="^EPSG:",ignore.case=TRUE))==1 | !is.na(as.numeric(pm$outProj)))
-    {
-        require(rgdal)
-        epsg <- EPSGinfo
-        
-        outProj <- strsplit(as.character(pm$outProj),":")[[1]]
-        outProj <- as.numeric(outProj[length(outProj)])
-        
-        outProj <- epsg[grep(pattern=outProj, epsg$code),3]
-        
-        if (length(outProj)==0)
-        {
-            stop("Unknown EPSG code. Please check!")
-        } 
-           
-        pm$outProj <- outProj
-    }
-    t_srs <- paste(' -t_srs \"',pm$outProj,'\"',sep='')
-    
-    if (pm$product$SENSOR=="MODIS")
+    if (opts$product$SENSOR=="MODIS")
     {
         s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
-    } else if (pm$product$SENSOR=="SRTM")
+    } else if (opts$product$SENSOR=="SRTM")
     {
         s_srs <- ' -s_srs \"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs\"'
     }
      
-    for (z in 1:length(pm$product$PRODUCT))
+    for (z in 1:length(opts$product$PRODUCT))
     {
-        
-#        if (pm$product$TYPE[z]=="CMG") 
-#        {
-#            tileID <- "GLOBAL"
-#            ntiles <- 1 
-#        } else {
-#            pm$extent <- getTile(extent=pm$extent,tileH=pm$tileH,tileV=pm$tileV,buffer=pm$buffer)
-#            ntiles    <- length(pm$extent$tile)
-#        }
-    
-        todo <- paste(pm$product$PRODUCT[z],".",pm$product$CCC[[pm$product$PRODUCT[z]]],sep="")    
+        todo <- paste(opts$product$PRODUCT[z],".",opts$product$CCC[[opts$product$PRODUCT[z]]],sep="")    
     
         for(u in 1:length(todo))
         {
             MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
             ftpdirs <- list()
-            ftpdirs[[1]] <- read.table(file.path(auxPATH,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
             
             prodname <- strsplit(todo[u],"\\.")[[1]][1] 
             coll     <- strsplit(todo[u],"\\.")[[1]][2]
@@ -215,19 +97,19 @@ runGdal <- function(...)
             {
                 avDates <- avDates[us]
     
-                if (is.null(pm$job))
+                if (is.null(opts$job))
                 {
-                    pm$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
-                    cat("No 'job' name specified, generated (date/time based)):",paste(pm$outDirPath,pm$job,sep="/"),"\n")
+                    opts$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
+                    cat("No 'job' name specified, generated (date/time based)):",paste(opts$outDirPath,opts$job,sep="/"),"\n")
                 }
-                outDir <- file.path(pm$outDirPath,pm$job,fsep="/")
+                outDir <- file.path(opts$outDirPath,opts$job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
     
                 for (l in 1:length(avDates))
                 { 
                     files <- unlist(
                                 getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
-                                tileH=pm$extent$tileH, tileV=pm$extent$tileV, stubbornness=pm$stubbornness)
+                                tileH=opts$extent$tileH, tileV=opts$extent$tileV, stubbornness=opts$stubbornness)
                              )
                     files <- files[basename(files)!="NULL"]
                     
@@ -236,7 +118,7 @@ runGdal <- function(...)
         			SDS <- list()
         			for (z in seq(along=files))
         			{ # get all SDS names for one chunk
-        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=pm$SDSstring, method="gdal")
+        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=opts$SDSstring, method="gdal")
         			}
         			options("warn"= w)					
     
@@ -248,54 +130,54 @@ runGdal <- function(...)
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
                         te <- NULL
-                        if ( !is.null(pm$extent$extent) )
+                        if ( !is.null(opts$extent$extent) )
                         {
-                            if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != pm$outProj)
+                            if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != opts$outProj)
                             {   
-                                if (!is.null(pm$extent$target$extent))
+                                if (!is.null(opts$extent$target$extent))
                                 {
-                                    te <- paste(" -te", pm$extent$target$extent@xmin, pm$extent$target$extent@ymin,
-                                    pm$extent$target$extent@xmax, pm$extent$target$extent@ymax, collapse=" ") 
+                                    te <- paste(" -te", opts$extent$target$extent@xmin, opts$extent$target$extent@ymin,
+                                    opts$extent$target$extent@xmax, opts$extent$target$extent@ymax, collapse=" ") 
                         
                                 } else 
                                 {
                                     
-                                    xy <- matrix(c(pm$extent$extent@xmin, pm$extent$extent@ymin, pm$extent$extent@xmin,
-                                        pm$extent$extent@ymax, pm$extent$extent@xmax,
-                                        pm$extent$extent@ymax, pm$extent$extent@xmax, pm$extent$extent@ymin),
+                                    xy <- matrix(c(opts$extent$extent@xmin, opts$extent$extent@ymin, opts$extent$extent@xmin,
+                                        opts$extent$extent@ymax, opts$extent$extent@xmax,
+                                        opts$extent$extent@ymax, opts$extent$extent@xmax, opts$extent$extent@ymin),
                                         ncol=2, nrow=4, byrow=TRUE)
                                     colnames(xy) <- c("x","y")
 				                    xy <- as.data.frame(xy)
 				                    coordinates(xy) <- c("x","y")
 				                    proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-                                    outBB <- spTransform(xy,CRS(pm$outProj))@bbox
+                                    outBB <- spTransform(xy,CRS(opts$outProj))@bbox
 				                    te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
                                 
                                 }
                             
                             } else
                             {
-                                te <- paste(" -te", pm$extent$extent@xmin,pm$extent$extent@ymin,pm$extent$extent@xmax,pm$extent$extent@ymax,collapse=" ")  
+                                te <- paste(" -te", opts$extent$extent@xmin,opts$extent$extent@ymin,opts$extent$extent@xmax,opts$extent$extent@ymax,collapse=" ")  
                             }
                         }
                         
                         #### generate non-obligatory GDAL arguments
                         
                         # GeoTiff BLOCKYSIZE and compression. See: http://www.gdal.org/frmt_gtiff.html                          
-                        if(is.null(pm$blockSize))
+                        if(is.null(opts$blockSize))
                         {
                             bs <- NULL
                         } else
                         {
-                            pm$blockSize <- as.integer(pm$blockSize)
-                            bs <- paste(" -co BLOCKYSIZE=",pm$blockSize,sep="")
+                            opts$blockSize <- as.integer(opts$blockSize)
+                            bs <- paste(" -co BLOCKYSIZE=",opts$blockSize,sep="")
                         }
                         
                         # compress output data
-                        if(is.null(pm$compression))
+                        if(is.null(opts$compression))
                         {
                             cp <- " -co compress=lzw -co predictor=2"
-                        } else if (isTRUE(pm$compression))
+                        } else if (isTRUE(opts$compression))
                         {
                             cp <- " -co compress=lzw -co predictor=2"
                         } else

@@ -2,19 +2,16 @@
 # Date : Oktober 2012
 # Licence GPL v3
 
-checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", localArcPath=.getDef('localArcPath'))
+checkSize <- function(HdfName, flexB=0,...)
 {
-    # 4 debug
-    # quiet=FALSE;dlmethod="auto";stubbornness="low";localArcPath=MODIS:::.getDef('localArcPath'); u=1;j=1
+    # debuging
+    # u=1; j=1
     
-    localArcPath <- paste(strsplit(localArcPath,"/")[[1]],collapse="/")# removes "/" or "\" on last position (if present)
-    dir.create(localArcPath,showWarnings=FALSE)
-    # test local localArcPath
-    try(testDir <- list.dirs(localArcPath,recursive=FALSE), silent=TRUE)
-    if(!exists("testDir")) {stop("'localArcPath' not set properly!")} 
-    #################
+    opts <- combineOptions(...)
     
-    sturheit <- MODIS:::.stubborn(level=stubbornness)
+    opts$localArcPath <- MODIS:::setPath(opts$localArcPath)
+    
+    sturheit <- MODIS:::.stubborn(level=opts$stubbornness)
 
     if(!missing(HdfName)) 
     {
@@ -28,7 +25,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                 avFiles[[i]] <- HdfName[i] 
             } else 
             {
-                avFiles[[i]] <- list.files(localArcPath,pattern=HdfName[i],recursive=TRUE,full.names=TRUE)
+                avFiles[[i]] <- list.files(opts$localArcPath,pattern=HdfName[i],recursive=TRUE,full.names=TRUE)
                 avFiles[[i]] <- grep(avFiles[[i]], pattern=".hdf$",value=TRUE) # no ".hdf.xml" files, only ".hdf" 
             }
         }
@@ -36,7 +33,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
     avFiles <- unlist(avFiles)
     } else 
     {
-        avFiles <- list.files(localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under 'localArcPath'
+        avFiles <- list.files(opts$localArcPath,pattern=".hdf$",recursive=TRUE,full.names=TRUE) # all hdf under 'localArcPath'
     }
     avFiles <- normalizePath(avFiles,winslash="/")
     # tests if it is a MODIS-grid file(s) (TODO proper function that checks that)
@@ -56,7 +53,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
             product    <- getProduct(avFiles[u],quiet=TRUE)
             fdate      <- MODIS:::.getPart(product,"DATE")
             collection <- MODIS:::.getPart(product,"CCC")
-            path       <- MODIS:::.genString(product,localArcPath=localArcPath)
+            path       <- MODIS:::.genString(product,localArcPath=opts$localArcPath)
             
             Sinfo <- seq_along(path$remotePath)
             refFile <- rep(0,length(Sinfo))
@@ -166,7 +163,7 @@ checkSize <- function(HdfName, flexB=0, dlmethod="auto", stubbornness="low", loc
                         try(hdf <- download.file(
                             paste(path$remotePath[j],"/",avFiles[u],sep=""),
                             destfile=paste(path$localPath, "/",avFiles[u],sep=""),
-                            mode='wb', method=dlmethod, quiet=FALSE, cacheOK=FALSE)
+                            mode='wb', method=opts$dlmethod, quiet=FALSE, cacheOK=FALSE)
                         ,silent=TRUE)
                         
                         if (MODIS:::.checksizefun(file=paste(path$localPath,"/",avFiles[u],sep=""), sizeInfo = info, flexB = flexB)$isOK)

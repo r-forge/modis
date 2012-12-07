@@ -4,17 +4,18 @@
 
 # 'date' is an EXISTING date! result from .getStruc() and passed as single date! For format see ?transDate
 
-.genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, localArcPath=.getDef("localArcPath"))
+.genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, ...)
 {
+        
     if (missing(x)) 
     {
-        stop("'x' must be a file name or a product name!")
+        stop(".genString Error: 'x' must be a file name or a product name!")
     }
 
     product <- getProduct(x=x,quiet=TRUE)
     if(length(product$PRODUCT)>1)
     {
-        cat(".genString() does not support multiple products! Generating the string only for the first:",product$PRODUCT[1],"\n")
+        cat(".genString() does not support multiple products! Generating 'path' only for the first:",product$PRODUCT[1],"\n")
         product <- lapply(product,function(x){x[1]}) # take only the first argument
     }
     
@@ -28,13 +29,14 @@
         product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) # generates MODIS file date format "AYYYYDDD"
     }
     
+    opts <- combineOptions(...)
+    remotePath <- localPath <- NULL
+    
     if (is.null(product$DATE)) # if x is a PRODUCT and date is not provided 
     { 
-        
         if (local) 
         {
-            struc <- MODISpackageOpts$arcStructure
-            tempString <- strsplit(struc,"/")[[1]]
+            tempString <- strsplit(opts$arcStructure,"/")[[1]]
             
             string <- list()
             l=0
@@ -65,11 +67,11 @@
                     }
                 }
             }
-        localPath <- path.expand(paste(MODISpackageOpts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+        localPath <- path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
         }
         if (remote) 
         {
-            namesFTP <- names(MODISpackageOpts)
+            namesFTP <- names(MODIS_FTPinfo)
             Hmany <- grep(namesFTP,pattern="^ftpstring*.")
             
             remotePath <- list()
@@ -77,7 +79,7 @@
             for (e in Hmany)
             {
        
-                stringX <- MODISpackageOpts[[e]]
+                stringX <- MODIS_FTPinfo[[e]]
                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {
@@ -122,15 +124,12 @@
                 }
             }
         }
-        return(list(localPath=if(local){localPath} else {NULL}, remotePath=if(remote){remotePath} else {NULL}))
-
     } else 
     { # if x is a file name
             
         if (local) 
         {
-            struc <- MODISpackageOpts$arcStructure
-            tempString <- strsplit(struc,"/")[[1]]
+            tempString <- strsplit(opts$arcStructure,"/")[[1]]
         
             string <- list()
             l=0
@@ -149,7 +148,7 @@
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
             }    
-        localPath <- path.expand(paste(MODISpackageOpts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+        localPath <- path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
         }
 
         if (remote) 
@@ -159,14 +158,14 @@
                 stop("Parameter 'what' must be 'images' or 'metadata'")
             }
                      
-            namesFTP <- names(MODISpackageOpts)
+            namesFTP <- names(names(MODIS_FTPinfo))
             Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
         
             remotePath <- list()
             n = 0
             for (e in Hmany)
             {
-                stringX <- MODISpackageOpts[[e]]
+                stringX <- MODIS_FTPinfo[[e]]
                 
                 # if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
@@ -197,7 +196,7 @@
                 }
             }        
         }
-    return(list(localPath=if(local){localPath} else {NULL}, remotePath=if(remote){remotePath} else {NULL}))
     }        
+    return(list(localPath=localPath, remotePath=remotePath))
 }
 

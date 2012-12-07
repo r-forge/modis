@@ -7,7 +7,7 @@ setPath <- function(path)
         stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
         warning(path," does not exists, it will be created!")
     }
-    path
+    normalizePath(path,"/")
 }
 
 # this function handles the parameter resamplingTpye and must be placed inside runMrt() and runGdal()
@@ -93,13 +93,21 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     tool <- toupper(tool)
     if (!tool %in% c("GDAL", "MRT"))
     {
-        stop("Unknown 'tool'. Allowed are 'MRT' or 'GDAL'")
+        stop("checkOptProj Error: Unknown 'tool'. Allowed are 'MRT' or 'GDAL'")
         
     }
     if(outProj=="asIn") # lot of troubles because of this!
     {
         return("asIn")    
     }
+    # this is here becaus we could think in a conversoin between GDAL and MRT inputs!
+    MRTprojs <- matrix(byrow=T,ncol=2,
+        c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
+          "IGH", "Interrupted Goode Homolosine", "HAM", "Hammer", "ISIN", "Integerized Sinusoidal", 
+          "LA", "Lambert Azimuthal Equal Area", "LCC", "Lambert Conformal Conic", 
+          "MERCAT", "Mercator", "MOL", "Molleweide", "PS", "Polar Stereographic", 
+          "SIN", "Sinusoidal", "TM", "Transverse Mercator", "UTM", "Universal Transverse Mercator"),
+          dimnames=list(NULL,c("short","long")))
     
     if (tool=="GDAL") # EPRS:xxxx or xxxx or "+proj=sin...." 
     { # EPSGinfo is lazy loaded (see: minorFuns.R)
@@ -118,7 +126,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
         
         if (length(ind)==0)
         {
-            stop("'EPSG' code is not valid, please check!")
+            stop("checkOptProj Error: 'EPSG' information is not valid, please check CRS string!")
         } else
         {
             return(EPSGinfo$prj4[ind])
@@ -126,14 +134,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     }
     if (tool == "MRT")
     {
-        MRTprojs <- matrix(byrow=T,ncol=2,c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
-                                            "IGH", "Interrupted Goode Homolosine", "HAM", "Hammer", "ISIN", "Integerized Sinusoidal", 
-                                            "LA", "Lambert Azimuthal Equal Area", "LCC", "Lambert Conformal Conic", 
-                                            "MERCAT", "Mercator", "MOL", "Molleweide", "PS", "Polar Stereographic", 
-                                            "SIN", "Sinusoidal", "TM", "Transverse Mercator", "UTM", "Universal Transverse Mercator"),
-                                            dimnames=list(NULL,c("short","long")))
-        
-        ind <- which(MRTprojs==outProj)
+        ind <- grep(MRTprojs,pattern=outProj,ignore.case=TRUE)
         
         if(length(ind)==0)
         {
@@ -150,25 +151,76 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     }
 }
 
-# well doOptions() would do the entire job, maybe it is somehow redundant processing to do it like that. Maybe it makes more sense to put the single funs (setPath,...) in the parameter retrieval/generation part in the function itself (getHdf,runGdal,runMrt,...) so only required argumetns are checked.
- 
-doOptions <- function(tool, quiet=FALSE,...) 
+
+
+# returns 0 if a given GDAL supports HDF4 else 1 
+checkGdalDriver <- function(path=NULL)
 {
-    opts  <- MODIS:::.getDef()
-    Fopts <- list(...)
+    if(.Platform$OS=="windows")
+    {
+        if(!is.null(path))
+        {
+            path <- paste(normalizePath(path,"\\",mustWork=FALSE),sep="")
+            path <- paste(paste(strsplit(path,"\\\\")[[1]],sep="",collapse="\\"),"\\",sep="")
+            path <- shortPathName(path)
+        }
+        
+        driver <- shell(paste(path,'gdalinfo.exe --formats',sep=""),intern=TRUE)
+        if(length(grep(driver,pattern="HDF4"))==0)
+        {
+            # test file from HDF group http://www.hdfgroup.org/tutorial4.html 
+            try(test <- shell(paste(path,'gdalinfo ',shortPathName(system.file("external", "sdunl.hdf", package="MODIS")),sep=""),intern=TRUE),silent=TRUE) 
+            if (test[1]!="Driver: HDF4Image/HDF4 Dataset")
+            {
+                FALSE
+            } else 
+            {
+                TRUE    
+            }
+        } else 
+        {
+            TRUE
+        }
+    } else
+    { # Linux...should always work with any GDAL... but so it is schecked it it is on path or not installed!
+        if (is.null(path))
+        {
+            try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)
+        } else
+        {
+            try(driver <- system(paste(file.path(path,'gdalinfo'),' --formats',sep=""),intern=TRUE), silent=TRUE)
+        }
+        
+        if(length(grep(driver,pattern="HDF4"))==0)
+        {
+            FALSE
+        } else
+        {
+            TRUE
+        }
+    }
+}        
+ 
+combineOptions <- function(...) 
+{
+    opts <- options() # collects all defaults
+    opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
+    if(length(opts)==0)
+    {
+        MODISoptions()    
+        opts <- options() # collects all defaults
+        opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
+    }
+    
+    names(opts) <- gsub(names(opts),pattern="MODIS_",replacement="") # convert names to function arg style 
+
+    Fopts <- list(...) # collects fun args
     
     # overwrite 'opts' with 'Fopts'
     if (!is.null(Fopts))
     {
         opts <- c(Fopts, opts[(!names(opts) %in% names(Fopts))])
     }
-    
-    opts$localArcPath   <- MODIS:::setPath(opts$localArcPath)
-    opts$outDirPath     <- MODIS:::setPath(opts$outDirPath)
-    opts$auxPath        <- dir.create(paste(opts$localArcPath,"/.auxiliaries",sep=""),showWarnings=FALSE)
-    opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType,tool=tool,quiet=quiet)  
-    opts$pixelSize      <- opts$pixelSize 
-    opts$outProj        <- MODIS:::checkOutProj(opts$outProj,tool=tool,quiet=quiet)
 return(opts)
 }
 

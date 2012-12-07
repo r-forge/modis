@@ -3,13 +3,13 @@
 # Licence GPL v3
   
 
-getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, dlmethod="auto", stubbornness="high", quiet=FALSE, wait=1, checkSize=FALSE) 
+getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkSize=FALSE,...) 
 {
 
-    opts <- doOptions(...)
+    opts <- combineOptions(...)
     
-    sturheit <- MODIS:::.stubborn(level=stubbornness)
-    wait <- as.numeric(wait)
+    sturheit <- MODIS:::.stubborn(level=opts$stubbornness)
+    wait     <- as.numeric(wait)
     
     # TODO HdfName as regex
     if (!missing(HdfName))
@@ -25,8 +25,8 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             rm(fname)
     
             product <- getProduct(x=HdfName[i],quiet=TRUE)    
-            path    <- MODIS:::.genString(product)
-            dir.create(path$localPath,recursive=TRUE,showWarnings=FALSE)
+            path    <- MODIS:::.genString(product,opts)
+            MODIS:::setPath(path$localPath)
         
             if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) 
             {
@@ -43,10 +43,10 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         try(hdf <- download.file(
                             paste(path$remotePath[[x]],"/",HdfName[i],sep=""),
                             destfile=paste(path$local,"/",HdfName[i],sep=""),
-                            mode='wb', method=dlmethod, quiet=qi, cacheOK=FALSE)
+                            mode='wb', method=opts$dlmethod, quiet=qi, cacheOK=FALSE)
                         )
                         if (hdf!=0 & !quiet) {cat("Remote connection fail! Re-try:",g,"\r")} 
-                        if (hdf==0 & !quiet & g>1) {cat("Downloaded after:",g,"retries\n")}
+                        if (hdf==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n")}
                         if (hdf==0 & !quiet & g==1) {cat("Downloaded by the first try!\n")}
                         if (hdf==0) {break}    
                         Sys.sleep(wait)
@@ -62,7 +62,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                 while(g <= sturheit) 
                 {
                     if (g==1){qi <- quiet} else { qi <- TRUE}
-                    try(xml <- checkSize(HdfName = HdfName[i],quiet=qi,dlmethod=dlmethod))
+                    try(xml <- checkSize(HdfName = HdfName[i],quiet=qi,dlmethod=opts$dlmethod))
                     if(sum(xml)==0) {break}
                     g=g+1
                 }
@@ -129,7 +129,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         {
             cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once (the metadata is not used at the moment!)\n")
             download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
-            mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE)
+            mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE)
         }
         if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/")))
         {
@@ -177,7 +177,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         hdf <- download.file(
                             paste(path$remotePath[[server[g]]],"/", files[d],sep=""),
                             destfile=paste(path$localPath,"/", files[d], sep=""),
-                            mode='wb', method=dlmethod, quiet=quiet, cacheOK=TRUE),
+                            mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE),
                         silent=TRUE
                     )
                     if (hdf==0) 
@@ -361,7 +361,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                                     hdf <- download.file(
                                                     paste(path$remotePath[[server]],"/", HDF,sep=""),
                                                     destfile=paste(path$localPath,"/", HDF, sep=""),
-                                                    mode='wb', method=dlmethod, quiet=quiet, cacheOK=FALSE),
+                                                    mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),
                                                     silent=TRUE
                                                 )
 

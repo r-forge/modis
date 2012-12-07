@@ -2,13 +2,23 @@
 # Date: August 2011
 # Licence GPL v3
 
-orgStruc <- function(source=.getDef("localArcPath"),to=.getDef("localArcPath"),structure=.getDef('arcStructure'), pattern, move=TRUE, quiet=FALSE)
+orgStruc <- function(source,to,structure, pattern, move=TRUE, quiet=FALSE)
 {	
 	
+	opts <- combineOptions()
+    if (missing(source))
+    {
+        source <- opts$localArcPath
+    }
     source <- normalizePath(source,"/", mustWork = TRUE)
-
+    
+    if (missing(to))
+    {
+        to <- opts$localArcPath
+    }
+    
     to <- normalizePath(to,"/",mustWork = FALSE)
-    dir.create(to, showWarnings = FALSE, recursive = TRUE)
+    MODIS:::setPath(to)
     
     ###########################
     
