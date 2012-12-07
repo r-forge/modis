@@ -125,7 +125,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
 
 .checkTools <- function(what=c("MRT","GDAL"), quiet=FALSE)
 {
-    what <-toupper(what)
+    what <- toupper(what)
     iw   <- options()$warn 
     options(warn=-1)
     
@@ -134,7 +134,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
         
     if ("MRT" %in% what)
     {
-        MRT <- 0
+        MRT   <- 0
         mrtH  <- normalizePath(Sys.getenv("MRT_HOME"), winslash="/", mustWork = FALSE)
         mrtDD <- normalizePath(Sys.getenv("MRT_DATA_DIR"), winslash="/", mustWork = FALSE)
         
@@ -170,7 +170,8 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     if ("GDAL" %in% what)
     {
         GDAL <- 0
- 
+        opts <- MODIS:::combineOptions()
+        
         if (.Platform$OS=="unix")
         {    
             if (!quiet)
@@ -197,21 +198,19 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                 cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
             # if GDALpath is not set manually, try if it is already in the system settings
-            if (is.null(MODIS:::MODISpackageOpts$GDALpath))
+            if (is.null(opts$gdalPath))
             {
                 cmd <- 'gdalinfo --version'
             } else
             {
-                cmd <- file.path(shortPathName(MODIS:::MODISpackageOpts$GDALpath),'gdalinfo --version',fsep="\\")            
+                cmd <- file.path(shortPathName(opts$gdalPath),'gdalinfo --version',fsep="\\")            
             }
             gdal <- shell(cmd,intern=TRUE)
             
             if (length(grep(x=gdal,pattern="GDAL"))==0)
             {
-                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\n
-                    \n")
-                   
-                #Trying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time):
+                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time, you can interupt this process and set it manually 'MODISoptions(gdalPath='/path/to/XXGDAL/bin/')':\n\n")
+                
                 a <- dirname(list.files(path="c:/",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
 
                 if (length(a)==0)
@@ -221,47 +220,73 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
 
                 fwt <- a[grep(a,pattern="FWTools")]
                 osg <- a[grep(a,pattern="OSGeo4W")]
-                
-                # which is newer?
-                if (!is.null(fwt) & !is.null(osg))
+                minone <- FALSE
+                if(length(fwt)==1)
                 {
-                    cat("Found 'FWTools' and 'OSGeo4W' installation, trying to fetch the newer GDAL verison\n")
-
-                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
-                    fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
-                    fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
-                    
-                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
-                    osgV <- shell(paste(osgP, "--version"),intern=TRUE)
-                    osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
-                    
-                    for (ug in 1:max(nchar(osgV),nchar(fwtV)))
-                    {
-                        osgT <- substr(osgV,ug,ug)
-                        fwtT <- substr(fwtV,ug,ug)
-                        
-                        if (osgT!="." | fwtT!=".")
-                        {
-                            if(isTRUE(osgT>fwtT))
-                            {
-                                a <- normalizePath(osg,winslash="/") 
-                                break   
-                            }
-                        }
-                        if (ug==max(nchar(osgV),nchar(fwtV)))
-                        {
-                            a <- normalizePath(osg,winslash="/")                         
-                        }
-                    }                 
-                    if (length(a)==0)
-                    {
-                        cat("Could not determine the versions, using 'OSGeo4W' installation.\n")
-                        a <- osg
-                    }
+                  fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
+                  fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
+                  fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
+                  
+                  if(MODIS:::checkGdalDriver(fwt))
+                  {                  
+                    cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run: MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
+                    minone <- TRUE
+                  } else 
+                  {
+                    cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, please report it!\n",sep="")
+                  }
+                }
+                if(length(osg)==1)
+                {
+                  osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
+                  osgV <- shell(paste(osgP, "--version"),intern=TRUE)
+                  osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
+                  
+                  if(MODIS:::checkGdalDriver(osg))
+                  {                  
+                    cat("Found 'OSgeo4W' verion: '", osgV,"' to enalbe this run: MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
+                    minone <- TRUE
+                  } else 
+                  {
+                    cat("Found 'OSgeo4W' verion: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, please report it!\n",sep="")
+                  }
                 }
                 
-                cat("Please copy the following line in the MODIS options file ('", normalizePath("~/.MODIS_Opts.R", winslash="/"), "', section: Windows specific):\n GDALpath <- '", normalizePath(a,winslash="/"), "'\n",sep="")
-                
+#                # which is newer?
+#                if (length(fwt)!=0 & length(osg)!=0)
+#                {
+#                    cat("Found 'FWTools' and 'OSGeo4W' installation\n")
+#                
+#                    
+#                    for (ug in 1:max(nchar(osgV),nchar(fwtV)))
+#                    {
+#                        osgT <- substr(osgV,ug,ug)
+#                        fwtT <- substr(fwtV,ug,ug)
+#                        
+#                        if (osgT!="." | fwtT!=".")
+#                        {
+#                            if(isTRUE(osgT>fwtT))
+#                            {
+#                                a <- normalizePath(osg,winslash="/") 
+#                                break   
+#                            }
+#                        }
+#                        if (ug==max(nchar(osgV),nchar(fwtV)))
+#                        {
+#                            a <- normalizePath(osg,winslash="/")                         
+#                        }
+#                    }                 
+#                    if (length(a)==0)
+#                    {
+#                        cat("Could not determine the versions, using 'OSGeo4W' installation.\n")
+#                        a <- osg
+#                    }
+#                }
+              if (!minone)
+              {
+                cat("No HDF4 supporting GDAL installation found. You may set it manually in MODISoptions(gdalPath='/Path/to/XXGDAL/bin')\n")
+              }
+                            
             } else 
             {
                 if (!quiet)

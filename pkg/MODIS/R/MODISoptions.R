@@ -42,23 +42,24 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         if (file.exists(optfile))
         {   
             eval(parse(optfile),envir=opts)
-            whose <- 'user'
             uo <- TRUE
         }
+        whose <- 'user'
+        
     } 
     
     if(!uo)
     {
         if(!so)
         {
-            warning("No user nor system settings found for the MODIS package please consult ?MODISoptions before continuing!\n")
+            warning("No user nor systemwide settings found for the MODIS package.\nGenerating '",whose,"' options file in: ",normalizePath(optfile,'/',mustWork=FALSE)
+                    ,".\nPlease consult ?MODISoptions before continuing!\n",sep="")
         }
     }
     #################################
     opt <- as.list(opts)	
-    
-    
-    # create the '.MODIS_opts.R' file
+        
+    #  create the '.MODIS_opts.R' file
     filename <- file(optfile, open="wt")
   
     write(paste('# This file contains ', whose,' default values for the R package \'MODIS\'.',sep=""), filename)
@@ -68,14 +69,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('# 1.) Path and archive structure defaults. (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\"):', filename)	
     write('  ', filename)
   
-    write('# set path. All data will be stored below this directory. If it doesn\'t exist it is created. Should work also with a remote path like a samba share!',filename)	
+    write('# set path. All data will be stored below this directory. If it doesn\'t exist it is created. Should work also with a remote path like a network directory!',filename)	
     
     if(!missing(localArcPath))
     {
         opt$localArcPath <- localArcPath
     }
     
-    opt$localArcPath <- setPath(opt$localArcPath)
+    opt$localArcPath <- MODIS:::setPath(opt$localArcPath)
     
     write(paste('localArcPath <- \'',opt$localArcPath,'\' # If you already have downloaded some files, don\'t forget to call the function \'orgStruc()\' after changing here!!', sep=''), filename)    
     write('  ', filename)
@@ -85,12 +86,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     if(!missing(outDirPath))
     {
         opt$outDirPath <- outDirPath    
-    } else if (is.null(opt$outDirPath))
-    {
-        opt$outDirPath <- file.path(opts$localArcPath,"PROCESSED",fsep="/")
     }
-    opt$outDirPath <- setPath(opt$outDirPath)
-    write(paste('outDirPath   <- \'',setPath(opt$outDirPath),'\'',sep=''),filename)
+    opt$outDirPath <- MODIS:::setPath(opt$outDirPath)
+    write(paste('outDirPath   <- \'',opt$outDirPath
+                ,'\'',sep=''),filename)
           
     write('  ', filename)
   
@@ -139,10 +138,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         opt$pixelSize <- pixelSize
     }
-
     write(paste('pixelSize      <- \'',opt$pixelSize,'\'',sep=''),filename)
-
-          
+         
     write('  ', filename)	
     write('#########################', filename)
   
@@ -169,9 +166,9 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('  ', filename)	
     close(filename)
 
-    # checks if the pointed GDAL supports HDF4 
+# checks if the pointed GDAL supports HDF4 
         
-    if (checkGdalDriver(opt$gdalPath)) 
+    if (MODIS:::checkGdalDriver(opt$gdalPath)) 
     { 
         gdal <- 'enabled'
     } else 

@@ -141,7 +141,9 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
 # returns 0 if a given GDAL supports HDF4 else 1 
 checkGdalDriver <- function(path=NULL)
 {
-    if(.Platform$OS=="windows")
+  inW <- options("warn")$warn
+  
+  if(.Platform$OS=="windows")
     {
         if(!is.null(path))
         {
@@ -149,22 +151,22 @@ checkGdalDriver <- function(path=NULL)
             path <- paste(paste(strsplit(path,"\\\\")[[1]],sep="",collapse="\\"),"\\",sep="")
             path <- shortPathName(path)
         }
-        
-        driver <- shell(paste(path,'gdalinfo.exe --formats',sep=""),intern=TRUE)
+        options(warn=-1)
+        try(driver <- shell(paste(path,'gdalinfo.exe --formats',sep=""),intern=TRUE),silent=TRUE)
         if(length(grep(driver,pattern="HDF4"))==0)
         {
             # test file from HDF group http://www.hdfgroup.org/tutorial4.html 
             try(test <- shell(paste(path,'gdalinfo ',shortPathName(system.file("external", "sdunl.hdf", package="MODIS")),sep=""),intern=TRUE),silent=TRUE) 
             if (test[1]!="Driver: HDF4Image/HDF4 Dataset")
             {
-                FALSE
+              out <- FALSE
             } else 
             {
-                TRUE    
+              out <- TRUE    
             }
         } else 
         {
-            TRUE
+          out <- TRUE
         }
     } else
     { # Linux...should always work with any GDAL... but so it is schecked it it is on path or not installed!
@@ -178,12 +180,14 @@ checkGdalDriver <- function(path=NULL)
         
         if(length(grep(driver,pattern="HDF4"))==0)
         {
-            FALSE
+          out <- FALSE
         } else
         {
-            TRUE
+          out <- TRUE
         }
     }
+  options(warn=inW)
+  out
 }        
  
 combineOptions <- function(...) 
