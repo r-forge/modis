@@ -3,14 +3,13 @@
 \docType{methods}
 
 \alias{getCollection}
-\alias{localArcPath,product,collection,newest,forceCheck,as,stubbornness,quiet}
 
-\title{Get available collections of MODIS product}
+\title{Get available collections of MODIS product(s)}
 
-\description{Handles the input of a MODIS product collection.}
+\description{Checks and retirves MODIS collection.}
 
 \usage{getCollection(product, collection=NULL, newest=TRUE, 
-forceCheck=FALSE, as="character", stubbornness="high", quiet=TRUE)}
+forceCheck=FALSE, as="character", quiet=TRUE)}
 
 \arguments{
   \item{product}{Character. MODIS grid product to check for existing collections. For 'MODIS TERRA Vegetation Indices at 250 m ground resolution' use: 'MOD13Q1'. For vegetation indices from TERRA and AQUA use 'MxD13Q1'. See \code{getProduct()} for supported products.}   
@@ -22,8 +21,6 @@ forceCheck=FALSE, as="character", stubbornness="high", quiet=TRUE)}
   \item{forceCheck}{Logical. Default \code{FALSE}, if \code{TRUE} the function connects to the 'LP DAAC'-FTP and gets available collections. Since the collections doesn't change very frequently this check once done it is rarely needed.}
 
   \item{as}{character. Default \code{'character'}, and returns the typical 3 digits long collection number ie: \code{"005"}. Other possibility is to set it to \code{'numeric'} what would give as a result the numeric \code{5}}
-
-  \item{stubbornness}{Used only if it is needed to go online. Default="high". See: \code{?getHdf}}
 
   \item{quiet}{Default \code{TRUE}}
 }

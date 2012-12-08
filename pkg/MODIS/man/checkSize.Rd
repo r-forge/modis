@@ -12,7 +12,7 @@ The expected filesize is determined by listening file size infomration on the FT
 }
 
 \usage{
-checkSize(HdfName, flexB = 0, dlmethod = "auto", stubbornness = "low", localArcPath=.getDef('localArcPath'))
+checkSize(HdfName, flexB = 0, ...)
 }
 
 \arguments{
@@ -21,13 +21,11 @@ checkSize(HdfName, flexB = 0, dlmethod = "auto", stubbornness = "low", localArcP
   locally. If \code{HdfName} is not provided all found
   MODIS GRID files are gathered inside the \code{LocalArcPath}}
 \item{flexB}{positive integer. Rigor of the file size check in _Bites_}
-\item{dlmethod}{Default \code{"auto"}. Argument is passed to \code{?download.file} if it is called!}
-\item{stubbornness}{Character or numeric. Default \code{extreme}. See: code{?getHdf}}
-\item{localArcPath}{Character. Is the path to look recursively for MODIS-HDF files. default is \code{MODIS:::.getDef('localArcPath')} If \code{HdfName} is not set, all underlaying MODIS-HDF files are checked.}
+\item{...}{Arguments in \code{?MODISoptions}, Ie stubbornness, dlmethod and localArcPath}
 }
 
 \value{
-  A vector of the length of the checked files. \code{TRUE} for file is ok, \code{FASLE} if not.
+  Logical vector of the length of the checked files. \code{TRUE} for file is ok, \code{FASLE} if not.
 }
 
 \author{

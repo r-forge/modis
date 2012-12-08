@@ -3,7 +3,7 @@
 # Licence GPL v3
 
 
-arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE, outName=NULL, outDir)
+arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE, outName=NULL,...)
 {  
 
     if (!require(rgdal))
@@ -23,13 +23,9 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
         }
     }
     
-    opts <- combineOptions()
+    opts <- combineOptions(...)
     opts$localArcPath <- MODIS:::setPath(opts$localArcPath) 
-
-    if (!missing(outDir))
-    {
-        optsoutDirPath <- MODIS:::setPath(outDir)
-    }
+    opts$outDirPath   <- MODIS:::setPath(opts$outDirPath) 
     
     # product/dates/extent
     product     <- getProduct(x=product, quiet=TRUE)
@@ -41,7 +37,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
         ext <- getTile(extent=extent)
     }
 
-    MODIS:::.getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0)
+    MODIS:::.getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0,opts)
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"), stringsAsFactors=FALSE)
 
@@ -51,7 +47,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
 
         for(u in seq_along(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
+            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   
@@ -79,7 +75,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
                 tileinfo <- ext$tile
             }
                        
-            sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
+            sr <- shapefile(system.file("external","modis_latlonWGS84_grid_world.shp",package="MODIS"))
             tileNames <- paste("h",sprintf("%02d", sr@data[,"h"]),"v",sprintf("%02d", sr@data[,"v"]),sep="")            
             quanti <- nrow(sr@data)
             available <- rep(0,nrow=quanti)
@@ -139,7 +135,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
              
                 if (extent[1]!="global")
                 {
-                    png(paste(outDir,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
+                    png(paste(opts$outDirPath,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
                     
                     xlim <- c(ext$extent@xmin,ext$extent@xmax)
                     ylim <- c(ext$extent@ymin,ext$extent@ymax)
@@ -152,13 +148,14 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
                     spplot(sr, zcol="percent", col.regions=colors, xlim=xlim, ylim=ylim, at=0:100, sp.layout=spl,scales=list(draw = TRUE),main=paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""))
                     dev.off()
                     
-                } else {
+                } else 
+                {
                 
-                    dime <- 400
+                    dime   <- 400
                     width  <- (2*dime)
                     height <- (1*dime) + dime * 0.5 
                     
-                    png(paste(outDir,"/",todo[u],".",outName,".png",sep=""), width = width, height = height)
+                    png(paste(opts$outDirPath,"/",todo[u],".",outName,".png",sep=""), width = width, height = height)
                     
                     plot(sr,col=colors[(round(sr@data$percent,0)+1)],xlim=c(-180,180),ylim=c(-90,90))
                     axis(1,labels=seq(-180,180,by=60),at=seq(-180,180,by=60),pos=-100)
@@ -182,10 +179,11 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
                 if (extent[1]=="global")
                 {
                     out <- sr@data[,c("tileNames","available","needed","percent","MBperHDF")]
-                } else {
+                } else 
+                {
                     out <- sr@data[sr@data$tileName %in% ext$tile,c("tileNames","available","needed","percent","MBperHDF")]
                 }
-                write.csv(x=out,file=paste(outDir,"/",todo[u],".",outName,".csv",sep=""),row.names = FALSE)                
+                write.csv(x=out,file=paste(opts$outDirPath,"/",todo[u],".",outName,".csv",sep=""),row.names = FALSE)                
             }
         }
     }

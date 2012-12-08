@@ -10,7 +10,7 @@ Delete MODIS grid files to reduce the local storage.
 }
 
 \usage{delHdf(product, collection=NULL, extent="global", tileV=NULL, tileH=NULL, begin=NULL, end=NULL,
-ask=TRUE)}
+ask=TRUE,...)}
 
 \arguments{
 
@@ -29,6 +29,7 @@ ask=TRUE)}
   \item{end}{End date, default is to the most recent. Every file \code{'<='} than this date down to \code{begin} will be deleted  See: \code{?transDate} for formatting.}
 
   \item{ask}{Default \code{TRUE}. Should the function, after the checking ask for deletion?}
+\item{...}{Arguments from \code{?MODISoptions}, ie localArcDir}
 }
 
 \value{

@@ -3,14 +3,14 @@
 \docType{methods}
 \alias{arcStats}
 
-\title{Visualise local available MODIS hdf data}
+\title{Get summarisation of local MODIS hdf data. As Plot or as Table.}
 
 \description{
-In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview (plot or/and talbe) of locally available hdf files. 
+In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview (plot or/and talbe) of locally available MODIS GRID hdf files. 
 }
 
 \usage{arcStats(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE,
-outName=NULL, outDir=MODIS:::.getDef("outDirPath"))}
+outName=NULL,...)}
 
 \arguments{
 
@@ -28,11 +28,11 @@ outName=NULL, outDir=MODIS:::.getDef("outDirPath"))}
   
   \item{outName}{Character. Default is the 'product.collection.YYYYMMDDHHMMSS.png/csv' of the function call or if aplicable 'product.collection.extent.YYYYMMDDHHMMSS.png/csv'}  
 
-  \item{outDir}{Character. Default \code{outDir=MODIS:::.getDef("outDirPath")}. Path for saving results}
+  \item{...}{Any relevant arguments in \code{?MODISotions}. Most important \code{outDirPath}}
 }
 
 \value{
-  An invisible NULL (provably this will change to a matrix similar to the 'csv' output
+  An invisible NULL (provably this will change to a matrix similar to the 'csv' output. and a Table.csv + a png file in \code{outDirPath}
 }
 
 \author{

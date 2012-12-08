@@ -2,37 +2,38 @@
 # Date: August 2011
 # Licence GPL v3
 
-orgStruc <- function(source,to,structure, pattern, move=TRUE, quiet=FALSE)
+orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 {	
 	
 	opts <- combineOptions()
-    if (missing(source))
+    if (missing(from))
     {
-        source <- opts$localArcPath
+        from <- opts$localArcPath
     }
-    source <- normalizePath(source,"/", mustWork = TRUE)
+    from <- MODIS:::setPath(from)
     
     if (missing(to))
     {
         to <- opts$localArcPath
     }
+    to <- MODIS:::setPath(to)
     
-    to <- normalizePath(to,"/",mustWork = FALSE)
-    MODIS:::setPath(to)
-    
+    if (!missing(structure))
+    {
+      opts$acrStructure <- structure
+    }
     ###########################
     
     if(missing(pattern)) 
     {
-    	cat(paste("No 'pattern' set, moving/coping all MODIS grid data found in '", source,"'.\n",sep=""))
-    	avFiles <- unlist(list.files(source,pattern=".hdf$",recursive=TRUE,full.names=TRUE))
+    	cat(paste("No 'pattern' set, moving/coping all MODIS grid data found in '", from,"'.\n",sep=""))
+    	avFiles <- unlist(list.files(from, pattern=".hdf$", recursive=TRUE, full.names=TRUE))
     } else 
     {
-    	avFiles <- unlist(list.files(source,pattern=pattern,recursive=TRUE,full.names=TRUE))
+    	avFiles <- unlist(list.files(from, pattern=pattern, recursive=TRUE, full.names=TRUE))
     }
     
     if (length(avFiles)==0) {stop("No HDF nor HDF.XML files found!\n")}
-     
     doit <- MODIS:::.isSupported(avFiles)
     if (sum(doit)==0) {stop("No supported files Found")}
     avFiles <- avFiles[doit]
@@ -49,7 +50,7 @@ orgStruc <- function(source,to,structure, pattern, move=TRUE, quiet=FALSE)
 	    fname   <- basename(x)
 	    ########################
 	    # generate and create local path to file!
-	    path <- MODIS:::.genString(x=fname,remote=FALSE,localArcPath=to)$localPath
+	    path <- MODIS:::.genString(x=fname,remote=FALSE,localArcPath=to,opts)$localPath
 	    dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	    ###################
     
