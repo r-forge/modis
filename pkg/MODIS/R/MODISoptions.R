@@ -1,4 +1,4 @@
-MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, print=TRUE,save=TRUE)
+MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, print=TRUE, save=TRUE, checkPackages=TRUE)
 {
     # This function collects the package options from 3 sites and creates the /.MODIS_opts.R file (location depending on systemwide=T/F, see below):
     # 1. package installation directory (factory defaults); 
@@ -8,9 +8,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     # The final settings are written in to the user specific file 3.
     # options are not tested here! only generated!
     
-    # check if all suggested packages are installed:
-    suggestedPackages <- MODIS:::checkDeps()
-    
+    if(checkPackages)
+    {
+        # check if all suggested packages are installed:
+        suggestedPackages <- MODIS:::checkDeps()
+    } else
+    {
+        suggestedPackages <- "run MODISoptions() for further details"
+    }
     # container for all options
     opts  <- new.env()
     
