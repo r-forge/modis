@@ -63,10 +63,10 @@ Currently tested on MODIS and Landsat data. Using M*D13 it is also possible to u
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.5 MB): https://www.dropbox.com/sh/18t0rgcm6bga7xt/-4k_Xwojxr/MODIS 
 # Afterward extract it to: 
-MODIS:::.getDef()$outDirPath
+options("MODIS_outDirPath")
 
 # the only obligatory dataset is "vi" (vegetatino index), get the 'vi' data on the source directory: 
-path <- paste(MODIS:::.getDef()$outDirPath,"/fullCapa",sep="")
+paste(options("MODIS_outDirPath"),"/fullCapa",sep="")
 vi <- preStack(path=path, pattern="*_NDVI.tif$")
 
 # "orgTime" detects timing information of the input data and generates based on the arguments
