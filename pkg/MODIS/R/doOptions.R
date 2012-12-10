@@ -155,15 +155,15 @@ checkGdalDriver <- function(path=NULL)
         try(driver <- shell(paste(path,'gdalinfo.exe --formats',sep=""),intern=TRUE),silent=TRUE)
         if(length(grep(driver,pattern="HDF4"))==0)
         {
-            # test file from HDF group http://www.hdfgroup.org/tutorial4.html 
-            try(test <- shell(paste(path,'gdalinfo ',shortPathName(system.file("external", "sdunl.hdf", package="MODIS")),sep=""),intern=TRUE),silent=TRUE) 
-            if (test[1]!="Driver: HDF4Image/HDF4 Dataset")
-            {
+        #    test file from HDF group http://www.hdfgroup.org/tutorial4.html 
+        #    try(test <- shell(paste(path,'gdalinfo.exe ',shortPathName(system.file("external", "sdunl.hdf", package="MODIS")),sep=""),intern=TRUE),silent=TRUE) 
+        #    if (test[1]!="Driver: HDF4Image/HDF4 Dataset")
+        #    {
               out <- FALSE
-            } else 
-            {
-              out <- TRUE    
-            }
+        #    } else 
+        #    {
+        #      out <- TRUE    
+        #    }
         } else 
         {
           out <- TRUE

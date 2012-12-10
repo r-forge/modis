@@ -48,7 +48,6 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
             uo <- TRUE
         }
         whose <- 'user'
-        
     } 
     
     if(!uo)
@@ -111,6 +110,9 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     } else if (!is.null(opt$GDALpath)) # old style
     {
         opt$gdalPath <- opt$GDALpath
+    } else
+    {
+        opt$gdalPath <- NULL
     }
     
     if (save)
@@ -160,7 +162,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }    
     # checks if the pointed GDAL supports HDF4 
         
-    if (MODIS:::checkGdalDriver(opt$gdalPath)) 
+    if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
     { 
         gdal <- 'enabled'
     } else 
