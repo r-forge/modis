@@ -120,36 +120,36 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
          
             ntiles <- length(tileID)
             path   <- MODIS:::.genString("SRTM")
-        files  <- paste("srtm",tileID,".zip",sep="")
-        dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
+            files  <- paste("srtm",tileID,".zip",sep="")
+            dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
-        if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) 
-        {
-            cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once (the metadata is not used at the moment!)\n")
-            download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
-            mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE)
-        }
-        if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/")))
-        {
-            if (! require(RCurl)) 
+            if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) 
             {
-                stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+                cat("Getting SRTM metadata from: ftp://xftp.jrc.it\nThis is done once (the metadata is not used at the moment!)\n")
+                download.file("ftp://xftp.jrc.it/pub/srtmV4/SRTM_META/meta.zip",paste(path$localPath,"meta.zip",sep="/"),
+                mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE)
             }
-            sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
-            sizes <- strsplit(sizes, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
-            sizes <- sapply(sizes,function(x){x <- strsplit(x," ")[[1]];paste(x[length(x)],x[length(x)-5],sep=" ")})
-            names(sizes) <- NULL
-            write.table(sizes,paste(path$localPath,".SRTM_sizes",sep="/"),quote=FALSE,row.names=FALSE,col.names=FALSE)
-        }
+            if (!file.exists(paste(path$localPath,".SRTM_sizes",sep="/")))
+            {
+                if (! require(RCurl)) 
+                {
+                    stop("You need to install the 'RCurl' package: install.packages('RCurl')")
+                }
+                sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
+                sizes <- strsplit(sizes, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+                sizes <- sapply(sizes,function(x){x <- strsplit(x," ")[[1]];paste(x[length(x)],x[length(x)-5],sep=" ")})
+                names(sizes) <- NULL
+                write.table(sizes,paste(path$localPath,".SRTM_sizes",sep="/"),quote=FALSE,row.names=FALSE,col.names=FALSE)
+            }
         
-        sizes <- read.table(paste(path$localPath,".SRTM_sizes",sep="/"))
+            sizes <- read.table(paste(path$localPath,".SRTM_sizes",sep="/"))
         
-        files <- files[files %in% sizes[,1]] # remove Tiles that are not on the server
+            files <- files[files %in% sizes[,1]] # remove Tiles that are not on the server
         
-        startIND <- 1:length(path$remotePath) # for better cycling over the servers
-        startIND <- rep(startIND,length(files))
+            startIND <- 1:length(path$remotePath) # for better cycling over the servers
+            startIND <- rep(startIND,length(files))
         
-        cat("Be avare, that sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
+            cat("Be avare, that sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
         
         for(d in seq_along(files)) 
         {
