@@ -20,12 +20,10 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         for (i in seq(along=HdfName))
         {
         
-            fname <- basename(HdfName[i]) # separate name from path
-            HdfName[i] <- fname
-            rm(fname)
-    
+            HdfName[i] <- basename(HdfName[i]) # separate name from path
+          
             product <- getProduct(x=HdfName[i],quiet=TRUE)    
-            path    <- MODIS:::.genString(product,opts)
+            path    <- MODIS:::.genString(product,...)
             MODIS:::setPath(path$localPath)
         
             if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) 
@@ -45,7 +43,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                             destfile=paste(path$local,"/",HdfName[i],sep=""),
                             mode='wb', method=opts$dlmethod, quiet=qi, cacheOK=FALSE)
                         )
-                        if (hdf!=0 & !quiet) {cat("Remote connection fail! Re-try:",g,"\r")} 
+                        if (hdf!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
                         if (hdf==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n")}
                         if (hdf==0 & !quiet & g==1) {cat("Downloaded by the first try!\n")}
                         if (hdf==0) {break}    

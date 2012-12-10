@@ -430,14 +430,16 @@ checkDeps <- function()
     needed <- c('RCurl', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'snow', 'ptw', 'SSOAP', 'XML','plotrix')
     if (all(needed %in% installed.packages()[,1]))
     {
-        cat("Ok all suggested packages are installed!\n")
+        out <- "All suggested packages are installed"
     } else {
         missingP <- !needed %in% installed.packages()[,1]
         missingP <- paste(needed[missingP],sep="",collapse="', '")
 
-        cat("\nTo install all suggested and required packages run:\n  setRepositories() # activate CRAN, R-forge, and Omegahat\n  install.packages(c('",missingP,"'))\n",sep="")
+        out <- paste("To install all suggested and required packages run: setRepositories() # activate CRAN, R-forge, and Omegahat and then: 'install.packages(c('",missingP,"'))'\n",sep="")
     }
+out
 }
+
 
 # this function selects elements of a list by "row".
 listPather <- function(x,index)

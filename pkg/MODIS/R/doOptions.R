@@ -194,7 +194,7 @@ combineOptions <- function(...)
 {
     opts <- options() # collects all defaults
     opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
-    if(length(opts)==0)
+    if(length(opts)==0 | !file.exists("~/.MODIS_opts.R"))
     {
         MODISoptions()    
         opts <- options() # collects all defaults
