@@ -233,7 +233,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                     minone <- TRUE
                   } else 
                   {
-                    cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, please report it!\n",sep="")
+                    cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, try to remove and re-install 'FWTools'!\n",sep="")
                   }
                 }
                 if(length(osg)==1)
@@ -248,7 +248,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                     minone <- TRUE
                   } else 
                   {
-                    cat("Found 'OSgeo4W' verion: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, please report it!\n",sep="")
+                    cat("Found 'OSgeo4W' verion: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, try to remove and re-install 'OSgeo4W'!\n",sep="")
                   }
                 }
                 

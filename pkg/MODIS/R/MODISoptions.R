@@ -14,7 +14,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         suggestedPackages <- MODIS:::checkDeps()
     } else
     {
-        suggestedPackages <- "run MODISoptions() for further details"
+        suggestedPackages <- "run 'MODISoptions()' for further details"
     }
     # container for all options
     opts  <- new.env()
@@ -57,10 +57,13 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!uo)
     {
-        if(!so)
+        if(!so & save)
         {
-            warning("No user nor systemwide settings found for the MODIS package.\nGenerating '",whose,"' options file in: ",normalizePath(optfile,'/',mustWork=FALSE)
+            warning("No MODIS 'user' nor 'systemwide' settings file found.\nFile is created for '",whose,"' options in: ",normalizePath(optfile,'/',mustWork=FALSE)
                     ,".\nPlease consult ?MODISoptions before continuing!\n",sep="")
+        } else if (!save)
+        {
+            warning("No MODIS 'user' nor 'systemwide' settings file found.\nFile is _not_ created since 'save=FALSE'. Turn 'save=TRUE' if you want to make make settings permanent!")
         }
     }
     #################################
@@ -112,12 +115,6 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     if (!missing(gdalPath))
     {
         opt$gdalPath <- gdalPath
-    } else if (!is.null(opt$GDALpath)) # old style
-    {
-        opt$gdalPath <- opt$GDALpath
-    } else
-    {
-        opt$gdalPath <- NULL
     }
     
     if (save)
@@ -159,7 +156,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
 
         if (!is.null(opt$gdalPath))
         {
-            write(paste('gdalPath <- "',opt$gdalPath,'"',sep=''), filename)
+            write(paste("gdalPath <- '",opt$gdalPath,"'",sep=''), filename)
         }
        
         write('  ', filename)	
@@ -169,10 +166,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         
     if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
     { 
-        gdal <- 'enabled'
+        gdal <- "enabled"
     } else 
     {
-        gdal <- 'disabled. Use "MODIS:::.checkTools("GDAL")" for more information!'
+        gdal <- "disabled. Use 'MODIS:::.checkTools('GDAL')' for more information!"
     }
     
     if(MODIS:::.checkTools(what="MRT",quiet=TRUE)$MRT==1)
@@ -181,7 +178,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         opt$mrtPath <- TRUE
     } else
     {
-        mrt <- "disabled. Use MODIS:::.checkTools('MRT') for more information!"
+        mrt <- "disabled. Use 'MODIS:::.checkTools('MRT')' for more information!"
         opt$mrtPath <- FALSE
     }
     opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
