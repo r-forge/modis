@@ -5,7 +5,7 @@ Set or retrieve permanent MODIS package options}
 \description{
 With this function you can get or set _persistant_ MODIS package options (user or system wide). Changes here will persist sessions and updates.}
 \usage{
-MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, print = TRUE, save=TRUE, checkPackages=TRUE)
+MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet = FALSE, save=TRUE, checkPackages=TRUE)
 }
 \arguments{
   \item{localArcPath}{
@@ -28,7 +28,7 @@ Argument passed to ?download.file}
   \item{stubbornness}{
 The number of retries after that the FTP has refused the connection. Higher values increase the cahnce of getting the file but also leads to hanging functions if the server is down.}
   \item{systemwide}{Default \code{FALSE}. User wide settings, if \code{TRUE} write settings to system wide (presumed you have root/administrator access)}
-  \item{print}{ Print to console}
+  \item{quiet}{Logical. Print or not options to console.}
   \item{save}{Default \code{TRUE} make settings permanent.}
   \item{checkPackages}{Default \code{TRUE} Check if suggested packages are installed.}
 

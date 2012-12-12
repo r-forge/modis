@@ -1,4 +1,4 @@
-MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, print=TRUE, save=TRUE, checkPackages=TRUE)
+MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet=FALSE, save=TRUE, checkPackages=TRUE)
 {
     # This function collects the package options from 3 sites and creates the /.MODIS_opts.R file (location depending on systemwide=T/F, see below):
     # 1. package installation directory (factory defaults); 
@@ -183,7 +183,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }
     opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
     
-    if (print) 
+    if (!quiet) 
     {
         cat('\nSTORAGE\n')
         cat('localArcPath  :', opt$localArcPath, '\n' )
@@ -205,7 +205,13 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     # set the options
     for (i in seq_along(opt))
     {
-        eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
+        if (is.character(opt[[i]]))
+        {
+             eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
+        } else
+        {
+            eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
+        }
     }
     options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
     

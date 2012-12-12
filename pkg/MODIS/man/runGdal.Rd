@@ -30,6 +30,10 @@ Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 \tab \code{resamplingType}\tab Character. Default is 'near' or one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL. Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
 \tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2". See: http://www.gdal.org/frmt_gtiff.html\cr
+
+\tab \code{localArcPath}\tab Character. Default \code{options("MODIS_localArcPath")}. Local path to look for and/or to download MODIS files.\cr
+\tab \code{outDirPath}\tab Character. Default \code{options("MODIS_outDirPath")}. Root directory where to write \code{job} folder.\cr
+
 }
 }
 }

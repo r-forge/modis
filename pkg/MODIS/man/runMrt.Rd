@@ -9,31 +9,37 @@
 \description{
 Specifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
 
-\usage{runMrt(ParaSource=NULL,...)}
+\usage{runMrt(...)}
 
 \arguments{
-  \item{ParaSource}{Text file. Run: \code{runMrt()} and look in the MRT-grid Manual for more information.}
-  \item{...}{See: Methods or see ParaSource file.}
-
+  \item{...}{See: Methods}
 } 
 
 \section{Methods}{
 
 \describe{
 \tabular{rll}{
-\tab \code{localArcPath}\tab Character. Default \code{MODIS:::.getDef('localArcPath')}. Local path to look for and to download MODIS files.\cr
-  
-\tab \code{mosaic}\tab Logical, default \code{TRUE}. Mosaic files of not? One case for setting \code{mosaic=FALSE} is a to big \code{extent}. HDF4 file supports max 2GB filesize using \code{mosaic=FALSE} this can exied in the mosaicing process.\cr
-    
-\tab \code{anonym}\tab Logical, default \code{TRUE}. If \code{FALSE} the job name is added to the root filename.\cr
+\tab \code{product}\tab See: \code{?getProduct}\cr
+\tab \code{begin}\tab See: \code{?transDate}\cr
+\tab \code{end}\tab See: \code{?transDate}\cr
+\tab \code{extent}\tab See: \code{?getTile} and Details!\cr
+\tab \code{SDSstring}\tab See: \code{?getSds. Default is extract all SDS (layers).}\cr
+\tab \code{job}\tab Character. Name of the current job for the creation of the output folder. If not specified it is created: 'PRODUCT.COLLECTION_DATETIME'\cr
 
-\tab \code{MRTpath}\tab Character. Default \code{MRTpath='check'} for automatic detection. See \code{?getPath}. But you can insert path to \code{mrt/bin/}\cr
+\tab \code{localArcPath}\tab Character. Default \code{options("MODIS_localArcPath")}. Local path to look for and/or to download MODIS files.\cr
+\tab \code{outDirPath}\tab Character. Default \code{options("MODIS_outDirPath")}. Root directory where to write \code{job} folder.\cr
 
-\tab \code{quiet}\tab Logical. Default \code{FALSE}, its up to you to switsch to 'boring' alias \code{FASLE}. Not fully implemented!\cr
 
-\tab \code{dlmethod}\tab default \code{auto}. Argument passed to \code{?download.file}\cr
+\tab \code{outProj}\tab Character. See MRT manual.\cr
+\tab \code{zone}\tab Zone number used as optional setting only for \code{outProj="UTM"}, if not set it is autodetected. See MRT manual.\cr
+\tab \code{projPara}\tab Character. In that form: "6371007.18 0.00 0.00 ...". for \code{outProj \%in\% c("GEO","SIN")} it is autodetected. See MRT manual.\cr
+\tab \code{datum}\tab Character. Default 'NODATUM'. See MRT manual.\cr
 
-\tab \code{stubbornness}\tab Default \code{high}. \code{stubbornness} of the download machanism after ftp connection break. Levels are \code{low} try once, \code{medium} three retries, \code{high} with eight, \code{veryhigh} fifty times and \code{extreme} with fivehundred, or a numeric individual value. Increasing the \code{stubbornness} increases the chance of getting your job terminated. For large download jobs, it is recomanded to increase the \code{stubbornness}, any experience feedback is welcome!\cr
+\tab \code{mosaic}\tab Logical, default \code{TRUE}. Mosaic files of not? One case for setting \code{mosaic=FALSE} is a to large \code{extent}. HDF4 file supports max 2GB filesize, if crossed mosaicing process will fail.\cr
+\tab \code{anonym}\tab Logical, default \code{TRUE}. If \code{FALSE} the job name is added at the end of the root filename.\cr
+\tab \code{quiet}\tab Logical. Default \code{FALSE}, its up to you to switch to 'boring' alias \code{FALSE}. Not fully implemented!\cr
+\tab \code{dlmethod}\tab default \code{options("MODIS_dlmethod")}. Argument passed to \code{?download.file}. . See \code{?MODISoptions}\cr
+\tab \code{stubbornness}\tab Default \code{options("MODIS_stubborness")}. See \code{?MODISoptions}\cr
 }
 }
 }
@@ -51,9 +57,11 @@ You can obtain MRT-grid after registration from: \url{https://lpdaac.usgs.gov/to
 
 \examples{
 \dontrun{
-runMrt()
-# You can open the file specified by 'runMrt()' and modify it or test it!
-# runMrt(ParaSource="OutputOf'runMrt()'")
+
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleGEOdelme", outProj="GEO")
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleSINdelme", outProj="SIN")
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleUTMdelme", outProj="UTM")
+
 }
 }
 

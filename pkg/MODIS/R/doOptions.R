@@ -97,7 +97,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     }
     if(outProj=="asIn") # lot of troubles because of this!
     {
-        return("asIn")    
+        return(outProj)
     }
     # this is here because we could think in a conversoin between GDAL and MRT inputs! (the possible once)
     MRTprojs <- matrix(byrow=T,ncol=2,
@@ -119,7 +119,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     
     if (tool == "MRT")
     {
-        ind <- grep(MRTprojs,pattern=outProj,ignore.case=TRUE)
+        ind <- grep(MRTprojs,pattern=paste("^",outProj,"$",sep=""),ignore.case=TRUE)
         
         if(length(ind)==0)
         {
@@ -127,11 +127,17 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
             return(MRTprojs)
         } else
         {
+            
             if(ind > nrow(MRTprojs)) # catch short name
             {
-                ind <- ind-nrow(MRTprojs)
+                indL <- ind
+                ind  <- ind-nrow(MRTprojs)
+            } else
+            {
+                indL <- ind+nrow(MRTprojs)
             }
-            return(MRTprojs[ind])
+            
+            return(list(short = MRTprojs[ind],long = MRTprojs[indL]))
         }
     }
 }
@@ -194,10 +200,14 @@ combineOptions <- function(...)
 {
     opts <- options() # collects all defaults
     opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
-    if(length(opts)==0 | !file.exists("~/.MODIS_Opts.R"))
+    
+    if(length(opts)==0)
     {
-        cat("MODIS_Opts file not found, run '?MODISoptions' to see and set package defaults!\n")
-        MODISoptions(save=FALSE) # using 'factory' settings, and do not save them!    
+        if(!file.exists("~/.MODIS_Opts.R"))
+        {
+            cat("MODIS_Opts file not found, run '?MODISoptions' to see and set permanent package defaults!\n")
+        }
+        MODISoptions(save=FALSE,quiet=TRUE)    
         opts <- options() # collects all defaults
         opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
     }

@@ -2,11 +2,11 @@
 # Date : August 2011
 # Licence GPL v3
 
-runMrt <- function(ParaSource=NULL,...)
+runMrt <- function(...)
 {
     
     opts <- combineOptions(...)
-    if (opts$mrtPath)
+    if (!opts$mrtPath)
     {
         stop("MRT path not set or MRT not installed on your system!")
     }
@@ -33,87 +33,66 @@ runMrt <- function(ParaSource=NULL,...)
     opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
     tLimits          <- transDate(begin=opts$begin,end=opts$end)
     
-    if (is.null(opts$localArcPath))
-    {
-        opts$localArcPath <- opts$localArcPath
-    }
-    MODIS:::setPath(opts$localArcPath)
-
-    if (is.null(opts$outDirPath))
-    {
-        opts$outDirPath <- opts$outDirPath
-    }
-    MODIS:::setPath(opts$outDirPath)
+    opts$localArcPath <- MODIS:::setPath(opts$localArcPath)
+    opts$outDirPath   <- MODIS:::setPath(opts$outDirPath)
         
     ################################
     # Some defaults:
-    if (is.null(opts$quiet))    {opts$quiet <- FALSE} 
+    if (is.null(opts$quiet))    {opts$quiet  <- FALSE} 
     if (is.null(opts$mosaic))   {opts$mosaic <- TRUE} 
     if (is.null(opts$anonym))   {opts$anonym <- TRUE} 
 
-
-    if (is.null(opts$pixelSize)) 
-    {
-        cat("No output 'pixelSize' specified, input size used!\n")
-        opts$pixelsize <- opts$pixelSize
-    } else 
-    {
-        cat("Resampling to pixelSize:", opts$pixelSize,"\n")
-    }
-
-    if (is.null(opts$resamplingType)) 
-    {
-        cat("No resampling method specified, using ",opts$resamplingType,"!\n",sep="")
-        opts$resamplingType <- opts$resamplingType
-    } else 
-    {    
-        cat("Resampling method:", opts$resamplingType,"\n")
-    }
+    opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType,tool="mrt",quiet=TRUE)
     
-    if (is.null(opts$outProj)) 
+    opts$outProj        <- MODIS:::checkOutProj(opts$outProj,tool="mrt",quiet=TRUE)
+    
+    if (opts$outProj[1]=="asIn")
     {
-        opts$outProj <- opts$outProj 
-    }    
-    if (opts$outProj=="asIn")
-    {
-        if(as.numeric(opts$product$CCC)>=4)
+        if(as.numeric(opts$product$CCC) > 3) # this fails if a COLLECTION is "025"...don't know if this exists!
         {
-             opts$outProj <- "SIN"                    
-        } else 
+            opts$outProj <- list(short="SIN",long="Sinusoidal")
+        } else
         {
-            opts$outProj <- "ISIN"        
+            opts$outProj <- list(short="ISIN", long="Integerized Sinusoidal")
         }
-        cat("No output projection specified, no reprojection performed!\n",sep="")
-    }   else
-    {
-        cat("Output projection specified:", opts$outProj,"!\n",sep="")
     }
-    
-    if (opts$outProj=="UTM")
+    cat("Output projection:", opts$outProj$long,"\n")    
+    if (opts$outProj$short=="UTM")
     {
-        if (!is.null(opts$zone)) 
+        if (is.null(opts$zone)) 
         {
-            cat("No UTM zone specified used MRT autodetection.\n")            
+            cat("No UTM zone specified using MRT autodetection.\n")            
         } else 
         {
             cat("Using UTM zone:", opts$zone,"\n")
         }
     }
-    
 
-    if (is.null(opts$datum)) 
+    cat("Output pixel size:", opts$pixelSize,"\n")
+    cat("Resampling method:", opts$resamplingType,"\n")
+ 
+    if (is.null(opts$datum))
     {
-        cat("No Datum specified, using WGS84!\n")
-        opts$datum <- "WGS84"
+        cat("No Datum specified, using 'NODATUM'!\n")
+        opts$datum <- "NODATUM"
+    } else if (!toupper(opts$datum) %in% c("NAD27", "NAD83", "WGS66", "WGS72", "WGS84", "NODATUM"))
+    {
+        stop('"datum" must be one of: "NAD27", "NAD83", "WGS66", "WGS72", "WGS84" or "NODATUM"')
     }
     
     if (is.null(opts$projPara)) 
     {
-        cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
-        # opts$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+        if(opts$outProj$short=="SIN") # maybe we should add other
+        {
+            opts$projPara <- "6371007.18 0.00 0.00 0.00 0.00 0.00 0.00 0.00 86400.00 0.00 0.00 0.00 0.00 0.00 0.00"
+        } else 
+        {
+            cat("No output projection parameters specified. Reprojecting with no Parameters!\n")
+            opts$projPara <- "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+        }
     } else 
     {
-        cat("Output projection parameters specified!\nUsing:",opts$projPara,"\n")
+        cat("Output projection parameters specified!\nUsing:\n ",opts$projPara,"\n")
     }
 
     for (z in 1:length(opts$product$PRODUCT))
@@ -257,16 +236,16 @@ runMrt <- function(ParaSource=NULL,...)
                                 write(paste('SPATIAL_SUBSET_UL_CORNER = (',opts$extent$extent@ymax,' ',opts$extent$extent@xmin,')',sep=''),filename)
                                 write(paste('SPATIAL_SUBSET_LR_CORNER = (',opts$extent$extent@ymin,' ',opts$extent$extent@xmax,')',sep=''),filename)
                             }
-                            if (!is.null(opts$pixelSize))
+                            if (opts$pixelSize!="asIn")
                             {
                                 write(paste('OUTPUT_PIXEL_SIZE = ',opts$pixelSize,sep=''),filename) 
                             }    
                             write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,'.tif',sep=''),filename) 
                             write(paste('RESAMPLING_TYPE = ',opts$resamplingType,sep=''),filename)
                             
-                            write(paste('OUTPUT_PROJECTION_TYPE = ',opts$outProj,sep=''),filename)
+                            write(paste('OUTPUT_PROJECTION_TYPE = ',opts$outProj$short,sep=''),filename)
                             
-                            if (opts$outProj=="UTM" && !is.null(opts$zone))
+                            if (opts$outProj$short=="UTM" && !is.null(opts$zone))
                             {
                                 write(paste('UTM_ZONE = ',opts$zone,sep=''),filename)
                             }
@@ -275,8 +254,10 @@ runMrt <- function(ParaSource=NULL,...)
                             {
                                 write(paste('OUTPUT_PROJECTION_PARAMETERS = ( ',opts$projPara,' )',sep=''),filename)
                             }
-        
-                            write(paste('DATUM =', opts$datum,sep=''),filename)
+                            if (!is.null(opts$datum))
+                            {
+                                write(paste('DATUM =', opts$datum,sep=''),filename)
+                            }
                             close(filename)
     
                             if (.Platform$OS=="unix")
