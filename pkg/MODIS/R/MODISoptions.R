@@ -14,7 +14,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         suggestedPackages <- MODIS:::checkDeps()
     } else
     {
-        suggestedPackages <- "run 'MODISoptions()' for further details"
+        suggestedPackages <- "run 'MODISoptions(checkPackages=TRUE)' for further details"
     }
     # container for all options
     opts  <- new.env()
@@ -202,11 +202,15 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         cat(suggestedPackages,'\n\n')
     }
     
+    # remove ftpstring* from opt (old "~/.MODIS_Opts.R" style)
+    opt <- opt[-grep(names(opt),pattern="^ftpstring*")]
+    
     # set the options
     for (i in seq_along(opt))
     {
         if (is.character(opt[[i]]))
         {
+
              eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
         } else
         {
