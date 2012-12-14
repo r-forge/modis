@@ -72,7 +72,7 @@ checkResamplingType <- function(resamplingType,tool,quiet=FALSE)
     {    
         if(!quiet)
         {
-            warning("By not using resamplingType='near' some SDS become useless (ie all bit encoded Quality SDS's, or 'day of the year' SDS's). It is strongly recommanded to use resamplingType='near'!")
+            warning("By not using resamplingType='near'/'nn' some SDS become useless (ie all bit encoded Quality SDS's, or 'day of the year' SDS's). It is strongly recommanded to use resamplingType='near'!")
         }
     }
     
@@ -175,7 +175,7 @@ checkGdalDriver <- function(path=NULL)
           out <- TRUE
         }
     } else
-    { # Linux...should always work with any GDAL... but so it is schecked it it is on path or not installed!
+    { # Linux...should always work with any GDAL... but so it is schecked if it is on path or not installed!
         if (is.null(path))
         {
             try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)

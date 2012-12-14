@@ -123,18 +123,18 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
 }
 
 
-.checkTools <- function(what=c("MRT","GDAL"), quiet=FALSE)
+checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 {
-    what <- toupper(what)
+    tool <- toupper(tool)
     iw   <- options()$warn 
     options(warn=-1)
     
     MRT  <- NULL
     GDAL <- NULL
         
-    if ("MRT" %in% what)
+    if ("MRT" %in% tool)
     {
-        MRT   <- 0
+        MRT   <- FALSE
         mrtH  <- normalizePath(Sys.getenv("MRT_HOME"), winslash="/", mustWork = FALSE)
         mrtDD <- normalizePath(Sys.getenv("MRT_DATA_DIR"), winslash="/", mustWork = FALSE)
         
@@ -162,14 +162,26 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                     cat("  'MRT_DATA_DIR' found:",mrtDD,"\n")
                     cat("   MRT enabled, settings are fine!\n")
                 }
-                MRT <- 1 
-            }
+                MRT <- TRUE
+            } 
         }
+        if(MRT)
+        {
+            x <- file(paste(mrtH,"/doc/ReleaseNotes.txt",sep=""),open="rt")
+            v <- readLines(x)
+            v <- v[(grep(v,pattern="------*")-1)]
+            v <- v[grep(v,pattern="Version ")][1]
+            close(x)
+        } else 
+        {
+            v <- "Could not determine installed MRT version (but is should work...)"
+        }
+        MRT <- list(MRT=MRT,version=v)
     }
 
-    if ("GDAL" %in% what)
+    if ("GDAL" %in% tool)
     {
-        GDAL <- 0
+        GDAL <- FALSE
         opts <- MODIS:::combineOptions()
         
         if (.Platform$OS=="unix")
@@ -182,15 +194,17 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
             if (inherits(gdal,"try-error"))
             {
                 cat("   GDAL not found, install it or check path settings in order to use related functionalities!\n")
+                gdal <- "Could not determine GDAL version!"
             } else 
             {
                 if (!quiet)
                 {
                     cat("   OK,",gdal,"found!\n")
                 }
-                GDAL <- 1
-            }    
-        
+                GDAL <- TRUE
+            }
+            GDAL <- list(GDAL=GDAL,version=gdal)
+            
         } else 
         {
             if (!quiet)
@@ -229,7 +243,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                   
                   if(MODIS:::checkGdalDriver(fwt))
                   {                  
-                    cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run: MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
+                    cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
                     minone <- TRUE
                   } else 
                   {
@@ -244,7 +258,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
                   
                   if(MODIS:::checkGdalDriver(osg))
                   {                  
-                    cat("Found 'OSgeo4W' verion: '", osgV,"' to enalbe this run: MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
+                    cat("Found 'OSgeo4W' verion: '", osgV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
                     minone <- TRUE
                   } else 
                   {
@@ -286,15 +300,16 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
               {
                 cat("No HDF4 supporting GDAL installation found. You may set it manually in MODISoptions(gdalPath='/Path/to/XXGDAL/bin')\n")
               }
-                            
+              gdal <- "Could not determine GDAL version!"
             } else 
             {
                 if (!quiet)
                 {
                     cat("   OK,",gdal,"found!\n")
                 }
-                GDAL <- 1
+                GDAL <- TRUE
             }
+        GDAL <- list(GDAL = GDAL, version = gdal)
         }
     }
     return(invisible(list(GDAL=GDAL,MRT=MRT)))        

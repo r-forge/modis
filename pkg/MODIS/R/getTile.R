@@ -2,7 +2,7 @@
 # Date : August 2011
 # Licence GPL v3
 
-getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom=TRUE)
+getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, system = "MODIS", zoom = TRUE)
 {
     # debug:
     # extent = "austria"; tileH = NULL; tileV = NULL; buffer = NULL; system = "srtm"; zoom=TRUE
@@ -23,31 +23,25 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         # generate tiling structure of Culture-Meris data
         tiltab <- genTile(tileSize = 5)
         old <- TRUE
-
     } else if (system == "SRTM") 
     {
         # generate tiling structure of SRTMv4 data
         tiltab <- genTile(tileSize = 5,extent=list(xmin=-180,xmax=180,ymin=-60,ymax=60),StartNameFrom=c(1,1))
         old <- TRUE
-
     } else 
     {
         if (! require(rgdal) ) 
         {
-
             cat("Using old selection method,\nFor precise subsetting install the 'rgdal' package: install.packages('rgdal')\n")
             old <- TRUE
             tiltab <- tiletable
-
         }
 
         if (! require(rgeos) ) 
         {
-
             cat("Using old selection method,\nFor precise subsetting install the 'rgeos' package: install.packages('rgeos')\n")
             old <- TRUE
             tiltab <- tiletable
-
         }
     }
     
@@ -61,24 +55,43 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     {
         if (file.exists(extent))
         {
-            test <- try(ex <- raster(extent), silent=TRUE)
-            if (!inherits(test,"try-error"))
+            exts <- raster:::extension(extent)
+            if (exts!= ".shp")
             {
-                extent <- ex 
-                rm(ex)
+                test <- try(ex <- raster(extent), silent=TRUE)
+                if (!inherits(test,"try-error"))
+                {
+                    extent <- ex 
+                    rm(ex)
+                }
             }
         }
     }
     
-    # if extent is a shapefile    
+    # if extent is a shapefileNAME    
     test <- try(ex <- shapefile(extent), silent=TRUE)
     if (!inherits(test,"try-error"))
     {
         extent <- ex 
         rm(ex)
         isPoly <- TRUE
+    # if extent is a "shapefileOBJECT"    
     }
     
+    oclass <- class(extent)
+    if (length(grep(oclass, pattern="^SpatialPolygon*"))==1)
+    {
+        isPoly <- TRUE
+    }
+    # TODO for now only SpatialPolygons can do the exact matching... 
+    if (length(grep(oclass, pattern="^SpatialLine*"))==1)
+    {
+        isPoly <- FALSE
+    }
+    if (length(grep(oclass, pattern="^SpatialPoint*"))==1)
+    {
+        isPoly <- FALSE
+    }
         
     if (isTRUE(isTRUE(is.null(tileH) | is.null(tileV)) & is.null(extent))) 
     {
@@ -209,10 +222,18 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         }   
     }
 
-    if (inherits(extent, c("RasterLayer", "RasterStack","RasterBrick"))) # if RASTER* object
+    if (length(grep(oclass,pattern="Raster*"))==1 | length(grep(oclass,pattern="Spatial*"))==1) # if RASTER* object
     {
         t_srs      <- projection(extent)
-        resolution <- res(extent)
+        
+        if (length(grep(oclass,pattern="Raster*"))==1)
+        {
+            resolution <- res(extent)
+        } else 
+        {
+            resolution <- NULL
+        }
+        
         ext        <- extent(extent)
             
         # Is this grep query right to catch LatLon wgs84? are there other latlons?
@@ -237,7 +258,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         target <- list(t_srs = t_srs, extent = ext, resolution = resolution) 
     }
 
-    if (inherits(extent,"SpatialPolygonsDataFrame") & old)
+    if (length(grep(oclass, pattern="^SpatialPolygon*")==1) & old)
+    {
+        extent <- extent(extent)
+    }
+    # TODO; Quick and dirty
+    if(length(grep(oclass, pattern="^SpatialLine*"))==1 | length(grep(oclass, pattern="^SpatialPoint*"))==1)
     {
         extent <- extent(extent)
     }

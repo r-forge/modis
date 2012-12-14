@@ -22,7 +22,7 @@ Target reference system where to process data using \code{runGdal} or \code{runM
   \item{resamplingType}{
 Default is "NN" (Neares Neightbour). In common for MRT and GDAL are 'NN', 'CC', 'BIL'. GDAL supports  further: 'cubicspline' and 'lanczos' }
   \item{gdalPath}{
-Path to gdal _bin_ directory. Use \code{MODIS:::.checkTools("GDAL")} to detect it automaticly}
+Path to gdal _bin_ directory. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}
   \item{dlmethod}{
 Argument passed to ?download.file}
   \item{stubbornness}{

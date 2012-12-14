@@ -39,7 +39,7 @@ Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 }
 
 \details{
-\code{runGdal()} uses a lot of 'MODIS'-package functions, see their manual (?funX) for details and input possibilities. You can also pass arguments of \code{getHdf()} such as 'dlmetod', 'checkSize'... see \code{getHdf}.
+\code{runGdal()} uses a lot of 'MODIS'-package functions, see their manual (?funX) for details and input possibilities. You can also pass arguments of \code{getHdf()} such as 'dlmethod', 'checkSize'... to control the data aquisition. see \code{?getHdf}.
 \cr If the argument \code{extent} is a raster* object, and if not specified otherwise with dedicated arguments (pixelSize and outProj), the output has exactly the same extent, pixelSize and output projection as the used raster* object.
 }
 

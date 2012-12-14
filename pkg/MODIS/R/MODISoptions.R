@@ -149,7 +149,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         write('#########################', filename)
         write('# 4.) Windows specific section (could also be used in Linux if you want to point to an specific GDAL installation not in the default path):', filename)
         write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL instllation (location of "gdalinfo"); (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\")', filename)
-        write('# Or run: "MODIS:::.checkTools()" for autodetection.', filename)
+        write('# Or run: "MODIS:::checkTools()" for autodetection.', filename)
         write('# Example :', filename)
         write('# gdalPath <- "C:/OSGeo4W/bin"', filename)
         write('  ', filename)
@@ -162,23 +162,28 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         write('  ', filename)	
         close(filename)
     }    
+    
     # checks if the pointed GDAL supports HDF4 
-        
     if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
-    { 
-        gdal <- "enabled"
-    } else 
     {
-        gdal <- "disabled. Use 'MODIS:::.checkTools('GDAL')' for more information!"
+        gdal <- list(GDAL = TRUE, version = "enabled")
+    } else
+    {    
+        if(!is.null(opt$gdalPath))
+        {
+            warning(paste("The specified GDAL (",opt$gdalPath,") does not seem to support HDF4 files!", sep=""))    
+        }
+        gdal <- list(GDAL = FALSE, version = "disabled. Use 'MODIS:::checkTools('GDAL')' for more information!")
     }
     
-    if(MODIS:::.checkTools(what="MRT",quiet=TRUE)$MRT==1)
+    MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
+    if(MRT$MRT)
     {
-        mrt <- 'enabled'
+        mrt <- MRT$version
         opt$mrtPath <- TRUE
     } else
     {
-        mrt <- "disabled. Use 'MODIS:::.checkTools('MRT')' for more information!"
+        mrt <- "disabled. Use 'MODIS:::checkTools('MRT')' for more information!"
         opt$mrtPath <- FALSE
     }
     opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
@@ -193,7 +198,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         cat('dlmethod      :', opt$dlmethod,'\n')
         cat('stubbornness  :', opt$stubbornness,'\n\n')
         cat('PROCESSING\n')
-        cat('GDAL          :', gdal, '\n')
+        cat('GDAL          :', gdal$verion, '\n')
         cat('MRT           :', mrt, '\n')
         cat('pixelSize     :', opt$pixelSize, '\n')
         cat('outProj       :', opt$outProj, '\n')
@@ -203,8 +208,12 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }
     
     # remove ftpstring* from opt (old "~/.MODIS_Opts.R" style)
-    opt <- opt[-grep(names(opt),pattern="^ftpstring*")]
-    
+    oldftp <- grep(names(opt),pattern="^ftpstring*")
+    if(length(oldftp)>1)
+    {
+        opt <- opt[-oldftp]
+    }
+        
     # set the options
     for (i in seq_along(opt))
     {

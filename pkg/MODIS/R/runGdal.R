@@ -26,10 +26,10 @@ runGdal <- function(...)
     if (!is.null(opts$extent$target$resolution[[1]]))
     {
         tr <- paste(" -tr", paste(opts$extent$target$resolution, collapse=" "))
-        cat("Output pixelSize specified by raster* object:", paste(opts$extent$target$resolution,collapse=" "),"\n")            
+        cat("\nOutput pixelSize specified by raster* object:", paste(opts$extent$target$resolution,collapse=" "),"\n")            
     } else 
     {
-        cat("pixelSize      = ",opts$pixelSize,"\n")
+        cat("\npixelSize        = ",opts$pixelSize,"\n")
         
         if(opts$pixelSize=="asIn")
         {
@@ -41,7 +41,7 @@ runGdal <- function(...)
     }
     
     opts$resamplingType <- checkResamplingType(opts$resamplingType, tool="gdal")
-    cat("resamplingType = ", opts$resamplingType,"\n")
+    cat("resamplingType   = ", opts$resamplingType,"\n")
     rt <- paste(" -r",opts$resamplingType)
     
     # some support for mrt-style settings
@@ -67,7 +67,7 @@ runGdal <- function(...)
         cat("Output projection specified by raster* object: ")
     } else 
     {
-        cat("outProj        = ")
+        cat("outProj          = ")
     }
     opts$outProj <- MODIS:::checkOutProj(opts$outProj,tool="gdal")
     cat(opts$outProj,"\n")
@@ -107,11 +107,13 @@ runGdal <- function(...)
                 if (is.null(opts$job))
                 {
                     opts$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
-                    cat("No 'job' name specified, generated (date/time based)):",paste(opts$outDirPath,opts$job,sep="/"),"\n")
+                    cat("No 'job' name specified, generated (date/time based)) output directory = ")
                 } else
                 {
-                    cat("'job' name     =")
+                    cat("Output Directory = ")
                 }
+                cat(paste(opts$outDirPath,opts$job,sep="/"),"\n\n")
+                
                 outDir <- file.path(opts$outDirPath,opts$job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
     
@@ -128,7 +130,7 @@ runGdal <- function(...)
         			SDS <- list()
         			for (z in seq(along=files))
         			{ # get all SDS names for one chunk
-        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=opts$SDSstring, method="gdal")
+        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=opts$SDSstring, method="GDAL")
         			}
         			options("warn"= w)					
     

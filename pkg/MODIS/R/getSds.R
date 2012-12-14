@@ -5,10 +5,10 @@
 getSds <- function(HdfName,SDSstring=NULL,method="gdal") 
 {
 
-    method <- tolower(method) 
+    method <- toupper(method) 
     fsep <- .Platform$file.sep
     
-    opts <- combineOptions()
+    opts <- MODIS:::combineOptions()
     
     if (!file.exists(HdfName)) 
     {
@@ -17,15 +17,15 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     }
     
     HdfName <- HdfName[1]
-
-    checkMethod <- unlist(MODIS:::.checkTools(what=method,quiet=TRUE))
-
-    if (!toupper(method) %in% names(checkMethod[which(checkMethod==1)])) 
+    
+    checkTool <- MODIS:::checkTools(tool=method,quiet=TRUE)[[method]][[method]]
+    
+    if (!checkTool)
     {
-        stop("in getSds! Method ",method, " does not work. Is ", method," installed properly on your system? Run: 'MODIS:::.checkTools()' to check out which metods should work on your system!")
+        stop("Method ",method, " does not work. Is ", method," installed properly on your system? Run: 'MODIS:::checkTools()' to check out which metods should work on your system!")
     }
 
-    if (method=="gdal")
+    if (method=="GDAL")
     {
 
         if (.Platform$OS=="unix")
@@ -57,7 +57,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
                 }
             ))    
     
-    } else if (method=="mrt")
+    } else if (method=="MRT")
     {
         if (.Platform$OS=="unix")
         {
@@ -101,7 +101,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
             msk[o] <- substr(SDSstring,o,o)==1
         }
     
-        if (method=="gdal") 
+        if (method=="GDAL") 
         {
             return(list(SDSnames = sds[msk],SDSstring = paste(as.numeric(msk),collapse=" "),SDS4gdal=SDSnames[msk]))
         } else 
@@ -111,7 +111,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     } else 
     {
     
-        if (method=="gdal") 
+        if (method=="GDAL") 
         {
             return(list(SDSnames = sds,SDS4gdal=SDSnames))
         } else 
