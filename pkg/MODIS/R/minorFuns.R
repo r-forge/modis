@@ -122,6 +122,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     }
 }
 
+.checkTools <- function(){warning("'.checkTools()' has been renemed to 'checkTools()'") }
 
 checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 {
@@ -131,7 +132,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
     
     MRT  <- NULL
     GDAL <- NULL
-        
+    
     if ("MRT" %in% tool)
     {
         MRT   <- FALSE
@@ -167,14 +168,20 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
         }
         if(MRT)
         {
-            x <- file(paste(mrtH,"/doc/ReleaseNotes.txt",sep=""),open="rt")
-            v <- readLines(x)
-            v <- v[(grep(v,pattern="------*")-1)]
-            v <- v[grep(v,pattern="Version ")][1]
-            close(x)
+            if(file.exists(paste(mrtH,"/doc/ReleaseNotes.txt",sep="")))
+            {
+              x <- file(paste(mrtH,"/doc/ReleaseNotes.txt",sep=""),open="rt")
+              v <- readLines(x)
+              v <- v[(grep(v,pattern="------*")-1)]
+              v <- v[grep(v,pattern="Version ")][1]
+              close(x)
+            } else
+            {
+              v <- "enabled"
+            }
         } else 
         {
-            v <- "Could not determine installed MRT version (but is should work...)"
+            v <- "Not Found"
         }
         MRT <- list(MRT=MRT,version=v)
     }
