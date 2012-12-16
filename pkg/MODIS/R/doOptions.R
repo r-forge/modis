@@ -7,7 +7,7 @@ setPath <- function(path)
         stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
         warning(path," does not exists, it will be created!")
     }
-    normalizePath(path,"/")
+    path    
 }
 
 # this function handles the parameter resamplingTpye and must be placed inside runMrt() and runGdal()

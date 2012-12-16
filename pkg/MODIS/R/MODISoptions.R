@@ -198,7 +198,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         cat('dlmethod      :', opt$dlmethod,'\n')
         cat('stubbornness  :', opt$stubbornness,'\n\n')
         cat('PROCESSING\n')
-        cat('GDAL          :', gdal$verion, '\n')
+        cat('GDAL          :', gdal$version, '\n')
         cat('MRT           :', mrt, '\n')
         cat('pixelSize     :', opt$pixelSize, '\n')
         cat('outProj       :', opt$outProj, '\n')
@@ -226,6 +226,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
             eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
         }
     }
+    # this is fixed
     options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
     
 }   
