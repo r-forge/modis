@@ -12,7 +12,7 @@ MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalP
 File Path where to store downloaded MODIS Grid Products. Default is "~/MODIS_ARC".  
 }
   \item{outDirPath}{
-The output path where to store results of \code{runGdal} or \code{whittaker.raster}
+The output path where to store results of \code{runGdal} or \code{runMrt}
 }
   \item{pixelSize}{
 Default is "asIn", pixel size [target reference system units] of processing functions \code{runGdal} and \code{runMrt}.
@@ -26,11 +26,11 @@ Path to gdal _bin_ directory. Use \code{MODIS:::checkTools("GDAL")} to detect it
   \item{dlmethod}{
 Argument passed to ?download.file}
   \item{stubbornness}{
-The number of retries after that the FTP has refused the connection. Higher values increase the cahnce of getting the file but also leads to hanging functions if the server is down.}
-  \item{systemwide}{Default \code{FALSE}. User wide settings, if \code{TRUE} write settings to system wide (presumed you have root/administrator access)}
+The number of retries after that the FTP has refused the connection. Higher values increase the chance of getting the file but also leads to hanging functions if the server is down.}
+  \item{systemwide}{Default \code{FALSE}. User wide settings save to \code{path.expand("~/.MODIS_Opts.R")}, if \code{TRUE} write settings to 'systemwide' (presumed you have root/administrator access in \code{paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')})}
   \item{quiet}{Logical. Print or not options to console.}
   \item{save}{Default \code{TRUE} make settings permanent.}
-  \item{checkPackages}{Default \code{TRUE} Check if suggested packages are installed.}
+  \item{checkPackages}{Default \code{TRUE} check if suggested packages are installed.}
 
 }
 

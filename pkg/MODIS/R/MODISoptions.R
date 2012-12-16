@@ -24,7 +24,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     eval(parse(file.path(find.package("MODIS"), "external", "MODIS_Opts.R")),envir=opts) 
     
     # 2. system wide
-    sysopts <- paste(R.home(component="etc"), '/', 'MODIS_opts.R', sep='')
+    sysopts <- paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')
     so      <- FALSE
     
     if (file.exists(sysopts))
