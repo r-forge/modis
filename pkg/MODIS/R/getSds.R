@@ -38,12 +38,11 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
                 cmd <- paste('gdalinfo ', shortPathName(HdfName),sep="")
             } else
             {
-                gdalPath <- shortPathName(opts$gdalPath)
-                cmd <- shQuote(paste(opts$gdalPath,'\\gdalinfo ', shortPathName(HdfName),sep=""),type="cmd")            
+                opts$gdalPath <- shortPathName(normalizePath(opts$gdalPath,"\\"))
+                cmd <- shQuote(paste(opts$gdalPath,'\\gdalinfo.exe ', shortPathName(HdfName),sep=""),type="cmd")            
             }
              
             sdsRaw <- shell(cmd,intern=TRUE)
-
         }
         
         SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_[0-9]{1,2}_NAME",value=T)

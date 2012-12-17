@@ -40,7 +40,7 @@ runGdal <- function(...)
         }
     }
     
-    opts$resamplingType <- checkResamplingType(opts$resamplingType, tool="gdal")
+    opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType, tool="gdal")
     cat("resamplingType   = ", opts$resamplingType,"\n")
     rt <- paste(" -r",opts$resamplingType)
     
@@ -153,18 +153,16 @@ runGdal <- function(...)
                         
                                 } else 
                                 {
-                                    
                                     xy <- matrix(c(opts$extent$extent@xmin, opts$extent$extent@ymin, opts$extent$extent@xmin,
                                         opts$extent$extent@ymax, opts$extent$extent@xmax,
                                         opts$extent$extent@ymax, opts$extent$extent@xmax, opts$extent$extent@ymin),
                                         ncol=2, nrow=4, byrow=TRUE)
                                     colnames(xy) <- c("x","y")
-				                    xy <- as.data.frame(xy)
-				                    coordinates(xy) <- c("x","y")
-				                    proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+				                            xy <- as.data.frame(xy)
+				                            coordinates(xy) <- c("x","y")
+				                            proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
                                     outBB <- spTransform(xy,CRS(opts$outProj))@bbox
-				                    te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
-                                
+				                            te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
                                 }
                             
                             } else
