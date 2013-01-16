@@ -67,7 +67,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
         
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
+                    path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     allLocal <- list.files(path,recursive=TRUE)
@@ -85,7 +85,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
             
                 for(u in seq_along(todo))
                 {
-                    path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
+                    path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste(path[-length(path)],sep="",collapse="/")
                     

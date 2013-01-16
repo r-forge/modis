@@ -122,7 +122,7 @@ runMrt <- function(...)
 
             ######################## along platform (TerraAqua)
 
-            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
+            MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
     

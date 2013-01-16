@@ -34,7 +34,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
     }
     
     if (length(avFiles)==0) {stop("No HDF nor HDF.XML files found!\n")}
-    doit <- MODIS:::.isSupported(avFiles)
+    doit <- MODIS:::isSupported(avFiles)
     if (sum(doit)==0) {stop("No supported files Found")}
     avFiles <- avFiles[doit]
     
@@ -50,7 +50,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 	    fname   <- basename(x)
 	    ########################
 	    # generate and create local path to file!
-	    path <- MODIS:::.genString(x=fname,remote=FALSE,localArcPath=to,opts)$localPath
+	    path <- MODIS:::genString(x=fname,remote=FALSE,localArcPath=to,opts)$localPath
 	    dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	    ###################
     

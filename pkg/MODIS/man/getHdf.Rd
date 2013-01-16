@@ -15,7 +15,7 @@
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkSize=FALSE, ...)}
+\usage{getHdf(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE, ...)}
 
 \arguments{
 
@@ -35,7 +35,7 @@
 
   \item{collection}{Character or integer. (Ignored if \code{HdfName} is provided.) Refers to the MODIS product collection-version. Often '005', but see MODIS pages or run \code{?getCollection} for more information.} 
   
-  \item{checkSize}{Logical. Default \code{FALSE}, no file size id performed after dowlnoad. If \code{TRUE} the HDF files size is checked. This takes more time than using \code{FALSE} but gives more security of data integrity. You can also run \code{?checkSize} in a separate run.}
+  \item{checkIntegrity}{Logical. Default \code{FALSE}, no file integrity check is performed. If \code{TRUE} the HDF files size is checked and the function tries to re-download the file. Currently it uses GDAL (gdalinfo), that supports HDF4, run \code{MODISoptions()} to check availability).}
     
   \item{wait}{Numeric. Inserts a break (in seconds) after every internal \code{download.file()} or \code{getURL()} call. It reduces the chance of FTP connection error that often occurs after many requests. (Hopefully a temporary solution!)}
 
@@ -62,9 +62,6 @@ Jarvis A., H.I. Reuter, A.  Nelson, E. Guevara, 2008, Hole-filled  seamless SRTM
   Matteo Mattiuzzi
 }
 
-\seealso{
-  \code{\link{getXml}}
-}
 
 \examples{
 \dontrun{

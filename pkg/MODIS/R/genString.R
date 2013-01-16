@@ -2,11 +2,10 @@
 # Date : February 2012
 # Licence GPL v3
 
-# 'date' is an EXISTING date! result from .getStruc() and passed as single date! For format see ?transDate
+# 'date' is an EXISTING date! result from getStruc() and passed as single date! For format see ?transDate
 
-.genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, ...)
+genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, ...)
 {
-        
     if (missing(x)) 
     {
         stop(".genString Error: 'x' must be a file name or a product name!")
@@ -29,7 +28,7 @@
         product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) # generates MODIS file date format "AYYYYDDD"
     }
     
-    opts <- combineOptions(...)
+    opts <- MODIS:::combineOptions(...)
     remotePath <- localPath <- NULL
     
     if (is.null(product$DATE)) # if x is a PRODUCT and date is not provided 
@@ -57,7 +56,7 @@
                                 }
                             } else 
                             {
-                                tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
+                                tmp[[u]] <- MODIS:::getPart(x=product,s[u])
                             }
                         }
                     if (length(tmp)>0)
@@ -112,7 +111,7 @@
                                         }
                                     } else 
                                     {
-                                        tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
+                                        tmp[[u]] <- MODIS:::getPart(x=product,s[u])
                                     }
                                 }                                
                                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")    
@@ -143,7 +142,7 @@
                     tmp <- list()
                     for (u in 1:length(s))
                     {
-                        tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
+                        tmp[[u]] <- MODIS:::getPart(x=product,s[u])
                     }
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
@@ -185,7 +184,7 @@
                             tmp <- list()
                             for (u in 1:length(s))
                             {
-                                tmp[[u]] <- MODIS:::.getPart(x=product,s[u])
+                                tmp[[u]] <- MODIS:::getPart(x=product,s[u])
                             }
                             string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                         }

@@ -18,14 +18,18 @@ if (require(rgdal))
 load(system.file("external", "MODIS_FTPinfo.RData",package="MODIS")) 
 
 # central setting for stubbornness 
-.stubborn <- function(level="high")
+stubborn <- function(level="high")
 {
+    if(!is.numeric(level) & !tolower(level) %in% c("low","medium","high","veryhigh","extreme"))
+    {
+        stop("Unrecognised 'stubbornness' level!")
+    }
     if (is.numeric(level)) 
     {
-        level    
-    } else 
-    {
-        c(5,15,50,100,1000)[which(level==c("low","medium","high","veryhigh","extreme"))]
+        round(level)    
+    } else
+    { 
+        c(5,15,50,100,1000)[which(tolower(level)==c("low","medium","high","veryhigh","extreme"))]
     }
 }
 
@@ -47,7 +51,7 @@ file.size <- function(file,units="B")
     return(res)
 }
 
-.checksizefun <- function(file,sizeInfo=NULL,flexB=0)
+checksizefun <- function(file,sizeInfo=NULL,flexB=0)
 {
     # determine reference size
     if (is.null(sizeInfo))
@@ -122,7 +126,7 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     }
 }
 
-.checkTools <- function(){warning("'.checkTools()' has been renemed to 'checkTools()'") }
+checkTools <- function(){warning("'checkTools()' has been renemed to 'checkTools()'") }
 
 checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 {
@@ -197,7 +201,14 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cat("Checking availabillity of GDAL:\n")
             }
-            gdal <- try(system("gdalinfo --version",intern=TRUE),silent=TRUE)
+            if (is.null(opts$gdalPath))
+            {
+                cmd <- 'gdalinfo --version'
+            } else
+            {
+                cmd <- paste(path.expand(opts$gdalPath),'/gdalinfo --version', sep="")            
+            }
+            gdal <- try(system(cmd,intern=TRUE),silent=TRUE)
             if (inherits(gdal,"try-error"))
             {
                 cat("   GDAL not found, install it or check path settings in order to use related functionalities!\n")
@@ -272,37 +283,6 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                     cat("Found 'OSgeo4W' verion: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, try to remove and re-install 'OSgeo4W'!\n",sep="")
                   }
                 }
-                
-#                # which is newer?
-#                if (length(fwt)!=0 & length(osg)!=0)
-#                {
-#                    cat("Found 'FWTools' and 'OSGeo4W' installation\n")
-#                
-#                    
-#                    for (ug in 1:max(nchar(osgV),nchar(fwtV)))
-#                    {
-#                        osgT <- substr(osgV,ug,ug)
-#                        fwtT <- substr(fwtV,ug,ug)
-#                        
-#                        if (osgT!="." | fwtT!=".")
-#                        {
-#                            if(isTRUE(osgT>fwtT))
-#                            {
-#                                a <- normalizePath(osg,winslash="/") 
-#                                break   
-#                            }
-#                        }
-#                        if (ug==max(nchar(osgV),nchar(fwtV)))
-#                        {
-#                            a <- normalizePath(osg,winslash="/")                         
-#                        }
-#                    }                 
-#                    if (length(a)==0)
-#                    {
-#                        cat("Could not determine the versions, using 'OSGeo4W' installation.\n")
-#                        a <- osg
-#                    }
-#                }
               if (!minone)
               {
                 cat("No HDF4 supporting GDAL installation found. You may set it manually in MODISoptions(gdalPath='/Path/to/XXGDAL/bin')\n")
@@ -323,7 +303,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 }
 
 
-.isSupported <- function(x) 
+isSupported <- function(x) 
 {
     fname   <- basename(x)
     
@@ -340,7 +320,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             return(FALSE)
         } else 
         {
-            secName <- MODIS:::.defineName(product$request)
+            secName <- MODIS:::defineName(product$request)
         
             if (product$SENSOR[1] == "MODIS") 
             {
@@ -371,12 +351,12 @@ return(unlist(res))
 # TODO enhancement of SENSOR/PRODUCT detection capabilities! 
 # the methods below are based on the results of strsplit().
 
-.defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
+defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
 {
     
     if(missing(x)) 
     {
-        stop("Error in function 'MODIS:::.defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
+        stop("Error in function 'MODIS:::defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
     } else 
     {
     fname   <- basename(x)
@@ -481,41 +461,132 @@ listPather <- function(x,index)
 filesUrl <- function(url)
 {
     require(RCurl)
+
     if (substr(url,nchar(url),nchar(url))!="/")
     {
        url <- paste(url,"/",sep="") 
     }
-    getlist <- getURL(url) 
-    getlist <- strsplit(getlist, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+    oldO <- options()$warn
+    on.exit(options())
+    try(co <- getURLContent(url),silent=TRUE)
     
-    getlist <- strsplit(getlist," ")
-    elim    <- grep(getlist,pattern="total")
-    if(length(elim)==1)
+    if (!exists("co")) {return(FALSE)}
+    
+    if (substring(url,1,4)=="http")
     {
-        getlist <- getlist[-elim]
-    }
-    fnames  <- sapply(getlist,function(x){x[length(x)]})
-    size    <- sapply(getlist,
-                    function(x)
-                    { # filesize is one befor month info
-                        x[
-                        which(x %in% c("Jan", "Feb", "Mar", "Apr", "May",
-                        "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")==TRUE)-1
-                        ]
-                    })
-    return(data.frame(fileNames=basename(fnames),fileSize=size))
+        if(require(XML))
+        {
+            co     <- htmlTreeParse(co)
+            co     <- co$children[[1]][[2]][[2]]
+            co     <- sapply(co$children, function(el) xmlGetAttr(el, "href"))
+            co     <- as.character(unlist(co))
+            co     <- co[!co %in% c("?C=N;O=D", "?C=M;O=A", "?C=S;O=A", "?C=D;O=A")]
+            fnames <- co[-1] 
+         } else
+         {
+            stop("You need to install the 'XML' package from 'Omegahat' repository")
+         }
+     } else 
+     {
+        co <- strsplit(co, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
+       
+        co <- strsplit(co," ")
+        elim    <- grep(co,pattern="total")
+        if(length(elim)==1)
+        {
+            co <- co[-elim]
+        }
+        fnames <- basename(sapply(co,function(x){x[length(x)]}))
+     }
+     fnames <- gsub(fnames,pattern="/",replacement="")
+
+    return(fnames)
 }
 
+
 #http://ryouready.wordpress.com/2008/12/18/generate-random-string-name/
-makeRandomString <- function(n=1, lengh=12)
+makeRandomString <- function(n=1, length=12)
 {
     randomString <- c(1:n) # initialize vector
     for (i in 1:n)
     {
         randomString[i] <- paste(sample(c(0:9, letters, LETTERS),
-        lengh, replace=TRUE),collapse="")
+        length, replace=TRUE),collapse="")
     }   
     return(randomString)
 }
 
+# this function care about the download of files. Based on remotePath (result of MODIS:::genString) it alterates the effort on available sources and stops after succeded download or by reacing the stubbornness thresshold.
+ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
+{
+    x <- basename(x)
+
+    opts <- MODIS:::combineOptions(...)
+    opts$stubbornness <- MODIS:::stubborn(opts$stubbornness)
+
+    out <- rep(NA,length=length(x))
+    
+    for (a in seq_along(x))
+    { 
+        path <- MODIS:::genString(x[a],...)
+        MODIS:::setPath(path$localPath) 
+        
+        hv <- 1:length(path$remotePath)
+        hv <- rep(hv,length=opts$stubbornness)
+        g=1
+        while(g <= opts$stubbornness) 
+        {     
+            if (!quiet)
+            {
+                cat("Getting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
+            }      
+            try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=paste(path$localPath,x[a],sep="/"),mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+            if (is.na(out[a])) {cat("File not found!\n"); unlink(paste(path$localPath,x[a],sep="/")); break} # if NA then the url name is wrong!
+            if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
+            if (out[a]==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n\n")}
+            if (out[a]==0 & !quiet & g==1) {cat("Downloaded by the first try!\n\n")}
+            if (out[a]==0) {break}    
+            Sys.sleep(wait)
+            g=g+1    
+        }
+    }
+return(!as.logical(out)) 
+}
+
+doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
+{
+    x <- basename(x)
+
+    opts <- MODIS:::combineOptions(...)
+    opts$stubbornness <- MODIS:::stubborn(opts$stubbornness)
+
+    out <- rep(NA,length=length(x))
+        
+    for (a in seq_along(x))
+    { 
+        path <- MODIS:::genString(x[a],...)
+        MODIS:::setPath(path$localPath) 
+        
+        hv <- 1:length(path$remotePath)
+        hv <- rep(hv,length=opts$stubbornness)
+        g=1
+        while(g <= opts$stubbornness) 
+        {     
+            out[a] <- checkIntegrity(x = x[a],...)
+            if (is.na(out[a])){unlink(out[a]);break}
+            if (!out[a])
+            {
+                if (!quiet)
+                {
+                    cat(basename(x[a]),"is corrupted, trying to re-download it!\n\n")
+                }
+                out[a] <- MODIS:::ModisFileDownloader(x[a],quiet=quiet,...)
+            }
+            out[a] <- checkIntegrity(x = x[a],...)
+            if(out[a]) {break}
+            g=g+1
+        }
+    }
+return(as.logical(out)) 
+}
 

@@ -123,7 +123,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         filename <- file(optfile, open="wt")
   
         write(paste('# This file contains ', whose,' default values for the R package \'MODIS\'.',sep=""), filename)
-        write('# version 0.6-25', filename)
+        write('# version 0.7-10', filename)
         write('#########################', filename)
         write('# 1.) Path and archive structure defaults. (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\"):', filename)	
         write('  ', filename)
@@ -147,8 +147,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         write(paste('pixelSize      <- \'',opt$pixelSize,'\'',sep=''),filename)
         write('  ', filename)	
         write('#########################', filename)
-        write('# 4.) Windows specific section (could also be used in Linux if you want to point to an specific GDAL installation not in the default path):', filename)
-        write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL instllation (location of "gdalinfo"); (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\")', filename)
+        write('# 4.) Windows specific section (could also be used in Linux if you want to point to an alternative GDAL installation not in the default search path. Point ".../gdal-x.x.x/apps" directory!):', filename)
+        write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL instllation (location of "gdalinfo"); (USE FOR SEPARATOR _SINGLE FORWARD_ "/")', filename)
         write('# Or run: "MODIS:::checkTools()" for autodetection.', filename)
         write('# Example :', filename)
         write('# gdalPath <- "C:/OSGeo4W/bin"', filename)
@@ -171,7 +171,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {    
         if(!is.null(opt$gdalPath))
         {
-            warning(paste("The specified GDAL (",opt$gdalPath,") does not seem to support HDF4 files!", sep=""))    
+            warning(paste("The specified GDAL: ", opt$gdalPath," does not seem to support HDF4 files!", sep=""))    
         }
         gdal <- list(GDAL = FALSE, version = "disabled. Use 'MODIS:::checkTools('GDAL')' for more information!")
     }
@@ -194,15 +194,18 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         cat('localArcPath  :', opt$localArcPath, '\n' )
         cat('outDirPath    :', opt$outDirPath, '\n')
         cat('auxPath       :', opt$auxPath , '\n\n')
+        
         cat('DOWNLOAD\n')
         cat('dlmethod      :', opt$dlmethod,'\n')
         cat('stubbornness  :', opt$stubbornness,'\n\n')
+        
         cat('PROCESSING\n')
         cat('GDAL          :', gdal$version, '\n')
         cat('MRT           :', mrt, '\n')
         cat('pixelSize     :', opt$pixelSize, '\n')
         cat('outProj       :', opt$outProj, '\n')
         cat('resamplingType:', opt$resamplingType, '\n\n')
+        
         cat('DEPENDENCIES\n')
         cat(suggestedPackages,'\n\n')
     }

@@ -3,17 +3,17 @@
 # Licence GPL v3
 
 
-.getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=NULL, forceCheck=FALSE, wait=1, stubbornness=10)
+getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=NULL, forceCheck=FALSE, wait=1, stubbornness=10)
 {
     server <- toupper(server)
     if(!server %in% c("LPDAAC","LAADS"))
     {
-        stop(".getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
+        stop("getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
     }
     
     opts <- combineOptions()
     
-    sturheit <- .stubborn(level=opts$stubbornness)
+    sturheit <- stubborn(level=opts$stubbornness)
 
     #########################
     # Check Platform and product
@@ -48,7 +48,7 @@
     
         for(u in 1:length(todo))
         {
-            path <- MODIS:::.genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
+            path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
         
             # test if the product is available on "LAADS" (default is LPDAAC!)
             if (server =="LAADS")

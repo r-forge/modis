@@ -3,7 +3,7 @@ export("getTile")
 export("getProduct")
 export("getCollection")
 export("getSds")
-export("checkSize")
+#export("checkSize")
 export("transDate")
 export("arcStats")
 

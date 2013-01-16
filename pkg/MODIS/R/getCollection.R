@@ -42,8 +42,8 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 	        {
 	    	    stop("You need to install the 'RCurl' package: install.packages('RCurl')")
 	        }
-		    sturheit <- .stubborn(level=opts$stubbornness)
-
+		    sturheit <- MODIS:::stubborn(level=opts$stubbornness)
+		    
     		for (i in 1:length(unique(productN$PF1))) 
     		{		
     		    ftp <- paste("ftp://e4ftl01.cr.usgs.gov/",unique(productN$PF1)[i],"/",sep="")

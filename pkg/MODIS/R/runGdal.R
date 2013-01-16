@@ -1,32 +1,28 @@
 
-runGdal <- function(...)
+runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, tileH=NULL, tileV=NULL, buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)
 {
      
     opts <- combineOptions(...)
 
     # absolutly needed
-    opts$product <- getProduct(opts$product,quiet=TRUE)
+    product <- getProduct(product,quiet=TRUE)
     
     # optional and if missing it is added here:
-    opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
-    tLimits          <- transDate(begin=opts$begin,end=opts$end)
-
-    ################################
-    # Some defaults:
-    if (is.null(opts$quiet))    {opts$quiet <- FALSE} 
+    product$CCC <- getCollection(product,collection=collection)
+    tLimits     <- transDate(begin=begin,end=end)
 
     #### settings with messages
 
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    opts$extent <- getTile(extent=opts$extent,tileH=opts$tileH,tileV=opts$tileV,buffer=opts$buffer)
+    extent <- getTile(extent=extent,tileH=tileH,tileV=tileV,buffer=buffer)
     
     tr <- NULL
     
-    if (!is.null(opts$extent$target$resolution[[1]]))
+    if (!is.null(extent$target$resolution[[1]]))
     {
-        tr <- paste(" -tr", paste(opts$extent$target$resolution, collapse=" "))
-        cat("\nOutput pixelSize specified by raster* object:", paste(opts$extent$target$resolution,collapse=" "),"\n")            
+        tr <- paste(" -tr", paste(extent$target$resolution, collapse=" "))
+        cat("\nOutput pixelSize specified by raster* object:", paste(extent$target$resolution,collapse=" "),"\n")            
     } else 
     {
         cat("\npixelSize        = ",opts$pixelSize,"\n")
@@ -74,21 +70,21 @@ runGdal <- function(...)
         
     t_srs <- paste(' -t_srs \"',opts$outProj,'\"',sep='')
     
-    if (opts$product$SENSOR=="MODIS")
+    if (product$SENSOR=="MODIS")
     {
         s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
-    } else if (opts$product$SENSOR=="SRTM")
+    } else if (product$SENSOR=="SRTM")
     {
         s_srs <- ' -s_srs \"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs\"'
     }
      
-    for (z in 1:length(opts$product$PRODUCT))
+    for (z in 1:length(product$PRODUCT))
     {
-        todo <- paste(opts$product$PRODUCT[z],".",opts$product$CCC[[opts$product$PRODUCT[z]]],sep="")    
+        todo <- paste(product$PRODUCT[z],".",product$CCC[[product$PRODUCT[z]]],sep="")    
     
         for(u in 1:length(todo))
         {
-            MODIS:::.getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
+            MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
             
@@ -104,24 +100,24 @@ runGdal <- function(...)
             {
                 avDates <- avDates[us]
     
-                if (is.null(opts$job))
+                if (is.null(job))
                 {
-                    opts$job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
+                    job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
                     cat("No 'job' name specified, generated (date/time based)) output directory = ")
                 } else
                 {
                     cat("Output Directory = ")
                 }
-                cat(paste(opts$outDirPath,opts$job,sep="/"),"\n\n")
+                cat(paste(opts$outDirPath,job,sep="/"),"\n\n")
                 
-                outDir <- file.path(opts$outDirPath,opts$job,fsep="/")
+                outDir <- file.path(opts$outDirPath,job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
     
                 for (l in 1:length(avDates))
                 { 
                     files <- unlist(
                                 getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
-                                tileH=opts$extent$tileH, tileV=opts$extent$tileV, stubbornness=opts$stubbornness)
+                                tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
                              )
                     files <- files[basename(files)!="NULL"]
                     
@@ -130,7 +126,7 @@ runGdal <- function(...)
         			SDS <- list()
         			for (z in seq(along=files))
         			{ # get all SDS names for one chunk
-        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=opts$SDSstring, method="GDAL")
+        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
         			}
         			options("warn"= w)					
     
@@ -142,20 +138,20 @@ runGdal <- function(...)
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
                         te <- NULL
-                        if ( !is.null(opts$extent$extent) )
+                        if ( !is.null(extent$extent) )
                         {
                             if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != opts$outProj)
                             {   
-                                if (!is.null(opts$extent$target$extent))
+                                if (!is.null(extent$target$extent))
                                 {
-                                    te <- paste(" -te", opts$extent$target$extent@xmin, opts$extent$target$extent@ymin,
-                                    opts$extent$target$extent@xmax, opts$extent$target$extent@ymax, collapse=" ") 
+                                    te <- paste(" -te", extent$target$extent@xmin, extent$target$extent@ymin,
+                                    extent$target$extent@xmax, extent$target$extent@ymax, collapse=" ") 
                         
                                 } else 
                                 {
-                                    xy <- matrix(c(opts$extent$extent@xmin, opts$extent$extent@ymin, opts$extent$extent@xmin,
-                                        opts$extent$extent@ymax, opts$extent$extent@xmax,
-                                        opts$extent$extent@ymax, opts$extent$extent@xmax, opts$extent$extent@ymin),
+                                    xy <- matrix(c(extent$extent@xmin, extent$extent@ymin, extent$extent@xmin,
+                                        extent$extent@ymax, extent$extent@xmax,
+                                        extent$extent@ymax, extent$extent@xmax, extent$extent@ymin),
                                         ncol=2, nrow=4, byrow=TRUE)
                                     colnames(xy) <- c("x","y")
 				                            xy <- as.data.frame(xy)
@@ -167,7 +163,7 @@ runGdal <- function(...)
                             
                             } else
                             {
-                                te <- paste(" -te", opts$extent$extent@xmin,opts$extent$extent@ymin,opts$extent$extent@xmax,opts$extent$extent@ymax,collapse=" ")  
+                                te <- paste(" -te", extent$extent@xmin, extent$extent@ymin, extent$extent@xmax, extent$extent@ymax,collapse=" ")  
                             }
                         }
                         
@@ -221,7 +217,7 @@ runGdal <- function(...)
                                 system(cmd)
 #                           )
                             
-                        } else 
+                        } else # windows
                         {
                             if(!is.null(opts$gdalPath))
                             {

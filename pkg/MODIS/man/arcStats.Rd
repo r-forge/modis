@@ -26,9 +26,9 @@ outName=NULL,...)}
 
   \item{asMap}{\code{TRUE,FALSE or "both"}. Indicates if the output is a 'png' a 'csv' or 'both' of them.}
   
-  \item{outName}{Character. Default is the 'product.collection.YYYYMMDDHHMMSS.png/csv' of the function call or if aplicable 'product.collection.extent.YYYYMMDDHHMMSS.png/csv'}  
+  \item{outName}{Character. Default is the 'product.collection.YYYYMMDDHHMMSS.png/csv' of the function call or if applicable 'product.collection.extent.YYYYMMDDHHMMSS.png/csv'}  
 
-  \item{...}{Any relevant arguments in \code{?MODISotions}. Most important \code{outDirPath}}
+  \item{...}{Any relevant arguments in \code{?MODISoptions}. Most important \code{outDirPath}}
 }
 
 \value{

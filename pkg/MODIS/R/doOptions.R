@@ -143,11 +143,12 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
 }
 
 
-
 # returns 0 if a given GDAL supports HDF4 else 1 
 checkGdalDriver <- function(path=NULL)
 {
-  inW <- options("warn")$warn
+  inW <- options()$warn
+  on.exit(options(warn=inW))
+  options(warn=-1)  
   
   if(.Platform$OS=="windows")
     {
@@ -156,26 +157,23 @@ checkGdalDriver <- function(path=NULL)
             path <- paste(normalizePath(path,"\\",mustWork=FALSE),sep="")
             path <- paste(paste(strsplit(path,"\\\\")[[1]],sep="",collapse="\\"),"\\",sep="")
             path <- shortPathName(path)
+
+            if (!file.exists(paste(path,'gdalinfo.exe',sep="")))
+            {
+                return(FALSE)
+            }
         }
-        options(warn=-1)
-        try(driver <- shell(paste(path,'gdalinfo.exe --formats',sep=""),intern=TRUE),silent=TRUE)
+
+        try(driver <- shell(paste(path,'gdalinfo --formats',sep=""),intern=TRUE),silent=TRUE)
         if(length(grep(driver,pattern="HDF4"))==0)
         {
-        #    test file from HDF group http://www.hdfgroup.org/tutorial4.html 
-        #    try(test <- shell(paste(path,'gdalinfo.exe ',shortPathName(system.file("external", "sdunl.hdf", package="MODIS")),sep=""),intern=TRUE),silent=TRUE) 
-        #    if (test[1]!="Driver: HDF4Image/HDF4 Dataset")
-        #    {
-              out <- FALSE
-        #    } else 
-        #    {
-        #      out <- TRUE    
-        #    }
+            return(FALSE)
         } else 
         {
-          out <- TRUE
+            return(TRUE)
         }
     } else
-    { # Linux...should always work with any GDAL... but so it is schecked if it is on path or not installed!
+    { # on Linux it sould alwas work...
         if (is.null(path))
         {
             try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)
@@ -186,14 +184,12 @@ checkGdalDriver <- function(path=NULL)
         
         if(length(grep(driver,pattern="HDF4"))==0)
         {
-          out <- FALSE
+          return(FALSE)
         } else
         {
-          out <- TRUE
+          return(TRUE)
         }
     }
-  options(warn=inW)
-  out
 }        
  
 combineOptions <- function(...) 
