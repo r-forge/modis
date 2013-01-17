@@ -11,9 +11,9 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
         stop("getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
     }
     
-    opts <- combineOptions()
+    opts <- MODIS:::combineOptions()
     
-    sturheit <- stubborn(level=opts$stubbornness)
+    sturheit <- MODIS:::stubborn(level=stubbornness)
 
     #########################
     # Check Platform and product
@@ -42,11 +42,11 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
     good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
     ftpdirs <- ftpdirs[,good] # remove wrong cols
     
-    for (i in 1:length(product$PRODUCT))
+    for (i in seq_along(product$PRODUCT))
     {
         todo <- paste(product$PRODUCT[i],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[i])]],sep="")
     
-        for(u in 1:length(todo))
+        for(u in seq_along(todo))
         {
             path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
         
@@ -83,7 +83,8 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
                     } else {
                         getIT <- FALSE
                     }
-                } else {
+                } else 
+                {
                     getIT <- TRUE
                 }
         
@@ -108,19 +109,13 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
                         for (g in 1:sturheit)
                         {
                             cat("Try:",g,"\r")
-                            try(FtpDayDirs <- getURL(startPath),silent=TRUE)
+                            try(FtpDayDirs <- MODIS:::filesUrl(startPath))
                             Sys.sleep(wait)
                             cat("             \r")     
                             if(exists("FtpDayDirs"))
                             {    
                                 break
                             }
-                        }
-                        if(exists("FtpDayDirs"))
-                        {
-                            FtpDayDirs <- unlist(strsplit(FtpDayDirs[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
-                            FtpDayDirs <- FtpDayDirs[substr(FtpDayDirs, 1, 1)=='d'] 
-                            FtpDayDirs <- unlist(lapply(strsplit(FtpDayDirs, " "), function(x){x[length(x)]}))
                         }
     
                     } else if (server=="LAADS")
@@ -135,7 +130,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
                         for (g in 1:sturheit)
                         {
                             cat("Getting Year(s) try:",g,"\r")
-                            try(years <- getURL(startPath),silent=TRUE)
+                            try(years <- MODIS:::filesUrl(startPath))
                             if(g < (sturheit/2)) {
                                 Sys.sleep(wait)
                             } else
@@ -161,7 +156,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
                         {
                             cat("                          \r")
                             cat("Getting day(s) try:",g,"\r") # for",todo[u],"
-                            try(p <- getURL(Ypath),silent=TRUE) # async=T!
+                            try(p <- MODIS:::filesUrl(Ypath)) # async=T!
                             if(g < (sturheit/2))
                             {
                                 Sys.sleep(wait)

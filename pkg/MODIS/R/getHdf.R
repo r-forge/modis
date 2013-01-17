@@ -177,7 +177,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
     l=0
     
     
-    for(z in 1:length(product$PRODUCT))
+    for(z in seq_along(product$PRODUCT))
     { # Platforms MOD/MYD
 
         if (product$TYPE[z]=="Swath") 
