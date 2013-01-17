@@ -48,18 +48,18 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     
     if (opts$outProj == "asIn")
     {
-        if (opts$product$SENSOR=="MODIS")
+        if (product$SENSOR=="MODIS")
         {
             opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
-        } else if (opts$product$SENSOR=="SRTM")
+        } else if (product$SENSOR=="SRTM")
         {
             opts$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
         } 
     }
 
-    if (!is.null(opts$extent$target$t_srs))
+    if (!is.null(extent$target$t_srs))
     {
-        opts$outProj <- opts$extent$target$t_srs
+        opts$outProj <- extent$target$t_srs
         cat("Output projection specified by raster* object: ")
     } else 
     {
