@@ -8,7 +8,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
     server <- toupper(server)
     if(!server %in% c("LPDAAC","LAADS"))
     {
-        stop("getStruc() Error! server must be or 'LPDAAC' or 'LAADS'")
+        stop("getStruc() Error! Server must be or 'LPDAAC' or 'LAADS'")
     }
     
     opts <- MODIS:::combineOptions()

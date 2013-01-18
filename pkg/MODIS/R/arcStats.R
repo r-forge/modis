@@ -23,7 +23,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
         }
     }
     
-    opts <- combineOptions(...)
+    opts <- MODIS:::combineOptions(...)
     opts$localArcPath <- MODIS:::setPath(opts$localArcPath) 
     opts$outDirPath   <- MODIS:::setPath(opts$outDirPath) 
     
@@ -37,7 +37,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
         ext <- getTile(extent=extent)
     }
 
-    MODIS:::getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0,opts)
+    MODIS:::getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0)
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"), stringsAsFactors=FALSE)
 
@@ -47,7 +47,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
 
         for(u in seq_along(todo))
         {
-            path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
+            path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,...)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   

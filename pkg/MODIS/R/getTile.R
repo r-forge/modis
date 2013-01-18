@@ -377,10 +377,9 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
    
     } else 
     {
-        # "modis_latlonWGS84_grid_world.shp" is the reprojected MODIS Sinusoidal bounding grid from:
-        # Author: Markus Neteler (software used: GRASS GIS 6.4)
+        # The "modis_latlonWGS84_grid_world.shp" file is the reprojected MODIS Sinusoidal bounding grid created by
+        # Markus Neteler (software used: GRASS GIS 6.4)
         # License: CC-BY-SA unless stated otherwise
-        # sr <- readOGR(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"),"modis_latlonWGS84_grid_world",verbose=FALSE)
         sr <- shapefile(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"))
         if(isPoly) 
         {
