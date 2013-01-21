@@ -33,32 +33,38 @@ checkIntegrity <- function(x,...)
 
     for (i in seq_along(x))
     {
-        #cat(i,"\n")
-        if (dirname(x[i])==".")
-        {
-            x[i] <- paste(MODIS:::genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]), sep="/")        
-        }
- 
-        if (!file.exists(x[i]) | is.na(x[i]))
+
+        if (basename(x[i])=="NA" | is.na(basename(x[i])))
         {
             out[i] <- NA
         } else
         {
-        
-            if (.Platform$OS.type=="windows")
+           if (dirname(x[i])==".")
             {
-                try(a <- system(paste(cmd," ",shortPathName(x[i]),sep=""),intern=TRUE),silent=TRUE)            
+                x[i] <- paste(MODIS:::genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]), sep="/")        
+            }
+    
+            if (!file.exists(x[i]))
+            {
+                out[i] <- NA
             } else
             {
-                try(a <- system(paste(cmd," ",x[i],sep=""), intern=TRUE), silent=TRUE)
-            }
-        
-            if(length(grep(a,pattern="gdalinfo failed")==1) | length(a)==0)
-            {
-                out[i] <- FALSE
-            } else 
-            {
-                out[i] <- TRUE
+            
+                if (.Platform$OS.type=="windows")
+                {
+                    try(a <- system(paste(cmd," ",shortPathName(x[i]),sep=""),intern=TRUE),silent=TRUE)            
+                } else
+                {
+                    try(a <- system(paste(cmd," ",x[i],sep=""), intern=TRUE), silent=TRUE)
+                }
+            
+                if(length(grep(a,pattern="gdalinfo failed")==1) | length(a)==0)
+                {
+                    out[i] <- FALSE
+                } else 
+                {
+                    out[i] <- TRUE
+                }
             }
         }
     }

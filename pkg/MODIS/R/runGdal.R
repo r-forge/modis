@@ -119,12 +119,12 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                 getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
                                 tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
                              )
-                    files <- files[basename(files)!="NULL"]
+                    files <- files[basename(files)!="NA"]
                     
         			w <- options()$warn
         			options("warn"= -1)
         			SDS <- list()
-        			for (z in seq(along=files))
+        			for (z in seq_along(files))
         			{ # get all SDS names for one chunk
         				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
         			}

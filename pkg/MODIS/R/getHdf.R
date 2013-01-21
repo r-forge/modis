@@ -188,7 +188,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
 
             todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
         
-            for (u in 1:length(todo))
+            for (u in seq_along(todo))
             {
                 # tileID
                 if (product$TYPE[z]=="CMG") 
@@ -285,12 +285,10 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                             
                             if (ftpfiles[1] != "total 0") 
                             {
-        
                                 ftpfiles <- unlist(lapply(strsplit(ftpfiles," "),function(x){x[length(x)]})) # found empty dir!
         
                                 for(j in 1:ntiles)
                                 {
-
                                     if(mtr[j]==1)
                                     { # if tile is missing get it
                                         onFtp <- grep(ftpfiles,pattern=dates[[l]][i,j+1],value=TRUE)

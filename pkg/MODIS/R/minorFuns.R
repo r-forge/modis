@@ -564,27 +564,44 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
         
     for (a in seq_along(x))
     { 
-        path <- MODIS:::genString(x[a],...)
-        MODIS:::setPath(path$localPath) 
-        
-        hv <- 1:length(path$remotePath)
-        hv <- rep(hv,length=opts$stubbornness)
-        g=1
-        while(g <= opts$stubbornness) 
-        {     
-            out[a] <- checkIntegrity(x = x[a],...)
-            if (is.na(out[a])){unlink(out[a]);break}
-            if (!out[a])
-            {
-                if (!quiet)
+        if(basename(x[a])=="NA")
+        {
+            out[a] <- NA
+        } else
+        { 
+            path <- MODIS:::genString(x[a],...)
+            MODIS:::setPath(path$localPath) 
+            
+            hv <- 1:length(path$remotePath)
+            hv <- rep(hv,length=opts$stubbornness)
+            g=1
+            while(g <= opts$stubbornness) 
+            {     
+                if (g==1)
                 {
-                    cat(basename(x[a]),"is corrupted, trying to re-download it!\n\n")
+                    out[a] <- MODIS:::checkIntegrity(x = x[a],...)
                 }
-                out[a] <- MODIS:::ModisFileDownloader(x[a],quiet=quiet,...)
+                
+                if (is.na(out[a]))
+                {
+                    unlink(x[a])
+                    break
+                }
+                if (!out[a])
+                {
+                    if (!quiet)
+                    {
+                        cat(basename(x[a]),"is corrupted, trying to re-download it!\n\n")
+                    }
+                    out[a] <- MODIS:::ModisFileDownloader(x[a],quiet=quiet,...)
+                } else if (out[a]) 
+                {
+                    break
+                }
+                
+                out[a] <- checkIntegrity(x = x[a],...)
+                g=g+1
             }
-            out[a] <- checkIntegrity(x = x[a],...)
-            if(out[a]) {break}
-            g=g+1
         }
     }
 return(as.logical(out)) 
