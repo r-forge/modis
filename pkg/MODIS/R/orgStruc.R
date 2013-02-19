@@ -5,12 +5,11 @@
 orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 {	
 	
-	opts <- combineOptions()
+	opts <- MODIS:::combineOptions()
     if (missing(from))
     {
         from <- opts$localArcPath
     }
-    from <- MODIS:::setPath(from)
     
     if (missing(to))
     {
@@ -50,7 +49,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 	    fname   <- basename(x)
 	    ########################
 	    # generate and create local path to file!
-	    path <- MODIS:::genString(x=fname,remote=FALSE,localArcPath=to,opts)$localPath
+	    path <- MODIS:::genString(x=fname,remote=FALSE,localArcPath=to)$localPath
 	    dir.create(path,showWarnings=FALSE,recursive=TRUE)
 	    ###################
     

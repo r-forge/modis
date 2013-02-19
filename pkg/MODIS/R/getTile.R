@@ -13,7 +13,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         return(extent)
     }
     
-    old    <- FALSE # "old=T" always works "old=F" only for MODIS system + having rgdal and rgeos installed
+    old    <- FALSE # "old=T" always works, "old=F" only for MODIS system + having rgdal and rgeos installed
     target <- NULL  # if extent is a raster* and has a different proj it is changed
     isPoly <- FALSE
     system <- toupper(system) 
@@ -32,21 +32,21 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     {
         if (! require(rgdal) ) 
         {
-            cat("Using old selection method,\nFor precise subsetting install the 'rgdal' package: install.packages('rgdal')\n")
+            cat("Using 'old' selection method,\nFor precise subsetting install the 'rgdal' package: install.packages('rgdal')\n")
             old <- TRUE
             tiltab <- tiletable
         }
 
         if (! require(rgeos) ) 
         {
-            cat("Using old selection method,\nFor precise subsetting install the 'rgeos' package: install.packages('rgeos')\n")
+            cat("Using 'old' selection method,\nFor precise subsetting install the 'rgeos' package: install.packages('rgeos')\n")
             old <- TRUE
             tiltab <- tiletable
         }
     }
     
     # supported extent: shp, list, raster-Extent/-Layer/-Brick/-Stack, map or blank
-    # everyting (except 'shp' and 'map') merges to an raster 'Extent' object
+    # everything (except 'shp' and 'map') merges to an raster 'Extent' object
     # 'shp' and 'map' to a sp Polygon object (since the exact conture is used not the bounding box of the extent) 
     # argument extent is prioritary to tileV/H.
     
@@ -334,17 +334,14 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             if (extent@ymin < -60){extent@ymin <- -60; warning("Minimum Latitude is out of SRTM coverage, extent is trimmed to min LAT -60\n")}
             if (extent@ymax >  60){extent@ymax <-  60;  warning("Maximum Latitude is out of SRTM coverage, extent is trimmed to max LAT 60\n")}
         }
-        
-        # minTile <- subset(tiltab, (tiltab$xmin <= extent@xmin & tiltab$xmax >= extent@xmin) & (tiltab$ymin <= extent@ymin & tiltab$ymax >= extent@ymin))[,c("iv","ih")]
-        minTile <- tiltab[((tiltab$xmin <= extent@xmin & tiltab$xmax >= extent@xmin) & (tiltab$ymin <= extent@ymin & tiltab$ymax >= extent@ymin)),c("iv","ih")]
-        minTile <- c(min(minTile$iv), min(minTile$ih))
-        
-        # maxTile <- subset(tiltab, (tiltab$xmin <= extent@xmax & tiltab$xmax >= extent@xmax) & (tiltab$ymin <= extent@ymax & tiltab$ymax >= extent@ymax))[,c("iv","ih")]
-        maxTile <- tiltab[((tiltab$xmin <= extent@xmax & tiltab$xmax >= extent@xmax) & (tiltab$ymin <= extent@ymax & tiltab$ymax >= extent@ymax)),c("iv","ih")]
-        maxTile <- c(max(maxTile$iv), max(maxTile$ih))
+
+        minTile <- tiltab[((tiltab$xmin <= extent$xmin & tiltab$xmax >= extent$xmin) & (tiltab$ymin <= extent$ymin & tiltab$ymax >= extent$ymin)),c("iv","ih")]
+        maxTile <- tiltab[((tiltab$xmin <= extent$xmax & tiltab$xmax >= extent$xmax) & (tiltab$ymin <= extent$ymax & tiltab$ymax >= extent$ymax)),c("iv","ih")]
+        tiles   <- rbind(maxTile,minTile)
             
-        tileV <- as.vector(minTile[1]:maxTile[1])
-        tileH <- as.vector(minTile[2]:maxTile[2])
+        tileV <- as.vector(min(tiles[1]):max(tiles[1]))
+        tileH <- as.vector(min(tiles[2]):max(tiles[2]))
+        
         vmax  <- max(tiltab$iv)
         hmax  <- max(tiltab$ih)
         

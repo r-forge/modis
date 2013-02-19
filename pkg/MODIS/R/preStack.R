@@ -19,7 +19,7 @@ preStack <- function(pattern = "*", path = "./", files = NULL, timeInfo = NULL)
     
     if (!is.null(timeInfo))
     {
-        avDates  <- extractDate( basename(fnames), pos1 = timeInfo$pos1, pos2 = timeInfo$pos2, format = timeInfo$format, asDate = TRUE)
+        avDates  <- extractDate( basename(fnames), pos1 = timeInfo$call$pos1, pos2 = timeInfo$call$pos2, format = timeInfo$call$format, asDate = TRUE)
         fnames   <- fnames[ order(avDates$inputLayerDates) ]
         avDates  <- sort(avDates$inputLayerDates)
         begin    <- min(timeInfo$inputLayerDates) 

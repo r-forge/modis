@@ -11,25 +11,27 @@ This function uses a modified whittaker filter function (see references) from pa
 }
 
 \usage{
-whittaker.raster(vi,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(vi),lambda=500, nIter= 5,
- outPath ="./", ...)
+whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 3, collapse=FALSE, outPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
 }
 
 \arguments{
-  \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames.}
-  \item{w}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames.}
-  \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames.} 
+  \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
+  \item{w}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
+  \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.} 
   \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years. If \code{FALSE} a overall rasterBrick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="600"), it is not adapted to the time serie length but used as a fixed value (see details). High values = stiff/rigid spline} 
+  \item{collapse}{logical, if \code{TRUE} the input data is treated as _1_single_Year_ collapsing the data using the Julian date information without the year.}   
   \item{nIter}{Number of iteration for the upper envelope fitting.}   
   \item{outPath}{Output path default is the current directory.}   
+  \item{removeOutliers}{Logical. See details}  
+  \item{threshold}{numerical in the same unit as \code{vi}, used for outliers removal. See details}      
   \item{...}{Arguments passed to ?writeRaster (except filename ist automatic), NAflag, datatype, overwrite,..., and if }   
 } 
 
 \details{
 The argument 'lambda' is passed to the \code{MODIS:::miwhitatzb1} function. You can set it as a yearly 'lambda', this means that it doesn't matter how long the _input_ time serie is because 'lambda' is adapted to it with: \code{lambda*('length of _input_ timeserie in days'/365)}. The input length can differ from the output because of the \code{pillow} argument in \code{orgTime}! But you can also set it as a character value (i.e. lambda="1000") in this case the adaption to the time serie length is not performed.
-Further arguments will be implemented very soon!  
+If 'removeOutliers=TRUE', a whittaker sline (with the user specified 'lambda') is applied befor the iterative process. 
 }
 
 \value{

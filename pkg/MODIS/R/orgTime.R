@@ -12,8 +12,8 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     files <- basename(files)
     
     allDates <- sort(extractDate(files,asDate=TRUE,pos1=pos1,pos2=pos2,format=format)$inputLayerDates)
-
-    datLim   <- transDate(begin=begin,end=end)
+    
+    datLim <- transDate(begin=begin,end=end)
     
     if (!is.null(begin))
     {
@@ -45,20 +45,21 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     }
     
     inputLayerDates <- allDates[allDates >= minHAVE & allDates <= maxHAVE]
-
+    inDoys <- as.numeric(format(as.Date(inputLayerDates),"%j"))
+        
     if (minIN < minHAVE)
     {
-        if (as.numeric(minHAVE - minIN) >= pillow)
+        if (as.numeric(minHAVE - minIN) <= pillow)
         {
-            warning("'begin' - 'pillow' is earlier by, ",as.numeric(minHAVE - minIN) ," days, than the available input dates!\nPillow at the start of the time serie is reduced")
+            warning("'begin' - 'pillow' is earlier by, ",as.numeric(minHAVE - minIN) ," days, than the available input dates!\nPillow at the start of the time serie is reduced to ",pillow - as.numeric(minHAVE - minIN)," days!")
         } else if (minOUT == minHAVE)
         {      
-            warning("Is is not possible to use the pillow at the begin of the time series since there is no data available!")
+            warning("Is is not possible to use the pillow at the begin of the time series since there is no data available before 'begin' date!")
         }
     }
     if (maxIN > maxHAVE)
     {
-        warning("'end' + 'pillow' is later by, ",as.numeric(maxHAVE - max(inputLayerDates)) ," days, than the available input dates!")
+        warning("'end' + 'pillow' is later by, ",as.numeric(maxIN - max(inputLayerDates)) ," days, than the available input dates!")
     }
 
     if (nDays=="asIn")
@@ -73,7 +74,7 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     inSeq  <- as.numeric(inputLayerDates - t0+1)
     outSeq <- as.numeric(outputLayerDates - t0+1)
 
-    return(list(inSeq=inSeq,outSeq=outSeq,inputLayerDates=inputLayerDates,outputLayerDates=outputLayerDates,pos1=pos1,pos2=pos2,format=format,asDate=TRUE))        
+    return(list(inSeq=inSeq,outSeq=outSeq, inDoys=inDoys, inputLayerDates=inputLayerDates,outputLayerDates=outputLayerDates,call = list(pos1=pos1,pos2=pos2,format=format,asDate=TRUE,nDays=nDays,pillow=pillow)))        
 }
 
 

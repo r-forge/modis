@@ -41,9 +41,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     rt <- paste(" -r",opts$resamplingType)
     
     # some support for mrt-style settings
-    if (opts$outProj == "GEOGRAPHIC")
+    if (toupper(opts$outProj) == "GEOGRAPHIC")
     {
-        opts$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+        opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
     }
     
     if (opts$outProj == "asIn")
@@ -53,7 +53,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
             opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
         } else if (product$SENSOR=="SRTM")
         {
-            opts$outProj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+            opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
         } 
     }
 
@@ -75,7 +75,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
     } else if (product$SENSOR=="SRTM")
     {
-        s_srs <- ' -s_srs \"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs\"'
+        s_srs <- ' -s_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0\"'
     }
      
     for (z in 1:length(product$PRODUCT))
@@ -140,7 +140,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                         te <- NULL
                         if ( !is.null(extent$extent) )
                         {
-                            if ("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" != opts$outProj)
+                            if ("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0" != opts$outProj)
                             {   
                                 if (!is.null(extent$target$extent))
                                 {
@@ -156,7 +156,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                     colnames(xy) <- c("x","y")
 				                            xy <- as.data.frame(xy)
 				                            coordinates(xy) <- c("x","y")
-				                            proj4string(xy) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+				                            proj4string(xy) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
                                     outBB <- spTransform(xy,CRS(opts$outProj))@bbox
 				                            te <- paste(" -te",outBB["x","min"],outBB["y","min"],outBB["x","max"],outBB["y","max"],collapse=" ")
                                 }
