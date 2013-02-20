@@ -1,6 +1,6 @@
 MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet=FALSE, save=TRUE, checkPackages=TRUE)
 {
-    # This function collects the package options from 3 sites and creates the /.MODIS_opts.R file (location depending on systemwide=T/F, see below):
+    # This function collects the package options from 3 sites and creates the .MODIS_opts.R file (location depending on systemwide=T/F, see below):
     # 1. package installation directory (factory defaults); 
     # 2. /R/etc/.MODIS_opts.R for system wide settings (all users of a machine) and 
     # 3. user home "~/.MODIS_opts.R", for user specific settings. 
@@ -41,7 +41,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         if(!file.create(sysopts,showWarnings=FALSE))
         {
-            stop("You do not have write permission in ",R.home(component="etc")," to create/change 'systemwide' MODIS options. Set systemwide=FALSE for single user settings or start R as root/admin and run the function again!")
+            stop("You do not have write permission in ",R.home(component="etc")," to create/change 'systemwide' MODIS options. Set systemwide=FALSE for single user settings or start R as root/admin and run again 'MODISoptions'!")
         }
         optfile <- sysopts
         whose   <- 'system wide'
@@ -59,11 +59,11 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         if(!so & save)
         {
-            warning("No MODIS 'user' nor 'systemwide' settings file found.\nFile is created for '",whose,"' options in: ",normalizePath(optfile,'/',mustWork=FALSE)
-                    ,".\nPlease consult ?MODISoptions before continuing!\n",sep="")
+            warning("No MODIS 'user' nor 'systemwide' settings file found. File is created for '",whose,"' options in: ",normalizePath(optfile,'/',mustWork=FALSE)
+                    ,".\nPlease consult ?MODISoptions before continuing!",sep="")
         } else if (!save)
         {
-            warning("No MODIS 'user' nor 'systemwide' settings file found.\nFile is _not_ created since 'save=FALSE'. Turn 'save=TRUE' if you want to make make settings permanent!")
+            warning("No MODIS 'user' nor 'systemwide' settings file found. File is _not_ created since 'save=FALSE'. Run 'MODISoptions' with 'save=TRUE' if you want to make make settings permanent!")
         }
     }
     #################################
@@ -72,12 +72,21 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     if(!missing(localArcPath))
     {
         opt$localArcPath <- localArcPath
+        if(opt$localArcPath != localArcPath)
+        {
+            cat("Changing 'localArcPath' from",opt$localArcPath, "to", localArcPath,"\n")
+        }
     }
 
     opt$localArcPath <- MODIS:::setPath(opt$localArcPath)
     if(!missing(outDirPath))
     {
         opt$outDirPath <- outDirPath    
+        if(opt$outDirPath != outDirPath)
+        {
+            cat("Changing 'outDirPath' from",opt$outDirPath, "to", outDirPath,"\n")
+        }
+
     }
     opt$outDirPath <- MODIS:::setPath(opt$outDirPath)
 
@@ -192,8 +201,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         cat('\nSTORAGE\n')
         cat('localArcPath  :', opt$localArcPath, '\n' )
-        cat('outDirPath    :', opt$outDirPath, '\n')
-        cat('auxPath       :', opt$auxPath , '\n\n')
+        cat('outDirPath    :', opt$outDirPath, '\n\n')
+        # cat('auxPath       :', opt$auxPath , '\n\n')
         
         cat('DOWNLOAD\n')
         cat('dlmethod      :', opt$dlmethod,'\n')
@@ -231,7 +240,6 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }
     # this is fixed
     options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
-    
 }   
 
 
