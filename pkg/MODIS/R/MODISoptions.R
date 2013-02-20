@@ -44,7 +44,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
             stop("You do not have write permission in ",R.home(component="etc")," to create/change 'systemwide' MODIS options. Set systemwide=FALSE for single user settings or start R as root/admin and run again 'MODISoptions'!")
         }
         optfile <- sysopts
-        whose   <- 'system wide'
+        whose   <- 'systemwide'
     } else
     {
         if (file.exists(optfile))
