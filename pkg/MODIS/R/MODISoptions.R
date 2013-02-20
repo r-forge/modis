@@ -173,27 +173,36 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }    
     
     # checks if the pointed GDAL supports HDF4 
-    if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
+    if(checkPackages)
     {
-        gdal <- list(GDAL = TRUE, version = "enabled")
-    } else
-    {    
-        if(!is.null(opt$gdalPath))
-        {
-            warning(paste("The specified GDAL: ", opt$gdalPath," does not seem to support HDF4 files!", sep=""))    
-        }
-        gdal <- list(GDAL = FALSE, version = "disabled. Use 'MODIS:::checkTools('GDAL')' for more information!")
-    }
+      if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
+      {
+          gdal <- list(GDAL = TRUE, version = "enabled")
+      } else
+      {    
+          if(!is.null(opt$gdalPath))
+          {
+              warning(paste("The specified GDAL: ", opt$gdalPath," does not seem to support HDF4 files!", sep=""))    
+          }
+          gdal <- list(GDAL = FALSE, version = "disabled. Use 'MODIS:::checkTools('GDAL')' for more information!")
+      }
     
-    MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
-    if(MRT$MRT)
-    {
-        mrt <- MRT$version
-        opt$mrtPath <- TRUE
+      MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
+      if(MRT$MRT)
+      {
+          mrt <- MRT$version
+          opt$mrtPath <- TRUE
+      } else
+      {
+          mrt <- "disabled. Use 'MODIS:::checkTools('MRT')' for more information!"
+          opt$mrtPath <- FALSE
+      }
     } else
     {
-        mrt <- "disabled. Use 'MODIS:::checkTools('MRT')' for more information!"
-        opt$mrtPath <- FALSE
+      gdal <- list()
+      gdal$version <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
+      mrt <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
+      opt$mrtPath <- FALSE
     }
     opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
     
@@ -221,6 +230,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     # remove ftpstring* from opt (old "~/.MODIS_Opts.R" style)
     oldftp <- grep(names(opt),pattern="^ftpstring*")
+    
     if(length(oldftp)>1)
     {
         opt <- opt[-oldftp]
@@ -232,10 +242,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         if (is.character(opt[[i]]))
         {
 
-             eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
+          eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
         } else
         {
-            eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
+          eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
         }
     }
     # this is fixed

@@ -24,7 +24,7 @@ whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), la
   \item{collapse}{logical, if \code{TRUE} the input data is treated as _1_single_Year_ collapsing the data using the Julian date information without the year.}   
   \item{nIter}{Number of iteration for the upper envelope fitting.}   
   \item{outPath}{Output path default is the current directory.}   
-  \item{removeOutliers}{Logical. See details}  
+  \item{removeOutlier}{Logical. See details}  
   \item{threshold}{numerical in the same unit as \code{vi}, used for outliers removal. See details}      
   \item{...}{Arguments passed to ?writeRaster (except filename ist automatic), NAflag, datatype, overwrite,..., and if }   
 } 
