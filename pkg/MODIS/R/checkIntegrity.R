@@ -18,13 +18,12 @@ checkIntegrity <- function(x,...)
     } else
     {
         cmd <- paste(opts$gdalPath,"gdalinfo",collapse="/",sep="")            
-    
         testHdf  <- system.file("external", "sdunl.hdf", package="MODIS")
         try(test <- system(paste(cmd,testHdf),intern=TRUE),silent=TRUE)
 
     }
     
-    if(length(grep(test,"Driver: HDF4Image/HDF4 Dataset"))==0)
+    if(length(grep(test,pattern="Driver: HDF4Image/HDF4 Dataset"))==0)
     {
         stop("Your GDAL installation or the path to your GDAL/bin directory is not valid, please set it using '?MODISoptions'")
     }
