@@ -12,7 +12,8 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     # args <- list(bitShift=2,bitMask=15,threshold=6)
     # args <- list(bitShift=2,bitMask=15)
     # args <- list()
-    args <- list(...)
+    
+    args      <- list(...)
     bitShift  <- args$bitShift
     bitMask   <- args$bitMask
     threshold <- args$threshold
@@ -31,7 +32,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
 
     if(!require(ptw))
     {
-        stop("For using the the whittaker filter please install the package: install.package('ptw')") 
+        stop("In order to use the the whittaker filter please install 'ptw': install.package('ptw')") 
     }
     
     if(!inherits(vi,"Raster")) 
@@ -153,7 +154,7 @@ clFun <- function(l)
     set0   <- matrix(FALSE,nrow=mtrdim[1], ncol=mtrdim[2])
 
     # very save and very limited to scaled NDVI (-3000 to +10000)
-    set0[is.na(val)] <- TRUE
+    set0[is.na(val)]   <- TRUE
     set0[val <= -3000] <- TRUE
     set0[val >  10000] <- TRUE
     
@@ -174,7 +175,7 @@ clFun <- function(l)
              
             if(is.null(bitShift))
             {
-                stop("Could not extract 'bits' for weighting from this product. Use 'makeWeights' function to generate weightings manualy!")
+                stop("Could not extract 'bits' for weighting from this product. Use '?makeWeights' function to generate weightings manualy!")
             }
             wtu  <- makeWeights(wtu, bitShift = bitShift, bitMask = bitMask, threshold = threshold, decodeOnly = FALSE)
         }
@@ -182,7 +183,7 @@ clFun <- function(l)
         set0[wtu==0] <- TRUE
     } else
     {
-        # if no weighting info is available, weight all to 1
+        # if no weighting info is available then weight = 1
         wtu <- matrix(1,nrow=mtrdim[1],ncol=mtrdim[2])
     }
     
@@ -238,7 +239,7 @@ clFun <- function(l)
         }
     } else
     {
-        # if outlierremoval is FALSE generate a faky function to avoid a per pixel "if"
+        # if outlier removal is FALSE generate a faky function to avoid a per pixel "if"
         threshold <- NULL
         kickOutlier <- function(vals,weights,lambda,threshold)
         {

@@ -192,8 +192,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         return(result)
     }
 
-        
-    if (inherits(extent, "character")) # if CHARACTER (country name of MAP) 
+    # if CHARACTER (country name of MAP)     
+    if (inherits(extent, "character"))
     {
 
         if (! require(mapdata))
@@ -209,7 +209,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         extent <- map("worldHires", extent, plot = FALSE, fill=TRUE)
     }
     
-    if (inherits(extent, "map")) # if MAP
+    # if MAP (from mapdata/maps)
+    if (inherits(extent, "map"))
     {
         if (require(maptools) & system == "MODIS")
         {
@@ -221,10 +222,11 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             cat("'maptools' is not installed 'polygon area' extent disabled, simple bounding box is used instead!\n")
         }   
     }
-
-    if (length(grep(oclass,pattern="Raster*"))==1 | length(grep(oclass,pattern="Spatial*"))==1) # if RASTER* object
+    
+    # if raster* object or Spatial*
+    if (length(grep(oclass,pattern="Raster*"))==1 | length(grep(oclass,pattern="Spatial*"))==1) 
     {
-        t_srs      <- projection(extent)
+        t_srs <- projection(extent)
         
         if (length(grep(oclass,pattern="Raster*"))==1)
         {
@@ -234,7 +236,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             resolution <- NULL
         }
         
-        ext        <- extent(extent)
+        ext <- extent(extent)
             
         # Is this grep query right to catch LatLon wgs84? are there other latlons?
         if (length(grep(t_srs,pattern="+proj=longlat"))==0 | !isLonLat(extent)) 
@@ -250,11 +252,12 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             coordinates(xy) <- c("x","y")
             proj4string(xy) <- CRS(t_srs)
             outBB  <- spTransform(xy,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))@bbox
-            extent <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
-        } else
-        {
-            extent <- ext
-        }
+            ext <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
+            #extent <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
+        }# else
+        #{
+        #    extent <- ext
+        #}
         target <- list(t_srs = t_srs, extent = ext, resolution = resolution) 
     }
 
