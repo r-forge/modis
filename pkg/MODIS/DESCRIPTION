@@ -1,6 +1,6 @@
 Package: MODIS
-Version: 0.8-07
-Date: 2-April-2013
+Version: 0.8-08
+Date: 26-April-2013
 Title: MODIS download and processing package. Processing functionalities for (multi-temporal) MODIS grid data.  
 Depends: R (>= 2.10), utils, raster, bitops
 Suggests: RCurl, rgeos, XMLSchema, rgdal, mapdata, maptools, plotrix, SSOAP, XML, snow, ptw

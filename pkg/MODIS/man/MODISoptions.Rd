@@ -23,8 +23,7 @@ Target reference system where to process data using \code{runGdal} or \code{runM
 Default is "NN" (Neares Neightbour). In common for MRT and GDAL are 'NN', 'CC', 'BIL'. GDAL supports  further: 'cubicspline' and 'lanczos' }
   \item{gdalPath}{
 Path to gdal _bin_ directory. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}
-  \item{dlmethod}{
-Argument passed to ?download.file}
+  \item{dlmethod}{Default "auto" (use system default). If the download is not working properly consider to use "wget" instead! This argument is passed to ?download.file}
   \item{stubbornness}{
 The number of retries after that the FTP has refused the connection. Higher values increase the chance of getting the file but also leads to hanging functions if the server is down.}
   \item{systemwide}{Default \code{FALSE}. User wide settings save to \code{path.expand("~/.MODIS_Opts.R")}, if \code{TRUE} write settings to 'systemwide' (presumed you have root/administrator access in \code{paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')})}

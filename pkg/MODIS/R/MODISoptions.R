@@ -71,41 +71,36 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!missing(localArcPath))
     {
-        opt$localArcPath <- localArcPath
+
         if(opt$localArcPath != localArcPath)
         {
             cat("Changing 'localArcPath' from",opt$localArcPath, "to", localArcPath,"\n")
         }
+        opt$localArcPath <- localArcPath
     }
 
     opt$localArcPath <- MODIS:::setPath(opt$localArcPath)
+    
     if(!missing(outDirPath))
     {
-        opt$outDirPath <- outDirPath    
         if(opt$outDirPath != outDirPath)
         {
             cat("Changing 'outDirPath' from",opt$outDirPath, "to", outDirPath,"\n")
         }
-
+        opt$outDirPath <- outDirPath    
     }
     opt$outDirPath <- MODIS:::setPath(opt$outDirPath)
 
     if(!missing(dlmethod))
     {
         opt$dlmethod <- dlmethod
-    } else 
-    {
-        opt$dlmethod <- "auto"
     }
-
+    
     if(!missing(stubbornness))
     {
         opt$stubbornness <- stubbornness
-    } else 
-    {
-        opt$stubbornness <- "high"
     }
-
+    
     if(!missing(resamplingType))
     {
         opt$resamplingType <- resamplingType    
