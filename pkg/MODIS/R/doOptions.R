@@ -99,7 +99,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     {
         return(outProj)
     }
-    # this is here because we could think in a conversoin between GDAL and MRT inputs! (the possible once)
+    # this is here because we could think in a conversion between GDAL and MRT inputs! (the available once MRT it the limiting)
     MRTprojs <- matrix(byrow=T,ncol=2,
         c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
           "IGH", "Interrupted Goode Homolosine", "HAM", "Hammer", "ISIN", "Integerized Sinusoidal", 

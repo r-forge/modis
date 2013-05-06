@@ -1,6 +1,6 @@
 MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet=FALSE, save=TRUE, checkPackages=TRUE)
 {
-    # This function collects the package options from 3 sites and creates the .MODIS_opts.R file (location depending on systemwide=T/F, see below):
+    # This function collects the package options from up to 3 files and creates the .MODIS_opts.R file (location depending on systemwide=T/F, see below):
     # 1. package installation directory (factory defaults); 
     # 2. /R/etc/.MODIS_opts.R for system wide settings (all users of a machine) and 
     # 3. user home "~/.MODIS_opts.R", for user specific settings. 
@@ -118,7 +118,29 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
    
     if (!missing(gdalPath))
     {
-        opt$gdalPath <- gdalPath
+        gp <- gdalPath
+        if(!exists("gp"))
+        {
+            if(.Platform$OS=="unix")
+            {
+                stop("Your 'gdalpath' is not ok. Use single forward slash!")
+            } else
+            {
+                stop("Your 'gdalpath' is not ok. Use single forward or double backward slash!")
+            }
+        } else
+        {
+            if(.Platform$OS=="windows")
+            {
+                gp <- shortPathName(normalizePath(gdalPath,winslash="/"))
+            } else
+            {
+                gp <- path.expand(gdalPath)
+            }
+        
+        }
+               
+        opt$gdalPath <- gp
     }
     
     if (save)
@@ -140,8 +162,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         write('#########################', filename)
         write('# 2.) download defaults:', filename)
         write('  ', filename)
-        write(paste('dlmethod     <- \'',opt$dlmethod,'\' # Method passed to ?download.file, "auto" is always a good choice' ,sep=''), filename)
-        write(paste('stubbornness <- \'',opt$stubbornness,'\' # How stubborn shoud MODIS re-try to connect to ftp? See ?getHdf'  ,sep=''), filename)
+        write(paste('dlmethod     <- \'',opt$dlmethod,'\' # Method passed to ?download.file, "auto" is always a good choice, if you encouter problems (like "file not found") consider using "wget"' ,sep=''), filename)
+        write(paste('stubbornness <- \'',opt$stubbornness,'\' # How stubborn should MODIS re-try to connect to ftp/http? See ?getHdf'  ,sep=''), filename)
         write('  ', filename)
         write('#########################', filename)
         write('# 3.) Processing defaults:', filename)
@@ -237,10 +259,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         if (is.character(opt[[i]]))
         {
 
-          eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
+            eval(parse(text=paste("options(MODIS_",names(opt[i]),"='",opt[[i]],"')",sep="")))
         } else
         {
-          eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
+            eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
         }
     }
     # this is fixed

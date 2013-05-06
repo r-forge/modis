@@ -3,15 +3,17 @@
 # Licence GPL v3
 
 
-arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=NULL, asMap=TRUE, outName=NULL,...)
+arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.01", end=format(Sys.time(), "%Y.%m.%d"), asMap=TRUE, outName=NULL,...)
 {  
+# product="MYD17A2"; collection="005"; extent=list(xmin=-20,xmax=40,ymin=10, ymax=20); begin="2000.08.01"; end="2000.08.21"; asMap="both"; outName=NULL;u=1;z=1
 
     if (!require(rgdal))
     {
-        stop("Please install rgdal package: install.packages('rgdal')")
+        stop("Please install 'rgdal': install.packages('rgdal')")
     }
 
-    date4name <- format(Sys.time(), "%Y%m%d%H%M%S")       
+    date4name <- format(Sys.time(), "%Y%m%d%H%M%S") 
+          
     if(is.null(outName))
     {
         if (inherits(extent,"character"))
@@ -27,13 +29,24 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
     opts$localArcPath <- MODIS:::setPath(opts$localArcPath) 
     opts$outDirPath   <- MODIS:::setPath(opts$outDirPath) 
     
+    if (opts$outProj == "asIn")
+    {
+        opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
+    } else if (toupper(opts$outProj) == "GEOGRAPHIC")
+    {
+        opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+    }
+    
     # product/dates/extent
     product     <- getProduct(x=product, quiet=TRUE)
     product$CCC <- getCollection(product=product, collection=collection, quiet=TRUE)
     tLimits     <- transDate(begin=begin, end=end)
 
-    if (extent[1]!="global")
+    if (extent[1]=="global")
     {  
+        ext <- getTile(extent=extent(raster()))
+    } else 
+    {
         ext <- getTile(extent=extent)
     }
 
@@ -48,6 +61,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
         for(u in seq_along(todo))
         {
             path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,...)$localPath
+            # path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   
@@ -56,64 +70,74 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
             expected <- expected[!is.na(expected)]
   
             allLocal <- list.files(path=path,pattern=".hdf$",recursive=TRUE,full.names=TRUE)
-            
-            # remove not requested dates
-            locDates <- sapply(allLocal,function(x)
+
+            if(length(allLocal)==0)
+            {
+                warnings(paste("No", todo[u], "files found!"))
+                locDates <- NULL
+            } else 
+            {
+                # remove dates not in the query
+                locDates <- sapply(allLocal,function(x)
                 {
                     date <- strsplit(normalizePath(dirname(x),winslash="/"),"/")[[1]]
                     date <- date[length(date)]
                     return(date)
                 })
-                
-            allLocal <- allLocal[as.Date(locDates,"%Y.%m.%d")%in%expected]
+                            
+                locDates <- as.Date(locDates,"%Y.%m.%d")
+                locDates <- allLocal[locDates%in%expected]
+            }
             
             # remove not requested tiles
-            if(extent[1]=="global")
+            if(length(locDates)==0)
             {
-                tileinfo <- unique(sapply(basename(allLocal),function(x){x <- getProduct(x);MODIS:::getPart(x,"TILE")}))
-            } else {
                 tileinfo <- ext$tile
-            }
-                       
-            sr <- shapefile(system.file("external","modis_latlonWGS84_grid_world.shp",package="MODIS"))
-            tileNames <- paste("h",sprintf("%02d", sr@data[,"h"]),"v",sprintf("%02d", sr@data[,"v"]),sep="")            
-            quanti <- nrow(sr@data)
-            available <- rep(0,nrow=quanti)
-            needed    <- rep(0,nrow=quanti)
-            percent   <- rep(0,nrow=quanti)
-            MBperHDF  <- rep(0,nrow=quanti)            
-            sr@data   <- cbind(sr@data,tileNames,available,needed,percent,MBperHDF)
-            sr@data[,"needed"] <- length(expected)
-                        
-            # calculation section
-            for ( i in seq_along(tileinfo))
+            } else if (extent[1]=="global") 
             {
-                n <- grep(allLocal,pattern=tileinfo[i],value=TRUE)
-                meanSize <- mean(file.size(n,units="Mb")) 
+                tileinfo <- unique(sapply(basename(locDates),function(x){x <- getProduct(x);MODIS:::getPart(x,"TILE")}))
+            } else
+			{
+                tileinfo <- ext$tile
+			}
+                                 
+            available <- needed <- percent <- rep(0,length(MODIS:::tileNames))
+            MBperHDF  <- rep(NA,length(available))
+            table     <- data.frame(MODIS:::tileNames,available,needed,percent,MBperHDF)
+            table[,"needed"] <- length(expected)
+            colnames(table)  <- c("tile", "available", "needed", "percent", "MBperHDF")
+                            
+            # calculation section
+            for (i in seq_along(tileinfo))
+            {
+                n <- grep(locDates,pattern=tileinfo[i],value=TRUE)
                 
                 if (length(n)!=0)
                 {
+                    meanSize <- mean(file.size(n,units="Mb")) 
                     n <- sapply(n,function(x)
                     {
                         date <- strsplit(normalizePath(dirname(x),winslash="/"),"/")[[1]]
                         date <- date[length(date)]
                         return(date)
                     })
-                    
+                        
                     n <- as.Date(n,"%Y.%m.%d")
-                    n <- sum(n%in% expected)
-                } else {
-                    n <- 0 
+                    n <- sum(n %in% expected)
+                } else 
+                {
+                    n <- 0
+                    meanSize <- NA 
                 }
                     
-                ind <- which(tileNames==tileinfo[i])
-                sr@data[ind,"available"] <- n
-                sr@data[ind,"percent"]   <- round(100*(n/length(expected)),2)
-                sr@data[ind,"MBperHDF"]  <- meanSize
+                ind <- which(MODIS:::tileNames==tileinfo[i])
+                table[ind,"available"] <- n
+                table[ind,"percent"]   <- round(100*(n/length(expected)),2)
+                table[ind,"MBperHDF"]  <- round(meanSize)
             }
             
             # mapping 
-            if (isTRUE(asMap)|asMap=="both")
+            if (isTRUE(asMap)|tolower(asMap)=="both")
             {
                 if (!(require(maptools)))
                 {
@@ -124,64 +148,70 @@ arcStats <- function(product, collection=NULL, extent="global", begin=NULL, end=
                 {
                     stop("Please install mapdata package: install.packages('mapdata')")
                 }
-                if (!(require(plotrix)))
-                {
-                  stop("Please install plotrix package: install.packages('plotrix')")
-                }
-                
+#               if (!(require(plotrix)))
+ #              {
+  #               stop("Please install plotrix package: install.packages('plotrix')")
+   #            }
+
+                srx      <- MODIS:::sr
+                srx@data <- data.frame(percent=(round(table$percent)))
+                 
                 # require(scales)
-                # colors <- c("#00000000",colorRampPalette(c("red","blue","green"))(100))
+                # colors <- c("#00000000",colorRampPalette(c("red","blue","green"))(100)) # hollow + palette
                 colors <- c("#00000000", "#FF0000", "#F90005", "#F4000A", "#EF000F", "#EA0014", "#E50019", "#E0001E", "#DA0024", "#D50029", "#D0002E", "#CB0033", "#C60038", "#C1003D", "#BC0042", "#B60048", "#B1004D", "#AC0052", "#A70057", "#A2005C", "#9D0061", "#970067", "#92006C", "#8D0071", "#880076", "#83007B", "#7E0080", "#790085", "#73008B", "#6E0090", "#690095", "#64009A", "#5F009F", "#5A00A4", "#5400AA", "#4F00AF", "#4A00B4", "#4500B9", "#4000BE", "#3B00C3", "#3600C8", "#3000CE", "#2B00D3", "#2600D8", "#2100DD", "#1C00E2", "#1700E7", "#1200EC", "#0C00F2", "#0700F7", "#0200FC", "#0002FC", "#0007F7", "#000CF2", "#0012EC", "#0017E7", "#001CE2", "#0021DD", "#0026D8", "#002BD3", "#0030CE", "#0036C8", "#003BC3", "#0040BE", "#0045B9", "#004AB4", "#004FAF", "#0055A9", "#005AA4", "#005F9F", "#00649A", "#006995", "#006E90", "#00738B", "#007985", "#007E80", "#00837B", "#008876", "#008D71", "#00926C", "#009767", "#009D61", "#00A25C", "#00A757", "#00AC52", "#00B14D", "#00B648", "#00BC42", "#00C13D", "#00C638", "#00CB33", "#00D02E", "#00D529", "#00DA24", "#00E01E", "#00E519", "#00EA14", "#00EF0F", "#00F40A", "#00F905", "#00FF00")
-             
-                if (extent[1]!="global")
+
+                xlim <- c(ext$extent@xmin,ext$extent@xmax)
+                ylim <- c(ext$extent@ymin,ext$extent@ymax)
+
+                png(paste(opts$outDirPath,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
+                       
+                if(extent[1]=="global")
                 {
-                    png(paste(opts$outDirPath,"/",todo[u],".",outName,".png",sep=""), width = 800, height = 600)
-                    
-                    xlim <- c(ext$extent@xmin,ext$extent@xmax)
-                    ylim <- c(ext$extent@ymin,ext$extent@ymax)
-     
+                    globe <- map("world",plot=FALSE)
+                } else
+                {
                     globe <- map("worldHires",plot=FALSE,xlim=xlim,ylim=ylim)
-                    globe <- map2SpatialLines(globe)
-                    proj4string(globe) <- proj4string(sr)
-                    
-                    spl <- list("sp.lines", as(globe, "SpatialLines"), lwd=0.8)
-                    spplot(sr, zcol="percent", col.regions=colors, xlim=xlim, ylim=ylim, at=0:100, sp.layout=spl,scales=list(draw = TRUE),main=paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""))
-                    dev.off()
-                    
-                } else 
+                }  
+                globe$x[!is.na(globe$x) & globe$x>180] <- 180
+                                 
+                globe <- map2SpatialLines(globe)
+
+                invisible(set_ll_warn(TRUE))
+                iwa <- options()$warn
+                options(warn=-1)
+                proj4string(globe) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+                options(warn=iwa)
+                   
+                if(!isLonLat(opts$outProj))
                 {
-                
-                    dime   <- 400
-                    width  <- (2*dime)
-                    height <- (1*dime) + dime * 0.5 
-                    
-                    png(paste(opts$outDirPath,"/",todo[u],".",outName,".png",sep=""), width = width, height = height)
-                    
-                    plot(sr,col=colors[(round(sr@data$percent,0)+1)],xlim=c(-180,180),ylim=c(-90,90))
-                    axis(1,labels=seq(-180,180,by=60),at=seq(-180,180,by=60),pos=-100)
-                    axis(2,labels=seq(-90,90,by=30),at=seq(-90,90,by=30))
-                    globe <- map(plot=FALSE)
-                    globe <- map2SpatialLines(globe)
-                    proj4string(globe) <- proj4string(sr)
-                    plot(globe,add=TRUE) 
-                    #add a legend
-                    color.legend(-180,-140,180,-130,seq(0,100,by=10),colors)
-                    inxpd <- par()$xpd
-                    par(xpd=NA)
-                    text(0,-148,"[%]",cex=1) # substiture with mtext!
-                    par(xpd=inxpd)
-                    title(paste("Percentage of ",todo[u]," available on the local archive\nbetween ",min(expected)," and ",max(expected),sep=""),line=-2,cex.main=2)
-                    dev.off()
+                    tmp <- raster(ext$extent)
+                    projection(tmp) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+                    tmp <- projectExtent(tmp,opts$outProj)
+                     
+                    xlim <- c(xmin(tmp),xmax(tmp))
+                    ylim <- c(ymin(tmp),ymax(tmp))
+                      
+                    globe <- spTransform(globe,CRS(opts$outProj))
+                    srx   <- spTransform(srx,CRS(opts$outProj))
                 }
+                
+                globe <- list("sp.lines", as(globe, "SpatialLines"), lwd=0.8)                    
+                    
+                print(
+                    spplot(srx, zcol="percent", col.regions=colors,colorkey=TRUE,at=0:101, xlim=xlim, ylim=ylim, sp.layout=globe,scales=list(draw = TRUE),
+                    main= paste("Percentage of '",todo[u],"' available on the local archive\nbetween ",tLimits$begin," and ",tLimits$end,sep=""),checkEmptyRC=FALSE)
+                    )
+
+               dev.off()
             }
             if (!isTRUE(asMap)|asMap=="both")
             {
                 if (extent[1]=="global")
                 {
-                    out <- sr@data[,c("tileNames","available","needed","percent","MBperHDF")]
+                    out <- table
                 } else 
                 {
-                    out <- sr@data[sr@data$tileName %in% ext$tile,c("tileNames","available","needed","percent","MBperHDF")]
+                    out <- table[table$tile %in% ext$tile,]
                 }
                 write.csv(x=out,file=paste(opts$outDirPath,"/",todo[u],".",outName,".csv",sep=""),row.names = FALSE)                
             }
