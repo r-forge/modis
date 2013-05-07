@@ -54,6 +54,10 @@ arcStats(product="MYD13Q1",begin="2005001",outName="MyDataStart2005")
 arcStats(product="MYD13Q1",begin="2005001",asMap=TRUE, outName="InteractiveSelection2005",
  extent=getTile(), outProj="asIn")
 
+# generates 1 png for AQUA for the selected area and plots it in 'Geographic' Coordinates.
+arcStats(product="MYD13Q1",begin="2005001",asMap=TRUE, outName="InteractiveSelection2005",
+ extent=getTile(), outProj="GEOGRAPHIC")
+
 }
 }
 
