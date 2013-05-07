@@ -54,7 +54,7 @@ Currently tested on MODIS and Landsat data. Using M*D13 data it is also possible
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.7 MB): 
-# https://www.dropbox.com/sh/18t0rgcm6bga7xt/-4k_Xwojxr/MODIS
+# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=shorty_relay&id=QR5FZSxe0g
 # Afterward extract it to: 
 options("MODIS_outDirPath")
 

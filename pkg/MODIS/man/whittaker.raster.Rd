@@ -63,7 +63,8 @@ Currently tested on MODIS and Landsat data. Using M*D13 it is also possible to u
 # You need to extract the: 'vegetation index', 'VI_Quality layer', and 'composite day of the year' layer.
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
-# You can download this dataset from (2.5 MB): https://www.dropbox.com/sh/18t0rgcm6bga7xt/-4k_Xwojxr/MODIS 
+# You can download this dataset from (2.5 MB): 
+# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=shorty_relay&id=QR5FZSxe0g
 # Afterward extract it to: 
 options("MODIS_outDirPath")
 

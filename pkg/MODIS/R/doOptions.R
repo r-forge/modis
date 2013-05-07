@@ -160,6 +160,7 @@ checkGdalDriver <- function(path=NULL)
 
             if (!file.exists(paste(path,'gdalinfo.exe',sep="")))
             {
+                warning(paste("No gdal found in path",path))
                 return(FALSE)
             }
         }
@@ -173,13 +174,19 @@ checkGdalDriver <- function(path=NULL)
             return(TRUE)
         }
     } else
-    { # on Linux it sould alwas work...
+    { # on Linux with gdal-bin installed it sould always work...
         if (is.null(path))
         {
-            try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)
+            test <- try(driver <- system('gdalino --formats',intern=TRUE),silent=TRUE)
         } else
         {
-            try(driver <- system(paste(file.path(path,'gdalinfo'),' --formats',sep=""),intern=TRUE), silent=TRUE)
+            test <- try(driver <- system(paste(file.path(path,'gdalinfo'),' --formats',sep=""),intern=TRUE), silent=TRUE)
+        }
+        
+        if (class(test) == "try-error") 
+        {
+            warning("No gdal installation found please install 'gdal-bin' on your system first!")
+            return(FALSE)
         }
         
         if(length(grep(driver,pattern="HDF4"))==0)

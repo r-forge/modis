@@ -15,7 +15,8 @@
   update of the local MODIS data archive.
 }
 
-\usage{getHdf(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE, ...)}
+\usage{getHdf(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, 
+HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE, ...)}
 
 \arguments{
 

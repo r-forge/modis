@@ -192,16 +192,13 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     # checks if the pointed GDAL supports HDF4 
     if(checkPackages)
     {
-      if (MODIS:::checkGdalDriver(path=opt$gdalPath)) 
+      isOk <- MODIS:::checkGdalDriver(path=opt$gdalPath)
+      if (isOk) 
       {
           gdal <- list(GDAL = TRUE, version = "enabled")
       } else
       {    
-          if(!is.null(opt$gdalPath))
-          {
-              warning(paste("The specified GDAL: ", opt$gdalPath," does not seem to support HDF4 files!", sep=""))    
-          }
-          gdal <- list(GDAL = FALSE, version = "disabled. Use 'MODIS:::checkTools('GDAL')' for more information!")
+          gdal <- list(GDAL = FALSE, version = "Not available. Use 'MODIS:::checkTools('GDAL')' for more information!")
       }
     
       MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
@@ -211,7 +208,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
           opt$mrtPath <- TRUE
       } else
       {
-          mrt <- "disabled. Use 'MODIS:::checkTools('MRT')' for more information!"
+          mrt <- "Not available. Use 'MODIS:::checkTools('MRT')' for more information!"
           opt$mrtPath <- FALSE
       }
     } else

@@ -9,7 +9,8 @@
 In the same manner as \code{getHdf()}, this function quantifies the availability of local MODIS hdf data. This function gives you an overview (plot or/and talbe) of locally available MODIS GRID hdf files. 
 }
 
-\usage{arcStats(product, collection=NULL, extent="global", begin="2000.01.01", end=format(Sys.time(),'\%Y.\%m.\%d'), asMap=TRUE, outName=NULL,...)}
+\usage{arcStats(product, collection=NULL, extent="global", begin="2000.01.01",
+ end=format(Sys.time(),'\%Y.\%m.\%d'), asMap=TRUE, outName=NULL,...)}
 
 \arguments{
 
@@ -27,11 +28,11 @@ In the same manner as \code{getHdf()}, this function quantifies the availability
   
   \item{outName}{Character. Default is the 'product.collection.YYYYMMDDHHMMSS.png/csv' of the function call or if applicable 'product.collection.extent.YYYYMMDDHHMMSS.png/csv'}  
 
-  \item{...}{Any relevant arguments in \code{?MODISoptions}. Most important  \code{outProj} and \code{outDirPath}}
+  \item{...}{Any relevant arguments in \code{MODISoptions()}. Most important  \code{'outProj'} and \code{'outDirPath'}}
 }
 
 \value{
-  An invisible NULL (provably this will change to a matrix similar to the 'csv' output. and a Table.csv + a png file in \code{outDirPath}
+  An invisible NULL (provably this will change to a matrix like object similar to the '*.csv' output. Depending on 'asMap' argument a 'table.csv' and a 'image.png' file(s) in \code{'outDirPath'} see \code{'...'}.
 }
 
 \author{
@@ -50,7 +51,8 @@ arcStats(product="M.D13Q1",extent=c("austria","germany","italy"))
 arcStats(product="MYD13Q1",begin="2005001",outName="MyDataStart2005")
 
 # generates 1 png for AQUA for the selected area and plots it in 'Sinusoidal'.
-arcStats(product="MYD13Q1",begin="2005001",asMap=TRUE, outName="InteractiveSelection2005", extent=getTile(), outProj="asIn")
+arcStats(product="MYD13Q1",begin="2005001",asMap=TRUE, outName="InteractiveSelection2005",
+ extent=getTile(), outProj="asIn")
 
 }
 }
