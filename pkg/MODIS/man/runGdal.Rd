@@ -38,7 +38,7 @@ buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,.
 \tab \code{pixelSize}\tab Numeric single value. Output pixel size in target reference system unit.\cr \tab \tab Default is 'asIn'. See \code{'?MODISoptions'}.\cr
 \tab \code{resamplingType}\tab Character. Default is 'near', can be one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr \tab \tab See \code{'?MODISoptions'}.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL.\cr \tab \tab Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
-\tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2".\cr \tab \tab See: http://www.gdal.org/frmt_gtiff.html\cr
+\tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2".\cr \tab \tab See: \url{http://www.gdal.org/frmt_gtiff.html}\cr
 \tab \code{localArcPath}\tab Character.  See \code{'?MODISoptions'}. Local path to look for and/or to download MODIS files.\cr
 \tab \code{outDirPath}\tab Character.  See \code{'?MODISoptions'}. Root directory where to write \code{job} folder.\cr
 }
@@ -46,7 +46,8 @@ buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,.
 }
 
 \details{
-\code{runGdal()} uses a lot of 'MODIS'-package functions, see in section 'arguments' and 'methods' the respective '?function' for details and inputs.\cr If \code{extent} is a raster* object, the output has exactly the same extent, pixelSize and projection as the used raster* object.
+\code{runGdal()} uses a lot of 'MODIS'-package functions, see in section 'arguments' and 'methods' the respective '?function' for details and inputs.\cr
+If \code{extent} is a raster* object, the output has exactly the same extent, pixel size and projection as the used raster* object.
 }
 
 \author{
@@ -54,7 +55,7 @@ buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,.
 }
 
 \seealso{
-  \code{\link{getHdf}}, \code{\link{runMrt}}
+  \code{\link{getHdf}, \link{runMrt}}
 }
 
 \note{
