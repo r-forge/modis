@@ -25,25 +25,32 @@
 }
 
 \details{
-\code{extent}: 
-\cr
 
-If "list":\cr Then LatLon coordinates in the following form:\cr 
-\code{list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
+\describe{
+\tabular{ll}{
+\code{extent}:\cr
+\cr 
+
+If "list":\cr 
+\tab Then LatLon coordinates in the following form:\cr 
+\tab \code{list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
 \cr
 If "character":\cr
-- the country name of a \code{map} object (see package \code{maps})\cr
-- the file name of a raster or a ESRI Shapefile (shp).\cr
+\tab the country name of a \code{map} object (see package \code{maps}), you can use \code{?search4map} to find a map.\cr
+\tab the file name of a raster or a ESRI Shapefile (shp).\cr
 \cr
-One of the following "R-objects":\cr
-- Package raster: \code{"extent","rasterLayer","rasterStack"} or \code{"rasterBrick"}.\cr
-Using a raster object (not "extent"!), and if not specified otherwise, the "extent", "pixelsize", and the "projection" of the raster object is used as output arguments \code{"extent","pixelSize","outProj"}. (if not LatLon it requires a valid CRS string!)\cr
-If ESRI shapefile (shp) or \code{maps:::map} object, a call to ?sp:::over is performed to determine MODIS tile containg the "extent", this often reduces the number of required MODIS tiles considerably but leads to NO-DATA areas outside the specified "extent" in the result! 
+Other:\cr
+\tab \code{"extent","rasterLayer","rasterStack"} or \code{"rasterBrick"} (package raster).\cr
+\tab Using a raster object (not "extent"!), and if not specified otherwise, the "extent", "pixelsize", and the "projection" of the raster object is used as output arguments \code{"extent","pixelSize","outProj"}. (if not LatLon it requires a valid CRS string!)\cr
 \cr
-\cr
-\code{tileH, tileV}:\cr
-If the extent is specified through this method, no cropping is performed and the full un-cutted tile(s) is/are processed!  
+\tab If ESRI shapefile (shp) or \code{maps:::map} object, a call to \code{sp:::over} is performed to determine MODIS tile containg the "extent", this often considerably reduces the number of required tiles but can lead to NO-DATA areas if in the bounding box of 'extent' not all tiles had to be downloaded! 
 }
+}
+
+PS:\cr
+If an extent is specified through \code{tileV, tileH} arguments, no cropping is performed and the full un-cutted tile(s) (if more than one then also mosaicked) is/are processed!  
+}
+
 
 \value{List}
 
@@ -66,7 +73,7 @@ getTile()
 # "extent" specified with a vector file (map or shp)
 japan <- getTile(extent="Japan")
 japan
-# and here the same "extent" without polygon (vwector object) 
+# and here the same "extent" using the bounding box 
 getTile(extent=japan$extent)
 
 # ex 3 ############
@@ -74,14 +81,14 @@ getTile(extent=japan$extent)
 getTile(tileH=18:19,tileV=4)
 
 # ex 4 ############
-# with Extent of class "list"
+# with extent of class "list"
 Austria <- list(ymin=46.12,ymax=49.3,xmin=9.2,xmax=17.47)
 getTile(extent=Austria)
 getTile(extent=Austria,buffer=10)
 getTile(extent=Austria,buffer=c(0,10)) 
 
 # ex 5 ############
-# with Extent or raster* object from raster package
+# with extent or raster* object from raster package
 # rasterObject
 rasterObject <- raster(xmn=9.2,xmx=17.47,ymn=46.12,ymx=49.3)
 getTile(extent=rasterObject)
@@ -120,6 +127,7 @@ getTile(extent=ext)
 
 # or:
 getTile(extent=c("austria","germany","switzerland"))
+
 # SRTM data
 getTile(extent=c("austria","germany","switzerland"),system="SRTM")
 
