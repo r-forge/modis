@@ -439,7 +439,7 @@ return(secName)
 
 checkDeps <- function()
 {
-    needed <- c('RCurl', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'snow', 'ptw', 'SSOAP', 'XML','plotrix')
+    needed <- c('RCurl', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata','maptools', 'snow', 'ptw', 'SSOAP', 'XML')
     if (all(needed %in% installed.packages()[,1]))
     {
         out <- "All suggested packages are installed"
