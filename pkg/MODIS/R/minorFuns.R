@@ -447,7 +447,7 @@ checkDeps <- function()
         missingP <- !needed %in% installed.packages()[,1]
         missingP <- paste(needed[missingP],sep="",collapse="', '")
 
-        out <- paste("To install all suggested and required packages run: setRepositories() # activate CRAN, R-forge, and Omegahat and then: 'install.packages(c('",missingP,"'))'\n",sep="")
+        out <- paste("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'))\n",sep="")
     }
 out
 }
@@ -615,5 +615,30 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
         }
     }
 return(as.logical(out)) 
+}
+
+# setPath for localArcPath and outDirPath
+setPath <- function(path,ask=FALSE)
+{
+    path <- normalizePath(path, "/", mustWork = FALSE)
+    if(!file.exists(path)) 
+    {
+        if (ask)
+        {
+            doit <- toupper(readline(paste(path,"does not exist should it be created? [y/n]: "))
+        } else 
+        {
+            doit <- 'y'
+        }  
+        if (doit)
+        {
+            stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
+            warning(path," has been created!")
+        } else
+        {
+            path <- "Path not set, use ?MODISoptions to configure it"          
+        }
+    }
+    path    
 }
 
