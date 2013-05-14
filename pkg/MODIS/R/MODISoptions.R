@@ -71,15 +71,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!missing(localArcPath))
     {
-
         if(opt$localArcPath != localArcPath)
         {
-            cat("Changing 'localArcPath' from",opt$localArcPath, "to", localArcPath,"\n")
+            cat("Changing 'localArcPath' from",opt$localArcPath, "to", localArcPath,"\nIf you already have downloaded some HDF-files, don\'t forget to use ?orgStruc()!!")
         }
         opt$localArcPath <- localArcPath
     }
 
-    opt$localArcPath <- MODIS:::setPath(opt$localArcPath)
+    opt$localArcPath <- MODIS:::setPath(opt$localArcPath, ask=TRUE)
     
     if(!missing(outDirPath))
     {
@@ -89,7 +88,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         }
         opt$outDirPath <- outDirPath    
     }
-    opt$outDirPath <- MODIS:::setPath(opt$outDirPath)
+    opt$outDirPath <- MODIS:::setPath(opt$outDirPath, ask=TRUE)
 
     if(!missing(dlmethod))
     {
@@ -123,10 +122,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         {
             if(.Platform$OS=="unix")
             {
-                stop("Your 'gdalpath' is not ok. Use single forward slash!")
+                stop("Your 'gdalPath' is not ok. Use single forward slash!")
             } else
             {
-                stop("Your 'gdalpath' is not ok. Use single forward or double backward slash!")
+                stop("Your 'gdalPath' is not ok. Use single forward or double backward slash!")
             }
         } else
         {
@@ -139,7 +138,6 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
             }
         
         }
-               
         opt$gdalPath <- gp
     }
     
@@ -149,7 +147,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         filename <- file(optfile, open="wt")
   
         write(paste('# This file contains ', whose,' default values for the R package \'MODIS\'.',sep=""), filename)
-        write('# version 0.7-10', filename)
+        write('# version 0.8-13', filename)
         write('#########################', filename)
         write('# 1.) Path and archive structure defaults. (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\"):', filename)	
         write('  ', filename)
@@ -174,8 +172,8 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         write('  ', filename)	
         write('#########################', filename)
         write('# 4.) Windows specific section (could also be used in Linux if you want to point to an alternative GDAL installation not in the default search path. Point ".../gdal-x.x.x/apps" directory!):', filename)
-        write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL instllation (location of "gdalinfo"); (USE FOR SEPARATOR _SINGLE FORWARD_ "/")', filename)
-        write('# Or run: "MODIS:::checkTools()" for autodetection.', filename)
+        write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL installation (location of "gdalinfo"); (USE FOR SEPARATOR _SINGLE FORWARD_ "/")', filename)
+        write('# Or run: "MODIS:::checkTools()" to try to autodetect it.', filename)
         write('# Example :', filename)
         write('# gdalPath <- "C:/OSGeo4W/bin"', filename)
         write('  ', filename)
@@ -218,8 +216,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
       mrt <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
       opt$mrtPath <- FALSE
     }
-    opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
     
+    if(opt$localArcPath!="Path not set, use ?MODISoptions to configure it")
+    {
+        opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
+    } else
+    {
+        opt$auxPath <- NULL
+    }
     if (!quiet) 
     {
         cat('\nSTORAGE\n')
@@ -262,7 +266,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
             eval(parse(text=paste("options(MODIS_",names(opt[i]),"=",opt[[i]],")",sep="")))
         }
     }
-    # this is fixed
+    # this is fix
     options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
 }   
 
