@@ -625,12 +625,13 @@ setPath <- function(path,ask=FALSE)
     {
         if (ask)
         {
-            doit <- toupper(readline(paste(path,"does not exist should it be created? [y/n]: "))
+            doit <- toupper(readline(paste(path,"does not exist, should it be created? [y/n]: ")))
         } else 
         {
-            doit <- 'y'
+            doit <- 'Y'
         }  
-        if (doit)
+        
+        if  (doit %in% c("Y","YES"))
         {
             stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
             warning(path," has been created!")
