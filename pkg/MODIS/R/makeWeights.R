@@ -4,6 +4,11 @@
 
 makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', decodeOnly=FALSE,...)
 {
+    if(!require(bitops))
+    {
+        stop("You need to install the 'bitops' package: install.package('bitopts')")
+    }
+    
     if (inherits(x,"Raster"))
     {
         out <- brick(x, values=FALSE)
