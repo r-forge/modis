@@ -1,14 +1,3 @@
-# setPath for localArcPath and outDirPath
-setPath <- function(path)
-{
-    path <- normalizePath(path, "/", mustWork = FALSE)
-    if(!file.exists(path)) 
-    {
-        stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
-        warning(path," does not exists, it will be created!")
-    }
-    path    
-}
 
 # this function handles the parameter resamplingTpye and must be placed inside runMrt() and runGdal()
 checkResamplingType <- function(resamplingType,tool,quiet=FALSE) 
