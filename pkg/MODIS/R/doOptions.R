@@ -177,7 +177,7 @@ checkGdalDriver <- function(path=NULL)
     { # on Linux with gdal-bin installed it sould always work...
         if (is.null(path))
         {
-            test <- try(driver <- system('gdalino --formats',intern=TRUE),silent=TRUE)
+            test <- try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)
         } else
         {
             test <- try(driver <- system(paste(file.path(path,'gdalinfo'),' --formats',sep=""),intern=TRUE), silent=TRUE)
