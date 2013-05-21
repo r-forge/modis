@@ -552,7 +552,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
     out <- rep(NA,length=length(x))
     
     for (a in seq_along(x))
-    { 
+    {  # a=1
         path <- MODIS:::genString(x[a],...)
         MODIS:::setPath(path$localPath) 
         
@@ -561,18 +561,28 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
         g=1
         while(g <= opts$stubbornness) 
         {     
-            if (!quiet)
-            {
-                cat("Getting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
-            }      
-            try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=paste(path$localPath,x[a],sep="/"),mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-            if (is.na(out[a])) {cat("File not found!\n"); unlink(paste(path$localPath,x[a],sep="/")); break} # if NA then the url name is wrong!
-            if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
-            if (out[a]==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n\n")}
-            if (out[a]==0 & !quiet & g==1) {cat("Downloaded by the first try!\n\n")}
-            if (out[a]==0) {break}    
-            Sys.sleep(wait)
-            g=g+1    
+          if (!quiet)
+          {
+              cat("Getting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
+          }
+          
+          if(.Platform$OS=="windows")
+          {
+              destfile <- paste(shortPathName(path$localPath),x[a],sep="\\")  
+          } else
+          {
+              destfile <- paste(path$localPath,x[a],sep="/")
+          }
+            
+          try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+      
+          if (is.na(out[a])) {cat("File not found!\n"); unlink(paste(path$localPath,x[a],sep="/")); break} # if NA then the url name is wrong!
+          if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
+          if (out[a]==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n\n")}
+          if (out[a]==0 & !quiet & g==1) {cat("Downloaded by the first try!\n\n")}
+          if (out[a]==0) {break}    
+          Sys.sleep(wait)
+          g=g+1    
         }
     }
 return(!as.logical(out)) 
@@ -633,7 +643,7 @@ return(as.logical(out))
 }
 
 # setPath for localArcPath and outDirPath
-setPath <- function(path,ask=FALSE)
+setPath <- function(path,ask=FALSE, showWarnings=FALSE)
 {
     path <- normalizePath(path, "/", mustWork = FALSE)
     if(!file.exists(path)) 
@@ -648,7 +658,7 @@ setPath <- function(path,ask=FALSE)
         
         if  (doit %in% c("Y","YES"))
         {
-            stopifnot(dir.create(path, recursive = TRUE, showWarnings = TRUE))
+            stopifnot(dir.create(path, recursive = TRUE, showWarnings = showWarnings))
             warning(path," has been created!")
         } else
         {

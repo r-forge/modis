@@ -116,7 +116,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     # auxPath (hard coded)
     opt$auxPath <- path.expand(paste(opt$outDirPath,"/.auxiliaries",sep=""))
-       
+    
+    if(.Platform$OS=="windows")
+    {
+      opt$localArcPath <- normalizePath(shortPathName(normalizePath(opt$localArcPath,winslash="/")),winslash="/")
+      opt$outDirPath   <- normalizePath(shortPathName(normalizePath(opt$outDirPath,winslash="/")),winslash="/")
+      opt$auxPath      <- normalizePath(shortPathName(normalizePath(opt$auxPath,winslash="/")),winslash="/")
+    }
+    
     if(!missing(dlmethod))
     {
         dlmethod <- tolower(dlmethod)

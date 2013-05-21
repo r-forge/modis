@@ -67,8 +67,8 @@ Jarvis A., H.I. Reuter, A.  Nelson, E. Guevara, 2008, Hole-filled  seamless SRTM
 \examples{
 \dontrun{
 # one specific file (no regular erpression allowed here for now!)
-# ca 213 mB!!!
-a <- getHdf(HdfName="MOD13Q1.A2009209.h19v04.005.2009227222141.hdf", wait=0)
+# ca 2 mB!!!
+a <- getHdf(HdfName="MYD11A1.A2009001.h18v04.005.2009013145459.hdf", wait=0)
 a
 
 # DO NOT RUN THE NEXT EXAMPLE (unless you need this data)!!!

@@ -5,7 +5,7 @@
 
 getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE,...) 
 {
-
+   # product="MOD11A1"; begin="2010001"; end="2010005"; tileH=NULL; tileV=NULL; extent=NULL; collection=NULL; quiet=FALSE; wait=0.5; checkIntegrity=FALSE; z=1;u=1
     opts <- MODIS:::combineOptions(...)
     
     sturheit <- MODIS:::stubborn(level=opts$stubbornness)
@@ -223,7 +223,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                     colnames(dates[[l]]) <- c("date",tileID)
 
                     for (i in 1:nrow(dates[[l]]))
-                    {
+                    { # i=1
                         year <- format(as.Date(dates[[l]][i,1],format="%Y.%m.%d"), "%Y")
                         doy  <- as.integer(format(as.Date(dates[[l]][i,1],format="%Y.%m.%d"), "%j"))
                         doy  <- sprintf("%03d",doy)
@@ -288,7 +288,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                 ftpfiles <- unlist(lapply(strsplit(ftpfiles," "),function(x){x[length(x)]})) # found empty dir!
         
                                 for(j in 1:ntiles)
-                                {
+                                { # j=1
                                     if(mtr[j]==1)
                                     { # if tile is missing get it
                                         onFtp <- grep(ftpfiles,pattern=dates[[l]][i,j+1],value=TRUE)
@@ -296,7 +296,6 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         
                                         if(length(HDF)>0)
                                         {
-                    
                                             if (length(HDF)>1) 
                                             { # in very recent files sometimes there is more than 1 file/tile/date if so get the last
                                                 select <- list()
@@ -308,7 +307,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                             }
 
                                             dates[[l]][i,j+1] <- HDF
-                                            hdf <- ModisFileDownloader(HDF, wait=wait, quiet=quiet, ...)
+                                            hdf <- MODIS:::ModisFileDownloader(HDF, wait=wait, quiet=quiet,...)
                                             mtr[j] <- hdf
 
                                         } else 

@@ -25,7 +25,7 @@ Default is \code{NN} (Neares Neightbour). In common for MRT and GDAL are \code{N
 
   \item{gdalPath}{
 Path to gdal _bin_ directory, relvand more for windows. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}
-  \item{dlmethod}{Default \code{auto} (use system default). If the download is not working properly consider to use \code{wget} instead! This argument is passed to \code{?download.file}.}
+  \item{dlmethod}{Default \code{auto} see argument \code{method} in \code{?download.file}. On a Unixoid (also Mac?) it is suggested to use  \code{wget}.}
   \item{stubbornness}{
 The number of re-tries after that the HTTP/FTP server has refused the connection. Higher values increase the chance of getting the file but also leads to hanging functions if the server is down.}
   \item{systemwide}{Default \code{FALSE}. 'User' wide settings saved to \code{path.expand("~/.MODIS_Opts.R")}, if \code{TRUE} write settings to 'systemwide', presumed you have write access to \code{paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')}}
@@ -45,7 +45,7 @@ It is _not_ recommended to use a _not_ globally applicable georeference referenc
 
 On Windows you have to set \code{gdalPath} to the location of GDAL executables (the '.../GDAL../bin' directory). On Unix-alikes this should not be required unless you want to specify a non default GDAL installation.
 
-After the change of the 'LP DAAC' datapool from FTP to HTTP (May 2013) the download method \code{dlmethod=auto} seams not to work properly, if you also have problems switch to \code{wget} and make sure you have 'wget' installed (\url{http://www.gnu.org/software/wget/}). See \code{?download.file} for possibilities.
+On an unixoid OS it is suggested to use \code{dlmethod='wget'} because its a reliable tool and, after the change of the 'LP DAAC' datapool from FTP to HTTP (May 2013) \code{dlmethod='auto'} seams not to work properly. On Windows it seams to work fine with \code{dlmethod='auto'}. Help and suggestions appreciated! 
 
 }
 
