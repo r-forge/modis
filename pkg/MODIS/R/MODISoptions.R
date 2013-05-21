@@ -162,7 +162,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         {
             if(.Platform$OS=="windows")
             {
-                gdalPath <- normalizePath(shortPathName(normalizePath(gdalPath,winslash="/")),winshlash="/")
+                gdalPath <- normalizePath(shortPathName(normalizePath(gdalPath,winslash="/")),winslash="/")
             } else
             {
                 gdalPath <- path.expand(gdalPath)
