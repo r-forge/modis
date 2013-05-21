@@ -59,8 +59,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         if(!so & save)
         {
-            warning("No MODIS 'user' nor 'systemwide' settings file found. File is created for '",whose,"' settings in: ",normalizePath(optfile,'/',mustWork=FALSE)
-                    ,".\nPlease consult ?MODISoptions before continuing!",sep="")
+            warning("No MODIS 'user' nor 'systemwide' settings file found. File is created for '",whose,"'-settings in: ",normalizePath(optfile,'/',mustWork=FALSE),sep="")
         } else if (!save)
         {
             warning("No MODIS 'user' nor 'systemwide' settings file found, using default settings. Use '?MODISoptions' to configure the 'MODIS' package and make settings permanent!")
@@ -163,7 +162,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         {
             if(.Platform$OS=="windows")
             {
-                gdalPath <- shortPathName(normalizePath(gdalPath,winslash="/"))
+                gdalPath <- normalizePath(shortPathName(normalizePath(gdalPath,winslash="/")),winshlash"/")
             } else
             {
                 gdalPath <- path.expand(gdalPath)
