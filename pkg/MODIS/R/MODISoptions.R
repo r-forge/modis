@@ -41,7 +41,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         if(!file.create(sysopts,showWarnings=FALSE))
         {
-            stop("You do not have write permission in ",R.home(component="etc")," to create/change 'systemwide' MODIS options. Set systemwide=FALSE for single user settings or start R as root/admin and run again 'MODISoptions'!")
+            stop("You do not have write permission in ",R.home(component="etc")," to create/change 'systemwide' MODIS options. Set 'systemwide=FALSE' for single user settings or start R as root/admin and run again 'MODISoptions'!")
         }
         optfile <- sysopts
         whose   <- 'systemwide'
@@ -59,39 +59,69 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
         if(!so & save)
         {
-            warning("No MODIS 'user' nor 'systemwide' settings file found. File is created for '",whose,"' options in: ",normalizePath(optfile,'/',mustWork=FALSE)
+            warning("No MODIS 'user' nor 'systemwide' settings file found. File is created for '",whose,"' settings in: ",normalizePath(optfile,'/',mustWork=FALSE)
                     ,".\nPlease consult ?MODISoptions before continuing!",sep="")
         } else if (!save)
         {
-            warning("No MODIS 'user' nor 'systemwide' settings file found. File is _not_ created since 'save=FALSE'. Run 'MODISoptions' with 'save=TRUE' if you want to make make settings permanent!")
+            warning("No MODIS 'user' nor 'systemwide' settings file found, using default settings. Use '?MODISoptions' to configure the 'MODIS' package and make settings permanent!")
         }
     }
     #################################
     opt <- as.list(opts)	
     
+    # localArcPath
+    opt$localArcPath <- path.expand(opt$localArcPath)
+    
     if(!missing(localArcPath))
     {
-        if(opt$localArcPath != localArcPath)
+        localArcPath <- path.expand(localArcPath) 
+                   
+        if (!file.exists(opt$localArcPath))
         {
-            cat("Changing 'localArcPath' from",opt$localArcPath, "to", localArcPath,"\nIf you already have downloaded some HDF-files, don\'t forget to use ?orgStruc()!!")
+            message("'localArcPath' does not exist, it will be created in '",localArcPath,"'")               
+        } else if (opt$localArcPath != localArcPath)
+        {
+            message("Changing 'localArcPath' from '",opt$localArcPath, "' to '", localArcPath,"'\nIf you already have downloaded some HDF-files, you can use '?orgStruc()' to re-arrange your HDF-data!")
         }
         opt$localArcPath <- localArcPath
+    } else
+    {
+        if (!file.exists(opt$localArcPath))
+        {
+            message("'localArcPath' does not exist, it will be created in '",opt$localArcPath,"'. Consult '?MODISoptions' if you want to change it!")               
+        }    
     }
-
-    opt$localArcPath <- MODIS:::setPath(opt$localArcPath, ask=TRUE)
     
+    # outDirPath
+    opt$outDirPath <- path.expand(opt$outDirPath)
+        
     if(!missing(outDirPath))
     {
-        if(opt$outDirPath != outDirPath)
+        outDirPath <- path.expand(outDirPath)
+        
+        if (!file.exists(opt$outDirPath))
         {
-            cat("Changing 'outDirPath' from",opt$outDirPath, "to", outDirPath,"\n")
+            message("'outDirPath' does not exist and will be created in '",outDirPath,"'")               
+        } else if (opt$outDirPath != outDirPath)
+        {
+            message("'outDirPath' has been changed from '",opt$outDirPath,"' to '",outDirPath,"'")
         }
-        opt$outDirPath <- outDirPath    
+        opt$outDirPath <- outDirPath
+    } else
+    {
+        if (!file.exists(opt$outDirPath))
+        {
+            message("'outDirPath' does not exist, it will be created in '",opt$outDirPath,"'. Consult '?MODISoptions' if you want to change it!")               
+        }    
     }
-    opt$outDirPath <- MODIS:::setPath(opt$outDirPath, ask=TRUE)
-
+    
+    # auxPath (hard coded)
+    opt$auxPath <- path.expand(paste(opt$outDirPath,"/.auxiliaries",sep=""))
+       
     if(!missing(dlmethod))
     {
+        dlmethod <- tolower(dlmethod)
+        stopifnot(dlmethod %in% c("auto","internal","wget","curl","lynx"))
         opt$dlmethod <- dlmethod
     }
     
@@ -102,6 +132,9 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     
     if(!missing(resamplingType))
     {
+        stopifnot(tolower(resamplingType) %in% c('nn', 'cc', 'bil','near', 'bilinear', 'cubic','cubicspline','lanczos', 'average', 'mode'))
+        MODIS:::checkResamplingType
+        
         opt$resamplingType <- resamplingType    
     } 
 
@@ -117,8 +150,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
    
     if (!missing(gdalPath))
     {
-        gp <- gdalPath
-        if(!exists("gp"))
+        if(!exists("gdalPath")) # this can happen on Windows by using single backslash...I hope this solves the problem! 
         {
             if(.Platform$OS=="unix")
             {
@@ -131,14 +163,14 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
         {
             if(.Platform$OS=="windows")
             {
-                gp <- shortPathName(normalizePath(gdalPath,winslash="/"))
+                gdalPath <- shortPathName(normalizePath(gdalPath,winslash="/"))
             } else
             {
-                gp <- path.expand(gdalPath)
+                gdalPath <- path.expand(gdalPath)
             }
         
         }
-        opt$gdalPath <- gp
+        opt$gdalPath <- gdalPath
     }
     
     if (save)
@@ -148,34 +180,49 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   
         write(paste('# This file contains ', whose,' default values for the R package \'MODIS\'.',sep=""), filename)
         write('# version 0.8-13', filename)
+        write('# consult \'?MODISoptions\' for details and explanations', filename)
+        write('  ', filename)
         write('#########################', filename)
-        write('# 1.) Path and archive structure defaults. (USE FOR SEPARATOR EIGHTER SINGLE FORWARD "/" OR DOUBLE BACKWARD SLASHES "\\\\"):', filename)	
+        write('# 1.) Path and archive structure defaults.', filename)
+        write('# consult \'?MODISoptions\' for more details', filename)
+        write('# USE SINGLE FORWARD SLASH "/" (also on WINDOWS)', filename)
+        write('# If path does not exist it is created!', filename)
+        write('# Work also with network share!', filename)
         write('  ', filename)
-        write('# set path. All data will be stored below this directory. If it doesn\'t exist it is created. Should work also with a remote path like a network directory!',filename)	
-        write(paste('localArcPath <- \'',opt$localArcPath,'\' # If you already have downloaded some files, don\'t forget to call the function \'orgStruc()\' after changing here!!', sep=''), filename)    
+        
+        write('# All HDF-data will be (properly) stored in this directory.',filename)	
+        write(paste('localArcPath <- \'',opt$localArcPath,'\'', sep=''), filename)    
         write('  ', filename)
-        write('# set path, default output location for GDAL, FWTools/OSGeo4W, SSOAP, MRT processing results. If it doesn\'t exist it is created.',filename)
+        
+        write('# Default output location for MODIS package processing results.',filename)
         write(paste('outDirPath   <- \'',opt$outDirPath, '\'',sep=''),filename)
         write('  ', filename)
+        
         write('#########################', filename)
         write('# 2.) download defaults:', filename)
+        write('# consult \'?MODISoptions\' for more details', filename)
         write('  ', filename)
-        write(paste('dlmethod     <- \'',opt$dlmethod,'\' # Method passed to ?download.file, "auto" is always a good choice, if you encouter problems (like "file not found") consider using "wget"' ,sep=''), filename)
-        write(paste('stubbornness <- \'',opt$stubbornness,'\' # How stubborn should MODIS re-try to connect to ftp/http? See ?getHdf'  ,sep=''), filename)
+        write(paste('dlmethod     <- \'',opt$dlmethod,'\'' ,sep=''), filename)
+        write(paste('stubbornness <- \'',opt$stubbornness,'\'',sep=''), filename)
         write('  ', filename)
+        
         write('#########################', filename)
         write('# 3.) Processing defaults:', filename)
+        write('# It is highly recommended to not modify here, at least not \'resamplingType\' as there are several layers that require NN (i.e. VI_Quality, Day of the year,...)!', filename)
+        write('# consult \'?MODISoptions\' for more details', filename)
         write('  ', filename)
-        write(paste('resamplingType <- \'',opt$resamplingType,'\' # There are several layers that require "near" (i.e. VI_Quality, Day of the year,...)!',sep=''), filename)
+        write(paste('resamplingType <- \'',opt$resamplingType,'\'',sep=''), filename)
         write(paste('outProj        <- \'',opt$outProj,'\'',sep=''),filename)
         write(paste('pixelSize      <- \'',opt$pixelSize,'\'',sep=''),filename)
         write('  ', filename)	
         write('#########################', filename)
-        write('# 4.) Windows specific section (could also be used in Linux if you want to point to an alternative GDAL installation not in the default search path. Point ".../gdal-x.x.x/apps" directory!):', filename)
-        write('# Set path to "OSGeo4W" (recommanded) or "FWTools" _bin_ directory or any HDF4 supporting GDAL installation (location of "gdalinfo"); (USE FOR SEPARATOR _SINGLE FORWARD_ "/")', filename)
-        write('# Or run: "MODIS:::checkTools()" to try to autodetect it.', filename)
-        write('# Example :', filename)
-        write('# gdalPath <- "C:/OSGeo4W/bin"', filename)
+        write('# 4.) Set path to GDAL _bin_ directory', filename)
+        write('# More related to Windows, but also to other OS in case of a non standard location of GDAL', filename)
+        write('# ON WINDOWS install \'OSGeo4W\' (recommanded) or \'FWTools\'', filename)
+        write('# consult \'?MODISoptions\' for more details', filename)        
+        write('# Run: \'MODIS:::.checkTools()\' to try to autodetect.', filename)
+        write('# Example (USE SINGLE FORWARD SLASH \'/\'!):', filename)
+        write('# gdalPath <- \'C:/OSGeo4W/bin\'', filename)
         write('  ', filename)
 
         if (!is.null(opt$gdalPath))
@@ -190,59 +237,58 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     # checks if the pointed GDAL supports HDF4 
     if(checkPackages)
     {
-      isOk <- MODIS:::checkGdalDriver(path=opt$gdalPath)
-      if (isOk) 
-      {
-          gdal <- list(GDAL = TRUE, version = "enabled")
-      } else
-      {    
-          gdal <- list(GDAL = FALSE, version = "Not available. Use 'MODIS:::checkTools('GDAL')' for more information!")
-      }
-    
-      MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
-      if(MRT$MRT)
-      {
-          mrt <- MRT$version
-          opt$mrtPath <- TRUE
-      } else
-      {
-          mrt <- "Not available. Use 'MODIS:::checkTools('MRT')' for more information!"
-          opt$mrtPath <- FALSE
-      }
+        # GDAL
+        isOk <- MODIS:::checkGdalDriver(path=opt$gdalPath)
+        if (isOk) 
+        {
+            gdal <- list(GDAL = TRUE, version = MODIS:::checkTools(tool="GDAL",quiet=TRUE)$GDAL$version)
+        } else
+        {    
+            gdal <- list(GDAL = FALSE, version = "Not available. Use 'MODIS:::checkTools('GDAL')' for more information!")
+        }
+        
+        # MRT
+        MRT <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
+        
+        if(MRT$MRT)
+        {
+            mrt <- MRT$version
+            opt$mrtPath <- TRUE
+        } else
+        {
+            mrt <- "Not available. Use 'MODIS:::checkTools('MRT')' for more information!"
+            opt$mrtPath <- FALSE
+        }
     } else
     {
-      gdal <- list()
-      gdal$version <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
-      mrt <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
-      opt$mrtPath <- FALSE
+        gdal <- list()
+        gdal$version <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
+        mrt          <- "Not checked, run 'MODISoptions(checkPackages=TRUE)'"
+        opt$mrtPath  <- FALSE
     }
-    
-    if(opt$localArcPath!="Path not set, use ?MODISoptions to configure it")
-    {
-        opt$auxPath <- MODIS:::setPath(paste(opt$localArcPath,"/.auxiliaries",sep=""))
-    } else
-    {
-        opt$auxPath <- NULL
-    }
+ 
     if (!quiet) 
     {
-        cat('\nSTORAGE\n')
+        cat('\nSTORAGE:\n')
+        cat('_______________\n')
         cat('localArcPath  :', opt$localArcPath, '\n' )
-        cat('outDirPath    :', opt$outDirPath, '\n\n')
-        # cat('auxPath       :', opt$auxPath , '\n\n')
+        cat('outDirPath    :', opt$outDirPath, '\n\n\n')
         
-        cat('DOWNLOAD\n')
+        cat('DOWNLOAD:\n')
+        cat('_______________\n')
         cat('dlmethod      :', opt$dlmethod,'\n')
-        cat('stubbornness  :', opt$stubbornness,'\n\n')
+        cat('stubbornness  :', opt$stubbornness,'\n\n\n')
         
-        cat('PROCESSING\n')
+        cat('PROCESSING:\n')
+        cat('_______________\n')
         cat('GDAL          :', gdal$version, '\n')
         cat('MRT           :', mrt, '\n')
         cat('pixelSize     :', opt$pixelSize, '\n')
         cat('outProj       :', opt$outProj, '\n')
-        cat('resamplingType:', opt$resamplingType, '\n\n')
+        cat('resamplingType:', opt$resamplingType, '\n\n\n')
         
-        cat('DEPENDENCIES\n')
+        cat('DEPENDENCIES:\n')
+        cat('_______________\n')
         cat(suggestedPackages,'\n\n')
     }
     

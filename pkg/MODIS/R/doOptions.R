@@ -9,24 +9,37 @@ checkResamplingType <- function(resamplingType,tool,quiet=FALSE)
     
     resamplingType <- trim(tolower(as.character(resamplingType)))
     tool           <- toupper(tool)
+    
     if (!tool %in% c("GDAL","MRT"))
     {
         stop("Unknown 'tool'. Allowed are 'MRT' or 'GDAL'")
     }
-    
-    if (resamplingType %in% c("nn","cc","bil") & tool=="GDAL")
+
+    if ("GDAL" %in% tool)
     {
-        if(resamplingType=="nn")
+        if (resamplingType %in% c("nn","cc","bil"))
         {
-            resamplingType <- "near"
-        }
-        if(resamplingType=="cc")
+            if(resamplingType=="nn")
+            {
+                resamplingType <- "near"
+            }
+            if(resamplingType=="cc")
+            {
+                resamplingType <- "cubic"
+            }
+            if(resamplingType=="bil")
+            {
+                resamplingType <- "bilinear"
+            }
+        } else
         {
-            resamplingType <- "cubic"
-        }
-        if(resamplingType=="bil")
-        {
-            resamplingType <- "bilinear"
+            # for efficiency gdv should be stored as variable
+            gdv <- MODIS:::checkTools('GDAL',quiet=TRUE)$GDAL$vercheck
+
+            if (gdv[2] < 10 & resamplingType %in% c("average","mode"))
+            {
+                stop("resamplingType= 'average' and 'mode' requires GDAL >= 1.10.0")
+            }
         }
     }
     

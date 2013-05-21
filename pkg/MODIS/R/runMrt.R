@@ -10,24 +10,6 @@ runMrt <- function(...)
     {
         stop("MRT path not set or MRT not installed on your system!")
     }
-
-    # Collect parameters from any possible source
-#    if (!is.null(ParaSource))
-#    {
-#        fe  <- new.env()
-#        eval(parse(ParaSource),envir=fe)
-#        sp <- as.list(fe)
-#        dp <- list(...)
-#        pm <- c(sp, dp[(!names(dp) %in% names(sp))])
-#    } else {
-#        pm <- list(...)
-#    } 
-#
-#    if(length(pm)==0)
-#    {
-#        ParaEx <- file.path(find.package('MODIS'),'external','ParaExample.R')
-#        stop(paste("Provide a valid 'ParaSource' file, see or use: '",ParaEx,"' or insert the needed parameters directly.",sep=""))
-#    }
         
     opts$product     <- getProduct(opts$product,quiet=TRUE)
     opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
@@ -43,7 +25,6 @@ runMrt <- function(...)
     if (is.null(opts$anonym))   {opts$anonym <- TRUE} 
 
     opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType,tool="mrt",quiet=TRUE)
-    
     opts$outProj        <- MODIS:::checkOutProj(opts$outProj,tool="mrt",quiet=TRUE)
     
     if (opts$outProj[1]=="asIn")

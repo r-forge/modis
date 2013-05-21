@@ -7,7 +7,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 {
 
     opts <- combineOptions()
-    opts$auxPath <- MODIS:::setPath(opts$auxPath)
+    opts$auxPath <- paste(opts$localArcPath,"/.auxiliaries",sep="")
 
     ####
     # checks for product
@@ -20,10 +20,10 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
     {
         stop("Unknown product")
     }
-
     # load aux
     if (!file.exists(file.path(opts$auxPath,"collections.RData",fsep="/"))) # on the very first call use the delivered pre-updated version    
     {
+        opts$auxPath <- MODIS:::setPath(opts$auxPath)
         invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(opts$auxPath,"collections.RData",fsep="/")))
         unlink(file.path(opts$auxPath,"collections.txt",fsep="/"))
     }

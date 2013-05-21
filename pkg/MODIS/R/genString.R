@@ -8,13 +8,18 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
 {
     if (missing(x)) 
     {
-        stop(".genString Error: 'x' must be a file name or a product name!")
+        stop(".genString Error: 'x' must be a HDF-file or MODIS-product name!")
     }
 
+    opts <- MODIS:::combineOptions(...)
+    remotePath <- localPath <- NULL
+    
+    opts$auxPath <- MODIS:::setPath(paste(opts$localArcPath,"/.auxiliaries",sep=""))
+    
     product <- getProduct(x=x,quiet=TRUE)
     if(length(product$PRODUCT)>1)
     {
-        cat(".genString() does not support multiple products! Generating 'path' only for the first:",product$PRODUCT[1],"\n")
+        warning(".genString() does not support multiple products! Generating 'path' only for the first:", product$PRODUCT[1], "\n")
         product <- lapply(product,function(x){x[1]}) # take only the first argument
     }
     
@@ -27,9 +32,6 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
     { # date can be supplied as argument! 
         product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) # generates MODIS file date format "AYYYYDDD"
     }
-    
-    opts <- MODIS:::combineOptions(...)
-    remotePath <- localPath <- NULL
     
     if (is.null(product$DATE)) # if x is a PRODUCT and date is not provided 
     { 
@@ -66,7 +68,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                     }
                 }
             }
-        localPath <- path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+        localPath <- MODIS:::setPath(path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/")))
         }
         if (remote) 
         {
@@ -146,8 +148,8 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                     }
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
-            }    
-        localPath <- path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/"))
+            } 
+        localPath <- MODIS:::setPath(path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/")))
         }
 
         if (remote) 

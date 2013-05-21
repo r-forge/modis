@@ -136,13 +136,13 @@ search4map <- function(pattern="",database='worldHires',plot=FALSE)
     }
 }
 
-checkTools <- function(){warning("'checkTools()' has been renemed to 'checkTools()'") }
-
 checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 {
     tool <- toupper(tool)
+    
     iw   <- options()$warn 
     options(warn=-1)
+    on.exit(options(warn=iw))
     
     MRT  <- NULL
     GDAL <- NULL
@@ -191,11 +191,11 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
               close(x)
             } else
             {
-              v <- "enabled"
+              v <- "Enabled"
             }
         } else 
         {
-            v <- "Not Found"
+            v <- "Version not determined"
         }
         MRT <- list(MRT=MRT,version=v)
     }
@@ -203,6 +203,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
     if ("GDAL" %in% tool)
     {
         GDAL <- FALSE
+        gdv  <- NA
         opts <- MODIS:::combineOptions()
         
         if (.Platform$OS=="unix")
@@ -218,20 +219,26 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cmd <- paste(path.expand(opts$gdalPath),'/gdalinfo --version', sep="")            
             }
-            gdal <- try(system(cmd,intern=TRUE),silent=TRUE)
-            if (inherits(gdal,"try-error"))
+            gdaltext <- try(system(cmd,intern=TRUE),silent=TRUE)
+ 
+                         
+            if (inherits(gdaltext,"try-error"))
             {
-                cat("   GDAL not found, install it or check path settings in order to use related functionalities!\n")
-                gdal <- "Could not determine GDAL version!"
+                cat("   GDAL not found, install it or check path settings (see '?MODISoptions') in order to use related functionalities!\n")
+                gdaltext <- "Could not determine GDAL version!"
             } else 
             {
                 if (!quiet)
                 {
-                    cat("   OK,",gdal,"found!\n")
+                    cat("   OK,",gdaltext,"found!\n")
                 }
                 GDAL <- TRUE
+                
+                gdv <- strsplit(gdaltext,",")[[1]][1]
+                gdv <- trim(gsub(gdv,pattern="GDAL",replacement=""))
+                gdv <- as.numeric(strsplit(gdv,"\\.")[[1]])
             }
-            GDAL <- list(GDAL=GDAL,version=gdal)
+            GDAL <- list(GDAL=GDAL,version=gdaltext,vercheck=gdv)
             
         } else 
         {
@@ -247,11 +254,11 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cmd <- file.path(shortPathName(opts$gdalPath),'gdalinfo --version',fsep="\\")            
             }
-            gdal <- shell(cmd,intern=TRUE)
+            gdaltext <- shell(cmd,intern=TRUE)
             
-            if (length(grep(x=gdal,pattern="GDAL"))==0)
+            if (length(grep(x=gdaltext,pattern="GDAL"))==0)
             {
-                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time, you can interupt this process and set it manually 'MODISoptions(gdalPath='/path/to/XXGDAL/bin/')':\n\n")
+                cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time, you can interupt this process and set it manually, see 'gdalPath' argument in '?MODISoptions':\n\n")
                 
                 a <- dirname(list.files(path="c:/",pattern="^gdalinfo.exe$", full.names=TRUE, recursive=TRUE,include.dirs=TRUE))
 
@@ -265,48 +272,53 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                 minone <- FALSE
                 if(length(fwt)==1)
                 {
-                  fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
-                  fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
-                  fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
+                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
+                    fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
+                    fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
                   
-                  if(MODIS:::checkGdalDriver(fwt))
-                  {                  
-                    cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
-                    minone <- TRUE
-                  } else 
-                  {
-                    cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, try to remove and re-install 'FWTools'!\n",sep="")
-                  }
+                    if(MODIS:::checkGdalDriver(fwt))
+                    {                  
+                        cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
+                        minone <- TRUE
+                    } else 
+                    {
+                        cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, try to remove and re-install 'FWTools'!\n",sep="")
+                    }
                 }
                 if(length(osg)==1)
                 {
-                  osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
-                  osgV <- shell(paste(osgP, "--version"),intern=TRUE)
-                  osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
+                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
+                    osgV <- shell(paste(osgP, "--version"),intern=TRUE)
+                    osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
                   
-                  if(MODIS:::checkGdalDriver(osg))
-                  {                  
-                    cat("Found 'OSgeo4W' verion: '", osgV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
-                    minone <- TRUE
-                  } else 
-                  {
-                    cat("Found 'OSgeo4W' verion: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, try to remove and re-install 'OSgeo4W'!\n",sep="")
-                  }
+                    if(MODIS:::checkGdalDriver(osg))
+                    {                  
+                        cat("Found 'OSgeo4W' version: '", osgV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
+                        minone <- TRUE
+                    } else 
+                    {
+                        cat("Found 'OSgeo4W' version: '", osgV,"' in '",normalizePath(osg,"/"),"' but without HDF4 support...strange, try to remove and re-install 'OSgeo4W'!\n",sep="")
+                    }
                 }
-              if (!minone)
-              {
-                cat("No HDF4 supporting GDAL installation found. You may set it manually in MODISoptions(gdalPath='/Path/to/XXGDAL/bin')\n")
-              }
-              gdal <- "Could not determine GDAL version!"
+                if (!minone)
+                {
+                    cat("No HDF4 supporting GDAL installation found. You may set it manually in MODISoptions(gdalPath='/Path/to/XXGDAL/bin')\n")
+                }
+                gdaltext <- "Could not determine GDAL version!"
+
             } else 
             {
                 if (!quiet)
                 {
-                    cat("   OK,",gdal,"found!\n")
+                    cat("   OK,",gdaltext,"found!\n")
                 }
                 GDAL <- TRUE
+                gdv <- strsplit(gdaltext,",")[[1]][1]
+                gdv <- trim(gsub(gdv,pattern="GDAL",replacement=""))
+                gdv <- as.numeric(strsplit(gdv,"\\.")[[1]])
+
             }
-        GDAL <- list(GDAL = GDAL, version = gdal)
+            GDAL <- list(GDAL = GDAL, version = gdaltext,vercheck=gdv)
         }
     }
     return(invisible(list(GDAL=GDAL,MRT=MRT)))        
@@ -317,9 +329,9 @@ isSupported <- function(x)
 {
     fname   <- basename(x)
     
-    warn <- options("warn")
+    iw   <- options()$warn 
     options(warn=-1)
-    on.exit(options(warn=warn$warn))
+    on.exit(options(warn=iw))
     
     res <- sapply(fname,function(y) 
     {
@@ -476,8 +488,11 @@ filesUrl <- function(url)
     {
        url <- paste(url,"/",sep="") 
     }
-    oldO <- options()$warn
-    on.exit(options())
+    
+    iw   <- options()$warn 
+    options(warn=-1)
+    on.exit(options(warn=iw))
+
     try(co <- getURLContent(url),silent=TRUE)
     
     if (!exists("co")) {return(FALSE)}

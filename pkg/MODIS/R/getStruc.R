@@ -35,10 +35,11 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
     # load aux
     if (!file.exists(file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/")))
     {
+        opts$auxPath <- MODIS:::setPath(opts$auxPath)
         invisible(file.copy(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep="")),file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/")))
     }
-
     ftpdirs <- read.table(file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/"),stringsAsFactors=FALSE)
+    
     good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
     ftpdirs <- ftpdirs[,good] # remove wrong cols
     
