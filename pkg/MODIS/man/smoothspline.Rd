@@ -11,7 +11,7 @@ This function uses the \code{smooth.spline} function to filter a vegetation inde
 }
 
 \usage{
-smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),df=6,outPath ="./",...)
+smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),df=6,outDirPath ="./",...)
 }
 
 \arguments{
@@ -21,7 +21,7 @@ smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),df=6,ou
   \item{groupYears}{Default \code{TRUE}, raster-Brick files separated by years. If \code{FALSE} a overall raster-Brick file.} 
   \item{timeInfo}{result from \code{?orgTime}.} 
   \item{df}{Numeric: _Yearly_ degree of freedom value passed to \code{?smooth.spline}. If set as character (i.e. df="6"), it is not adapted to the time serie length but used as a fixed value (see deteils).} 
-  \item{outPath}{Output path default is the current directory.}   
+  \item{outDirPath}{Output path default is the current directory.}   
   \item{...}{Arguments passed to ?writeRaster, except 'filename', this is created automaticly!}   
 } 
 

@@ -1,31 +1,3 @@
-# lazy loading
-##########################################
-
-tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"), header=TRUE)
-
-# save(tileNames,file="~/tileNames.RData") # in chase of changes
-load(system.file("external", "tileNames.RData", package="MODIS"))
-
-# save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes
-load(system.file("external", "MODIS_Products.RData", package="MODIS"))
-
-# lazy load gdal EPSG
-if (require(rgdal))
-{
-    EPSGinfo <- make_EPSG() # if rgdal, make it new!
-} else
-{
-    # save(EPSGinfo,file="~/EPSGinfo.RData") # periodically safe manually 
-    load(system.file("external", "EPSGinfo.RData",package="MODIS"))
-}
- 
-# FTP information
-# save(MODIS_FTPinfo,file="~/MODIS_FTPinfo.RData") # in chase of changes
-load(system.file("external", "MODIS_FTPinfo.RData",package="MODIS")) 
-
-# load shapefile of MODIS Tiles
-sr <- shapefile(system.file("external","modis_latlonWGS84_grid_world.shp",package="MODIS"))
-
 ##########################################
 # central setting for stubbornness 
 stubborn <- function(level="high")
@@ -71,7 +43,7 @@ checksizefun <- function(file,sizeInfo=NULL,flexB=0)
         {
             stop("You need to install the 'XML' package: install.packages('XML')")
         }
-        xmlfile  <- paste(file,".xml",sep="")
+        xmlfile  <- paste0(file,".xml")
         xmlfile  <- xmlParse(xmlfile)
         MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
         MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
@@ -182,9 +154,9 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
         }
         if(MRT)
         {
-            if(file.exists(paste(mrtH,"/doc/ReleaseNotes.txt",sep="")))
+            if(file.exists(paste0(mrtH,"/doc/ReleaseNotes.txt")))
             {
-              x <- file(paste(mrtH,"/doc/ReleaseNotes.txt",sep=""),open="rt")
+              x <- file(paste0(mrtH,"/doc/ReleaseNotes.txt"),open="rt")
               v <- readLines(x)
               v <- v[(grep(v,pattern="------*")-1)]
               v <- v[grep(v,pattern="Version ")][1]
@@ -217,7 +189,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                 cmd <- 'gdalinfo --version'
             } else
             {
-                cmd <- paste(path.expand(opts$gdalPath),'/gdalinfo --version', sep="")            
+                cmd <- paste0(path.expand(opts$gdalPath),'/gdalinfo --version')            
             }
             gdaltext <- try(system(cmd,intern=TRUE),silent=TRUE)
  
@@ -272,8 +244,8 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                 minone <- FALSE
                 if(length(fwt)==1)
                 {
-                    fwtP <- shQuote(shortPathName(normalizePath(paste(fwt,"/gdalinfo.exe",sep=""),winslash="/")))
-                    fwtV <- shell(paste(fwtP, "--version"),intern=TRUE)
+                    fwtP <- shQuote(shortPathName(normalizePath(paste0(fwt,"/gdalinfo.exe"),winslash="/")))
+                    fwtV <- shell(paste0(fwtP, " --version"),intern=TRUE)
                     fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
                   
                     if(MODIS:::checkGdalDriver(fwt))
@@ -287,8 +259,8 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                 }
                 if(length(osg)==1)
                 {
-                    osgP <- shQuote(shortPathName(normalizePath(paste(osg,"/gdalinfo.exe",sep=""),winslash="/")))
-                    osgV <- shell(paste(osgP, "--version"),intern=TRUE)
+                    osgP <- shQuote(shortPathName(normalizePath(paste0(osg,"/gdalinfo.exe"),winslash="/")))
+                    osgV <- shell(paste0(osgP, " --version"),intern=TRUE)
                     osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
                   
                     if(MODIS:::checkGdalDriver(osg))
@@ -325,9 +297,152 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 }
 
 
+# get gdal wtrite formats (driver name, 'long name' and extension)
+gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
+{
+    iw   <- options()$warn 
+    options(warn=-1)
+    on.exit(options(warn=iw))
+    
+    opt <- try(as.list(...),silent=TRUE)
+    
+    if(class(opt) == 'try-error'| !exists('opt')) # this is in order to use the function outside the MODISoptions process
+    {
+        opt <- MODIS:::combineOptions()    
+    }    
+
+    if(!isTRUE(opt$gdalOk))
+    {
+        stop("Gdal is not properly configured or installed, see '?MODISoptions' for more informations")
+    }
+        
+    out <- file.exists(opt$outDirPath)
+    outfile <- paste0(opt$auxPath,"/gdalOutDriver.RData")
+    god <- file.exists(outfile)
+    
+    if (god)
+    {
+        load(outfile)
+        if (nrow(gdalOutDriver)<5)
+        {
+            renew <- TRUE
+        }
+    }
+    
+    if ((renew & god) | !god)
+    {
+        gdalPath <- opt$gdalPath
+        
+        if(!quiet)
+        {
+            message("Detecting available write drivers!")
+        }
+          
+        cmd <- paste0(c(gdalPath,"gdalinfo --formats"),collapse="/")
+          
+        # list all drivers with (rw)
+        if (.Platform$OS=="unix")
+        {
+            gdalOutDriver <- system(cmd,intern=TRUE)
+        } else
+        {
+            gdalOutDriver <- shell(cmd,intern=TRUE)
+        }
+        gdalOutDriver <- grep(gdalOutDriver,pattern="\\(rw",value=TRUE) # this regex must be preciser
+        name          <- sapply(gdalOutDriver,function(x){strsplit(x,"\\(")[[1]][1]})
+        name          <- gsub(as.character(name), pattern=" ", replacement="")
+          
+        description <- as.character(sapply(gdalOutDriver,function(x){strsplit(x,"\\): ")[[1]][2]}))
+     
+        if(!quiet)
+        {
+            message("Found: ",length(name)," candidate drivers, detecting file extensions...")
+        }
+                
+        extension <- rep(NA,length(name))
+        for (i in seq_along(name))
+        {
+            ind <- grep(name, pattern=paste0("^",name[i],"$"), ignore.case=TRUE, value=FALSE)
+            
+            if (length(ind)!=0)
+            {
+                extension[i] <- MODIS:::getExtension(name[ind])
+            }
+        }
+        if(!quiet)
+        {
+            message(sum(!is.na(extension))," usable drivers detected!")
+        }
+        gdalOutDriver <- data.frame(name=name[!is.na(extension)], description=description[!is.na(extension)], extension=extension[!is.na(extension)], stringsAsFactors=FALSE)        
+           
+        if (!out)
+        {
+            message('The \'MODIS\' processing output location \'',opt$outDirPath,'\' does not exist, should it be created here? Or see in \'?MODISoptions\' to select another location')
+        }                
+        if(file.exists(opt$auxPath))
+        {
+            save(gdalOutDriver, file=outfile)
+        }
+    }
+    gdalOutDriver    
+}    
+ 
+    
+getExtension <- function(dataFormat)
+{
+    if(toupper(dataFormat) %in% c("HDF-EOS","HDF4IMAGE")) # MRT + GDAL
+    {
+        return(".hdf")
+    } else if (toupper(dataFormat) %in% c("GTIFF","GEOTIFF"))  # MRT + GDAL
+    {
+        return(".tif")
+    } else if (tolower(dataFormat) =="raw binary")  # MRT + GDAL
+    {
+        return(".hdr")
+    } else if (toupper(dataFormat)=="ENVI") 
+    {
+        return("") # should generate a '.hdr' file + a file without extension
+    } else if (dataFormat=="FIT") 
+    {
+        return(NA)    
+    } else if (toupper(dataFormat)=="ILWIS")
+    {
+        return(".mpr") # is this ok?
+    } else 
+    {
+        gdalPath <- options()$MODIS_gdalPath
+        cmd <- paste0(c(gdalPath,'gdalinfo --format '),collapse="/")
+        
+        if(.Platform$OS.type=="unix")
+        {
+            ext <- system(paste0(cmd, dataFormat),intern=TRUE)   
+        } else
+        {
+            ext <- shell(paste0(cmd, dataFormat),intern=TRUE)   
+        }
+        
+        ext <- grep(ext,pattern="Extension:",value=TRUE)
+        
+        if(length(ext)==0)
+        {
+            return(NA)
+        } else
+        {
+            ext <- gsub(strsplit(ext,":")[[1]][2],pattern=" ",replacement="")
+            
+            if (ext!="")
+            {
+                ext <- paste0(".",ext)
+            }
+            return(ext)
+        }
+    }
+}
+
+
 isSupported <- function(x) 
 {
-    fname   <- basename(x)
+    fname <- basename(x)
     
     iw   <- options()$warn 
     options(warn=-1)
@@ -457,9 +572,9 @@ checkDeps <- function()
         out <- "All suggested packages are installed"
     } else {
         missingP <- !needed %in% installed.packages()[,1]
-        missingP <- paste(needed[missingP],sep="",collapse="', '")
+        missingP <- paste0(needed[missingP],collapse="', '")
 
-        out <- paste("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'))\n",sep="")
+        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\n")
     }
 out
 }
@@ -486,7 +601,7 @@ filesUrl <- function(url)
 
     if (substr(url,nchar(url),nchar(url))!="/")
     {
-       url <- paste(url,"/",sep="") 
+       url <- paste0(url,"/") 
     }
     
     iw   <- options()$warn 
@@ -499,18 +614,18 @@ filesUrl <- function(url)
     
     if (substring(url,1,4)=="http")
     {
-        if(require(XML))
+        if(!require(XML))
         {
-            co     <- htmlTreeParse(co)
-            co     <- co$children[[1]][[2]][[2]]
-            co     <- sapply(co$children, function(el) xmlGetAttr(el, "href"))
-            co     <- as.character(unlist(co))
-            co     <- co[!co %in% c("?C=N;O=D", "?C=M;O=A", "?C=S;O=A", "?C=D;O=A")]
-            fnames <- co[-1] 
-         } else
-         {
             stop("You need to install the 'XML' package from 'Omegahat' repository")
-         }
+        }
+             
+        co     <- htmlTreeParse(co)
+        co     <- co$children[[1]][[2]][[2]]
+        co     <- sapply(co$children, function(el) xmlGetAttr(el, "href"))
+        co     <- as.character(unlist(co))
+        co     <- co[!co %in% c("?C=N;O=D", "?C=M;O=A", "?C=S;O=A", "?C=D;O=A")]
+        fnames <- co[-1] 
+         
      } else 
      {
         co <- strsplit(co, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
@@ -643,14 +758,14 @@ return(as.logical(out))
 }
 
 # setPath for localArcPath and outDirPath
-setPath <- function(path,ask=FALSE, showWarnings=FALSE)
+setPath <- function(path, ask=FALSE, showWarnings=FALSE)
 {
     path <- normalizePath(path, "/", mustWork = FALSE)
     if(!file.exists(path)) 
     {
         if (ask)
         {
-            doit <- toupper(readline(paste(path,"does not exist, should it be created? [y/n]: ")))
+            doit <- toupper(readline(paste0(path," does not exist, should it be created? [y/n]: ")))
         } else 
         {
             doit <- 'Y'
@@ -659,7 +774,6 @@ setPath <- function(path,ask=FALSE, showWarnings=FALSE)
         if  (doit %in% c("Y","YES"))
         {
             stopifnot(dir.create(path, recursive = TRUE, showWarnings = showWarnings))
-            warning(path," has been created!")
         } else
         {
             path <- "Path not set, use ?MODISoptions to configure it"          

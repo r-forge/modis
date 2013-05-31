@@ -29,6 +29,7 @@ stubbornness <- 'high' # How stubborn should MODIS re-try to connect to ftp/http
 resamplingType <- 'NN' 
 outProj        <- 'asIn'
 pixelSize      <- 'asIn'
+dataFormat     <- 'GTiff'
   
 #########################
 # 4.) Set path to GDAL _bin_ directory

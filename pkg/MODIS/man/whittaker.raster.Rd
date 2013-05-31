@@ -11,27 +11,27 @@ This function uses a modified whittaker filter function (see references) from pa
 }
 
 \usage{
-whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 3, collapse=FALSE, outPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
+whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 3, collapse=FALSE, outDirPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
 }
 
 \arguments{
   \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
   \item{w}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
   \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.} 
-  \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years. If \code{FALSE} a overall rasterBrick file.} 
-  \item{timeInfo}{result from \code{?orgTime}.} 
-  \item{lambda}{_Yearly_ lambda value passed to \code{?with2}.  If set as character (i.e. lambda="600"), it is not adapted to the time serie length but used as a fixed value (see details). High values = stiff/rigid spline} 
+  \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years as result. If \code{FALSE} a single rasterBrick file for the entire period.} 
+  \item{timeInfo}{output of \code{?orgTime}.} 
+  \item{lambda}{_Yearly_ lambda value passed to \code{?ptw:::with2}.  If set as character (i.e. lambda="600"), it is not adapted to the time serie length but used as a fixed value (see details). High values = stiff/rigid spline} 
   \item{collapse}{logical, if \code{TRUE} the input data is treated as _1_single_Year_ collapsing the data using the Julian date information without the year.}   
   \item{nIter}{Number of iteration for the upper envelope fitting.}   
-  \item{outPath}{Output path default is the current directory.}   
+  \item{outDirPath}{Output path default is the current directory.}   
   \item{removeOutlier}{Logical. See details}  
   \item{threshold}{numerical in the same unit as \code{vi}, used for outliers removal. See details}      
-  \item{...}{Arguments passed to ?writeRaster (except filename ist automatic), NAflag, datatype, overwrite,..., and if }   
+  \item{...}{Arguments passed to ?writeRaster (except filename is automatic), NAflag, datatype, overwrite,...}   
 } 
 
 \details{
-The argument 'lambda' is passed to the \code{MODIS:::miwhitatzb1} function. You can set it as a yearly 'lambda', this means that it doesn't matter how long the _input_ time serie is because 'lambda' is adapted to it with: \code{lambda*('length of _input_ timeserie in days'/365)}. The input length can differ from the output because of the \code{pillow} argument in \code{orgTime}! But you can also set it as a character value (i.e. lambda="1000") in this case the adaption to the time serie length is not performed.
-If 'removeOutliers=TRUE', a whittaker sline (with the user specified 'lambda') is applied befor the iterative process. 
+The argument 'lambda' is passed to the \code{MODIS:::miwhitatzb1} function. You can set it as a yearly 'lambda', this means that it doesn't matter how long the _input_ time serie is because 'lambda' is adapted to it with: \code{lambda*('length of _input_ timeserie in days'/365)}. The input length can differ from the output because of the \code{pillow} argument in \code{orgTime}! But you can also set it as a character value (i.e. lambda="1000") in this case the adaption to the time serie length is not performed.\cr
+If 'removeOutliers=TRUE', a whittaker spline (with the user specified 'lambda') is applied befor the iterative  filtering process. If the difference between spline and raw value is bigger than \code{threshold} the raw value is removed. 
 }
 
 \value{
@@ -39,8 +39,8 @@ The filtered data and a text file with the dates of the output layers
 }
 
 \references{
-Modified Whittaker smoother, according to Atzberger & Eilers 2011 International Journal of Digital Earth 4(5):365-386.
-Implementation in R: A.Lobo 2012 \email{Agustin.Lobo@ictja.csic.es}
+Modified Whittaker smoother, according to Atzberger & Eilers 2011 International Journal of Digital Earth 4(5):365-386.\cr
+Implementation in R: Agustin Lobo 2012
 }
 
 \note{
@@ -93,7 +93,7 @@ wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)) 
 
 beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster
-system.time(whittaker.raster(vi=vi,wt=wt,inT=inT,timeInfo=timeInfo,lambda=1000,overwrite=TRUE))
+system.time(whittaker.raster(vi=vi, wt=wt, inT=inT, timeInfo=timeInfo, lambda=1000, overwrite=TRUE))
 
 }
 }

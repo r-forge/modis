@@ -4,9 +4,10 @@
 
 runMrt <- function(...)
 {
+    MODISoptions(save=FALSE,quiet=TRUE)
     
     opts <- combineOptions(...)
-    if (!opts$mrtPath)
+    if (!opts$mrtOk)
     {
         stop("MRT path not set or MRT not installed on your system!")
     }
@@ -17,7 +18,13 @@ runMrt <- function(...)
     
     opts$localArcPath <- MODIS:::setPath(opts$localArcPath)
     opts$outDirPath   <- MODIS:::setPath(opts$outDirPath)
-        
+    
+    if(!tolower(opts$dataFormat) %in% c('raw binary', 'hdf-eos', 'hdf4image','gtiff', 'geotiff'))
+    {
+        stop('dataFormat=\'',opts$dataFormat ,'\' is not supported by MRT (only \'raw binary\', \'HDF-EOS\' or \'GeoTiff\')')
+    } 
+    ext <- getExtension(opts$dataFormat)
+             
     ################################
     # Some defaults:
     if (is.null(opts$quiet))    {opts$quiet  <- FALSE} 
@@ -176,11 +183,12 @@ runMrt <- function(...)
                                 if (.Platform$OS=="unix")
                                 {
                                     system(paste("mrtmosaic -i ",paraname," -o ",outDir,"/",TmpMosNam," -s '",SDSstringIntern$SDSstring,"'" ,sep=""))
-                                } else {
+                                } else 
+                                {
                                     shell(paste("mrtmosaic -i \"",paraname,"\" -o \"", normalizePath(outDir) ,"\\",TmpMosNam,"\" -s \"",SDSstringIntern$SDSstring,"\"" ,sep=""))
                                 }
                                 unlink(paraname)
-                                Sys.sleep(1) # without wait the skript can break here. "wait" is a try but it seams to work!!!
+                                Sys.sleep(0.5) # without wait the skript can break here. "wait" is a try but it seams to work!!!
                             }
             
                             basenam <- strsplit(files[q],"/")[[1]]
@@ -205,7 +213,8 @@ runMrt <- function(...)
                             if (mos)
                             {
                                 write(paste('INPUT_FILENAME = "',outDir,"/",TmpMosNam,'"',sep=''), filename)
-                            } else {
+                            } else 
+                            {
                                 write(paste('SPECTRAL_SUBSET = ( ',SDSstringIntern$SDSstring,' )',sep=''), filename)
                                 write(paste('INPUT_FILENAME = "',files[q],'"',sep=''), filename)
                             }
@@ -221,7 +230,7 @@ runMrt <- function(...)
                             {
                                 write(paste('OUTPUT_PIXEL_SIZE = ',opts$pixelSize,sep=''),filename) 
                             }    
-                            write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,'.tif',sep=''),filename) 
+                            write(paste('OUTPUT_FILENAME = ',outDir,"/",basenam,ext,sep=''),filename) 
                             write(paste('RESAMPLING_TYPE = ',opts$resamplingType,sep=''),filename)
                             
                             write(paste('OUTPUT_PROJECTION_TYPE = ',opts$outProj$short,sep=''),filename)
@@ -245,7 +254,7 @@ runMrt <- function(...)
                             {
                                 system(paste("resample -p ",paraname,sep=""))
                             } else {
-                                shell(paste("resample -p \"",paraname,"\" -o \"",outDir,"/",basenam,'.tif',sep=""))
+                                shell(paste("resample -p \"",paraname,"\" -o \"",outDir,"/",basenam, ext,sep=""))
                             }
                             unlink(paraname)
     

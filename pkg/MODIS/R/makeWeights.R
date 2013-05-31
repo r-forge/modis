@@ -4,6 +4,7 @@
 
 makeWeights <- function(x, bitShift=2, bitMask=15, threshold=NULL, filename='', decodeOnly=FALSE,...)
 {
+
     if(!require(bitops))
     {
         stop("You need to install the 'bitops' package: install.package('bitopts')")
@@ -121,7 +122,7 @@ return(result)
 }
 
 ### detectBitInfo
-detectBitInfo <- function(product,what='all',warn=TRUE)
+detectBitInfo <- function(product, what='all',warn=TRUE)
 {
     if(inherits(product,"Raster"))
     {
@@ -156,7 +157,7 @@ detectBitInfo <- function(product,what='all',warn=TRUE)
     {
         if(warn)
         {
-            warning("Could not detect 'bit' information, please provide me the product name you have used so I can enable it!")
+            warning("Could not detect 'bit' information, please provide me (matteo@mattiuzzi.com) the product name you have used so I can enable it or add it manually!")
         }
         res <- NULL
     }

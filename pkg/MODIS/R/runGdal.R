@@ -1,21 +1,47 @@
 
 runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, tileH=NULL, tileV=NULL, buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)
 {
-     
-    opts <- combineOptions(...)
-
+    opts <- MODIS:::combineOptions(...)
+    
+    if(!opts$gdalOk)
+    {
+        stop("GDAL not installed or configured, read in '?MODISoptions' for help")
+    }
     # absolutly needed
     product <- getProduct(product,quiet=TRUE)
     
     # optional and if missing it is added here:
     product$CCC <- getCollection(product,collection=collection)
     tLimits     <- transDate(begin=begin,end=end)
-
+    
+    dataFormat <- toupper(opts$dataFormat) 
+    if (dataFormat == 'RAW BINARY')
+    {
+        stop('in argument dataFormat=\'raw binary\', format not supported by GDAL (it is MRT specific) type: \'options("MODIS_gdalOutDriver")\' (column \'name\') to list available inputs')
+    }
+  
+    if(dataFormat == 'HDF-EOS')
+    {
+        dataFormat <- "HDF4IMAGE"
+    } else if(dataFormat == 'GEOTIFF')
+    {
+        dataFormat <- "GTIFF"
+    }
+    
+    if(dataFormat %in% toupper(opts$gdalOutDriver$name))
+    {
+        dataFormat <- grep(opts$gdalOutDriver$name, pattern=paste("^",dataFormat,"$",sep=""),ignore.case = TRUE,value=TRUE)
+        of <- paste(" -of",dataFormat)
+        extension  <- getExtension(dataFormat)
+    } else 
+    {
+        stop('in argument dataFormat=\'',opts$dataFormat,'\', format not supported by GDAL type: \'options("MODIS_gdalOutDriver")\' (column \'name\') to list available inputs')
+    }
+    
     #### settings with messages
-
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    extent <- getTile(extent=extent,tileH=tileH,tileV=tileV,buffer=buffer)
+    extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
     
     tr <- NULL
     
@@ -41,7 +67,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     rt <- paste(" -r",opts$resamplingType)
     
     # some support for mrt-style settings
-    if (toupper(opts$outProj) == "GEOGRAPHIC")
+    if (toupper(opts$outProj) %in% c("GEO","GEOGRAPHIC"))
     {
         opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
     }
@@ -133,7 +159,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                     for (i in seq_along(SDS[[1]]$SDSnames))
                     {
                         outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
-                        ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), ".tif",sep="")
+                        ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension,sep="")
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
@@ -197,10 +223,11 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
 
                             ifile <- paste(gdalSDS,collapse="' '")
                             ofile <- paste(outDir, '/', outname,sep='')
-                            cmd <- paste(
+                            cmd <- paste(opts$gdalPath,
                                     "gdalwarp",
                                     s_srs,
                                     t_srs,
+                                    of,
                                     te,
                                     tr,
                                     cp,
@@ -237,6 +264,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                paste(cmd,
                                     s_srs,
                                     t_srs,
+                                    of,
                                     te,
                                     tr,
                                     cp,

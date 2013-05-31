@@ -6,7 +6,6 @@
 arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.01", end=format(Sys.time(), "%Y.%m.%d"), asMap=TRUE, outName=NULL,...)
 {  
 # product="MYD17A2"; collection="005"; extent=list(xmin=-20,xmax=40,ymin=10, ymax=20); begin="2000.08.01"; end="2000.08.21"; asMap="both"; outName=NULL;u=1;z=1
-
 # product="MOD13Q1"; collection="005"; extent='global'; begin="2000.08.01"; end="2004.08.21"; asMap="both"; outName=NULL;u=1;z=1
  
     if (!require(rgdal))
@@ -56,6 +55,8 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"), stringsAsFactors=FALSE)
 
+    sr <- shapefile(system.file("external","modis_latlonWGS84_grid_world.shp", package="MODIS"))
+    
     for (z in seq_along(product$PRODUCT))
     {
         todo <- paste(product$PRODUCT[z],".", product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
@@ -137,7 +138,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
                 table[ind,"percent"]   <- round(100*(n/length(expected)),2)
                 table[ind,"MBperHDF"]  <- round(meanSize)
             }
-            
+
             # mapping 
             if (isTRUE(asMap)|tolower(asMap)=="both")
             {
@@ -151,7 +152,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
                     stop("Please install mapdata package: install.packages('mapdata')")
                 }
 
-                srx      <- MODIS:::sr
+                srx <- sr
                 srx@data <- data.frame(percent=(round(table$percent)))
                  
                 # require(scales)

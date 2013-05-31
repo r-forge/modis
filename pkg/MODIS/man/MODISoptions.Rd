@@ -5,7 +5,7 @@ Set or retrieve permanent MODIS package options}
 \description{
 With this function you can get or set _persistant_ MODIS package options (per user or systemwide). Changes here will persist sessions and updates.}
 \usage{
-MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, gdalPath, 
+MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, gdalPath, 
 dlmethod, stubbornness, systemwide = FALSE, quiet = FALSE, save=TRUE, checkPackages=TRUE)
 }
 \arguments{
@@ -22,6 +22,8 @@ Default \code{asIn}. Output pixel size [target reference system units] of proces
 Target reference system where to process data using \code{runGdal} or \code{runMrt}, must be a valid CRS for \code{runGdal}. For \code{runMrt} consult the manual of MRT. Since the two pocessing method do not have common methods, it is suggested to leave the default. See Details.}
   \item{resamplingType}{
 Default is \code{NN} (Neares Neightbour). In common for MRT and GDAL are \code{NN', 'CC', 'BIL}. GDAL supports also: \code{cubicspline} and \code{lanczos}, GDAL >= 1.10.0 also \code{mode} and \code{average}.}
+  \item{dataFormat}{
+Default is \code{GTiff}. Or one of \code{options()$MODIS_dataFormat} (column 'name').}
 
   \item{gdalPath}{
 Path to gdal _bin_ directory, relvand more for windows. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}

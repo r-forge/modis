@@ -34,13 +34,14 @@ buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,.
 
 \describe{
 \tabular{rll}{
-\tab \code{outProj}\tab CRS/ prj4/ EPSG code of output any format supported by gdal see examples.\cr \tab \tab Default is 'asIn' (no warping). See \code{'?MODISoptions'}.\cr
-\tab \code{pixelSize}\tab Numeric single value. Output pixel size in target reference system unit.\cr \tab \tab Default is 'asIn'. See \code{'?MODISoptions'}.\cr
-\tab \code{resamplingType}\tab Character. Default is 'near', can be one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr \tab \tab See \code{'?MODISoptions'}.\cr
+\tab \code{outProj}\tab CRS/ prj4 or EPSG code of output, any format supported by gdal see examples.\cr \tab \tab Default is 'asIn' (no warping). See \code{?MODISoptions}.\cr
+\tab \code{pixelSize}\tab Numeric single value. Output pixel size in target reference system unit.\cr \tab \tab Default is 'asIn'. See \code{?MODISoptions}.\cr
+\tab \code{resamplingType}\tab Character. Default is 'near', can be one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr \tab \tab See \code{?MODISoptions}.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL.\cr \tab \tab Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
 \tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2".\cr \tab \tab See: \url{http://www.gdal.org/frmt_gtiff.html}\cr
-\tab \code{localArcPath}\tab Character.  See \code{'?MODISoptions'}. Local path to look for and/or to download MODIS files.\cr
-\tab \code{outDirPath}\tab Character.  See \code{'?MODISoptions'}. Root directory where to write \code{job} folder.\cr
+\tab \code{dataFormat}\tab Data output format, see \code{options()$MODIS_gdalOutDriver} column 'name'.\cr
+\tab \code{localArcPath}\tab Character.  See \code{?MODISoptions}. Local path to look for and/or to download MODIS files.\cr
+\tab \code{outDirPath}\tab Character.  See \code{?MODISoptions}. Root directory where to write \code{job} folder.\cr
 }
 }
 }

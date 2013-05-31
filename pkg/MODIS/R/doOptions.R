@@ -203,17 +203,17 @@ checkGdalDriver <- function(path=NULL)
  
 combineOptions <- function(...) 
 {
-    opts <- options() # collects all defaults
+    opts <- options() # collects all options
     opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
     
-    if(length(opts)==0)
+    if(length(opts)==0) # if nothing available look for inizial options
     {
         if(!file.exists("~/.MODIS_Opts.R"))
         {
-            cat("MODIS_Opts file not found, run '?MODISoptions' to see and set permanent package defaults!\n")
+            warning("MODIS_Opts file not found, run '?MODISoptions' to see and set permanent package defaults!\n")
         }
         MODISoptions(save=FALSE,quiet=TRUE)    
-        opts <- options() # collects all defaults
+        opts <- options() # collects all options
         opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
     }
     
@@ -221,7 +221,7 @@ combineOptions <- function(...)
 
     Fopts <- list(...) # collects fun args
     
-    # overwrite 'opts' with 'Fopts'
+    # replace 'opts' with 'Fopts'
     if (!is.null(Fopts))
     {
         opts <- c(Fopts, opts[(!names(opts) %in% names(Fopts))])

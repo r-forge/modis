@@ -4,10 +4,10 @@
 
 \alias{runMrt}
 
-\title{Run MRT-grid with specified parameters}
+\title{Run Modis Reprojection Tool ('MRT-grid') with specified parameters}
 
 \description{
-Specifying input parameters this function, gets MODIS grid data from archive (FTP or local) and processes the files.}
+Specifying input parameters this function, gets MODIS grid data from archive (HTTP/FTP or local) and processes the files with the 'MRT-grid' tool.}
 
 \usage{runMrt(...)}
 
@@ -29,11 +29,12 @@ Specifying input parameters this function, gets MODIS grid data from archive (FT
 \tab \code{localArcPath}\tab Character. Default \code{options("MODIS_localArcPath")}. Local path to look for and/or to download MODIS files.\cr
 \tab \code{outDirPath}\tab Character. Default \code{options("MODIS_outDirPath")}. Root directory where to write \code{job} folder.\cr
 
+\tab \code{dataType}\tab Default 'GeoTiff' specified in \code{MODISoptions()}, 'MRT' supports: \code{raw binary} (hdr+dat), \code{HDF-EOS} (hdf) or \code{GeoTiff} (tif). Any other format specified through \code{MODISoptions} or \code{dataType}, is switched to 'GeoTiff'.\cr
 
-\tab \code{outProj}\tab Character. See MRT manual.\cr
-\tab \code{zone}\tab Zone number used as optional setting only for \code{outProj="UTM"}, if not set it is autodetected. See MRT manual.\cr
-\tab \code{projPara}\tab Character. In that form: "6371007.18 0.00 0.00 ...". for \code{outProj \%in\% c("GEO","SIN")} it is autodetected. See MRT manual.\cr
-\tab \code{datum}\tab Character. Default 'NODATUM'. See MRT manual.\cr
+\tab \code{outProj}\tab Character. See 'MRT' manual.\cr
+\tab \code{zone}\tab Zone number used as optional setting only for \code{outProj="UTM"}, if not set it is autodetected. See 'MRT' manual.\cr
+\tab \code{projPara}\tab Character. In that form: "6371007.18 0.00 0.00 ...". for \code{outProj \%in\% c("GEO","SIN")} it is autodetected. See 'MRT' manual.\cr
+\tab \code{datum}\tab Character. Default 'NODATUM'. See 'MRT' manual.\cr
 
 \tab \code{mosaic}\tab Logical, default \code{TRUE}. Mosaic files of not? One case for setting \code{mosaic=FALSE} is a to large \code{extent}. HDF4 file supports max 2GB filesize, if crossed mosaicing process will fail.\cr
 \tab \code{anonym}\tab Logical, default \code{TRUE}. If \code{FALSE} the job name is added at the end of the root filename.\cr

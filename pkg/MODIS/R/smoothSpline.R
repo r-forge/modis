@@ -2,11 +2,24 @@
 # Date : August 2012
 # Licence GPL v3
 
-smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(x), df = 6,outPath = "./",...)
+smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(x), df = 6,outDirPath = "./",...)
 {
     
-    dir.create(outPath,showWarnings=FALSE)
-    outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
+    opt <- combineOptions(...)
+    
+    dir.create(opt$outDirPath,showWarnings=FALSE)
+    outDirPath <- normalizePath(opt$outDirPath, winslash = "/", mustWork = TRUE)
+
+    dataFormat <- opt$dataFormat
+    rasterOut  <- writeFormats()
+    
+    if(dataFormat %in% rasterOut[,"name"])
+    {
+        dataFormat <- raster:::.defaultExtension(dataFormat)
+    } else
+    {
+        stop("Argument dataFormat='",dataFormat,"' in 'smooth.spline.raster()' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")
+    }
     
     if(!inherits(x,"Raster")) 
     {
@@ -48,13 +61,13 @@ smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = 
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             b[[a]] <- brick(raster(x),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_year",y,".tif",sep=""),...)
+            b[[a]] <- writeStart(b[[a]], filename=paste(opt$outDirPath,"/NDVI_",nameDf,indf,"_year",y,dataFormat,sep=""),...)
         }
     
     } else 
     {
         b[[1]] <- brick(raster(x),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameDf,indf,"_fullPeriod.tif",sep=""),...)
+        b[[1]] <- writeStart(b[[1]], filename=paste(opt$outDirPath,"/NDVI_",nameDf,indf,"_fullPeriod",dataFormat,sep=""),...)
     }
         
     tr <- blockSize(x)
@@ -205,10 +218,10 @@ return(r)
         if (groupYears)
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
-            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y], file=paste(outPath,"/LayerDates_NDVI_",nameDf,indf,"_year",y,sep=""), row.names=FALSE, col.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y], file=paste(opt$outDirPath,"/LayerDates_NDVI_",nameDf,indf,"_year",y,sep=""), row.names=FALSE, col.names=FALSE)
         } else
         {
-            write.table(x=timeInfo$outputLayerDates, file=paste(outPath,"/LayerDates_NDVI_",nameDf,indf,"fullPeriod",sep=""), col.names=FALSE, row.names=FALSE)
+            write.table(x=timeInfo$outputLayerDates, file=paste(opt$outDirPath,"/LayerDates_NDVI_",nameDf,indf,"fullPeriod",sep=""), col.names=FALSE, row.names=FALSE)
         }
     }
 

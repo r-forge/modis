@@ -3,32 +3,43 @@
 # Licence GPL v3
 
 # maybe to add: derivate=1
-whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 3, collapse=FALSE, outPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
+whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500, nIter= 3, collapse=FALSE, outDirPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
 {
     # debug 
-    # w=wt; t=inT; groupYears=TRUE; lambda = 3000; nIter= 3; outPath = "./"
-    # w=NULL; t=NULL; groupYears=TRUE; lambda = 500; nIter= 5; outPath = "./SUB/"
+    # w=wt; t=inT; groupYears=TRUE; lambda = 3000; nIter= 3; outDirPath = "./"
+    # w=NULL; t=NULL; groupYears=TRUE; lambda = 500; nIter= 5; outDirPath = "./SUB/"
 
-    # args <- list(bitShift=2,bitMask=15,threshold=6)
-    # args <- list(bitShift=2,bitMask=15)
-    # args <- list()
+    # opt <- list(bitShift=2,bitMask=15,threshold=6)
+    # opt <- list(bitShift=2,bitMask=15)
+    # opt <- list()
+        
+    opt       <- combineOptions(...)
+    bitShift  <- opt$bitShift
+    bitMask   <- opt$bitMask
+    threshold <- opt$threshold
+    NAflag    <- opt$NAflag
     
-    args      <- list(...)
-    bitShift  <- args$bitShift
-    bitMask   <- args$bitMask
-    threshold <- args$threshold
-    NAflag    <- args$NAflag
+    dataFormat <- opt$dataFormat
+    rasterOut  <- writeFormats()
     
-    if (is.null(args$minDat))
+    if(dataFormat %in% rasterOut[,"name"])
+    {
+        dataFormat <- raster:::.defaultExtension(dataFormat)
+    } else
+    {
+        stop("Argument dataFormat='",dataFormat,"' in 'smooth.spline.raster()' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")
+    }
+    
+    if (is.null(opt$minDat))
     {
         minDat <- 3
     } else 
     {
-        minDat <- args$minDat
+        minDat <- opt$minDat
     }
        
-    dir.create(outPath,recursive=TRUE,showWarnings=FALSE)
-    outPath <- normalizePath(outPath, winslash = "/", mustWork = TRUE)
+    dir.create(opt$outDirPath,recursive=TRUE,showWarnings=FALSE)
+    opt$outDirPath <- normalizePath(opt$outDirPath, winslash = "/", mustWork = TRUE)
 
     if(!require(ptw))
     {
@@ -86,7 +97,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     if (collapse)
     {
         b[[1]] <- brick(raster(vi),nl=length(outDoys), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_sumarised",format(min(timeInfo$outputLayerDates),"%Y"),"to",format(max(timeInfo$outputLayerDates),"%Y"),".tif",sep=""),...)
+        b[[1]] <- writeStart(b[[1]], filename=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"_sumarised",format(min(timeInfo$outputLayerDates),"%Y"),"to",format(max(timeInfo$outputLayerDates),"%Y"),dataFormat,sep=""),...)
     }
     else if (groupYears)
     {
@@ -94,12 +105,12 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             b[[a]] <- brick(raster(vi),nl=as.integer(sum(format(timeInfo$outputLayerDates,"%Y")==y)), values=FALSE)
-            b[[a]] <- writeStart(b[[a]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,".tif",sep=""),...)
+            b[[a]] <- writeStart(b[[a]], filename=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"_year",y,dataFormat,sep=""),...)
         }
     } else 
     {
         b[[1]] <- brick(raster(vi),nl=as.integer(length(timeInfo$outSeq)), values=FALSE)  
-        b[[1]] <- writeStart(b[[1]], filename=paste(outPath,"/NDVI_",nameL,inlam,"_fullPeriod.tif",sep=""),...)
+        b[[1]] <- writeStart(b[[1]], filename=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"_fullPeriod",dataFormat,sep=""),...)
     }
 
     if(substr(dataType(b[[1]]),1,3) == "FLT")
@@ -356,16 +367,16 @@ return(t(out))
         {
             y <- unique(format(timeInfo$outputLayerDates,"%Y"))[a]
             write.table(x=timeInfo$outputLayerDates[format(timeInfo$outputLayerDates,"%Y")==y], 
-                file=paste(outPath,"/NDVI_",nameL,inlam,"_year",y,sep=""),row.names=FALSE,col.names=FALSE)
+                file=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"_year",y,sep=""),row.names=FALSE,col.names=FALSE)
         } else 
         {
             if (collapse)
             {
-                write.table(x=outDoys, file=paste(outPath,"/NDVI_",nameL,inlam,"_sumarised",format(min(timeInfo$outputLayerDates),"%Y"),"to",format(max(timeInfo$outputLayerDates),"%Y"),sep=""), 
+                write.table(x=outDoys, file=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"_sumarised",format(min(timeInfo$outputLayerDates),"%Y"),"to",format(max(timeInfo$outputLayerDates),"%Y"),sep=""), 
                     col.names=FALSE,row.names=FALSE)
             } else
             {
-                write.table(x=timeInfo$outputLayerDates, file=paste(outPath,"/NDVI_",nameL,inlam,"fullPeriod",sep=""), 
+                write.table(x=timeInfo$outputLayerDates, file=paste(opt$outDirPath,"/NDVI_",nameL,inlam,"fullPeriod",sep=""), 
                     col.names=FALSE,row.names=FALSE)
             }
         }
