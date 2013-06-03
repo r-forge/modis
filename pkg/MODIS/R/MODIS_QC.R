@@ -34,6 +34,19 @@ MYD09GA_QC <- data.frame(
         bitMask=c(3,1,7,3,3,1,1,1,1,1,1)
     )
 
+MOD09Q1_QC <- data.frame(
+        LongName=c("MODLAND_QA", "cloud state", "band 1 data quality four bit range", "band 2 data quality four bit range",
+        "atmospheric correction performed", "adjacency correction performed", "different orbit from 500 m", "spare (unused)"), 
+        bitShift=c(0,2,4,8,12,13,14,15),
+        bitMask=c(3,3,15,15,1,1,1,1)
+    )
+
+MYD09Q1_QC <- data.frame(
+        LongName=c("MODLAND_QA", "cloud state", "band 1 data quality four bit range", "band 2 data quality four bit range",
+        "atmospheric correction performed", "adjacency correction performed", "different orbit from 500 m", "spare (unused)"), 
+        bitShift=c(0,2,4,8,12,13,14,15),
+        bitMask=c(3,3,15,15,1,1,1,1)
+    )
 
 ########### M.D11
 
