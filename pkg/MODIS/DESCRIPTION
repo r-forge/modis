@@ -1,12 +1,12 @@
 Package: MODIS
-Version: 0.9-01
-Date: 03-June-2013
+Version: 0.9-02
+Date: 04-June-2013
 Title: MODIS download and processing package. Processing functionalities for (multi-temporal) MODIS grid data.  
 Depends: R (>= 2.10), utils, raster
 Suggests: RCurl, rgeos, rgdal, bitops, mapdata, maptools, SSOAP, XML, XMLSchema, snow, ptw
 Author: Matteo Mattiuzzi, Jan Verbesselt, Forrest Stevens, Steven Mosher, Tomislav Hengl, Anja Klisch, Bradley Evans and Agustin Lobo
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at> 
-Description: MODIS download and processing package. Downloading, re-projecting, re-sampling, mosaicking, format conversion, SDS-extraction, bit-encoding and filtering/smoothing capabilities. Download data from FTP (local processing) or using SSOAP (online processing) via the MODIS web-service. Pre-processing data with GDAL, MRT, SSOAP. Starting from version 0.3-14 also SRTMv41 can be downloaded. Manual: 
+Description: MODIS download and processing package. Downloading, re-projecting, re-sampling, mosaicking, format conversion, SDS-extraction, bit-encoding and filtering/smoothing capabilities. Download data from FTP/http (local processing) or using SSOAP (online processing) via the MODIS web-service. Pre-processing data with GDAL, MRT, SSOAP. Manual: http://ivfl-arc.boku.ac.at/owncloud/public.php?service=shorty_relay&id=QR5FZSxe0gNULL
 URL: http://r-forge.r-project.org/projects/modis/
 License: GPL (>=3)
 LazyLoad: yes

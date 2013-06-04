@@ -23,6 +23,8 @@ export("smooth.spline.raster")
 export("whittaker.raster")
 export("makeWeights")
 export("MODISoptions")
+export("detectBitInfo")
+export("maskWater")
 
 exportPattern(".+WS$")
 
