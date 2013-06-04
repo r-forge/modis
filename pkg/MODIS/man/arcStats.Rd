@@ -32,15 +32,20 @@ In the same manner as \code{getHdf()}, this function quantifies the availability
 }
 
 \value{
-  An invisible NULL (provably this will change to a matrix like object similar to the '*.csv' output. Depending on 'asMap' argument a 'table.csv' and a 'image.png' file(s) in \code{'outDirPath'} see \code{'...'}.
+  An invisible NULL (provably this will change to a matrix like object similar to the '*.csv' output. If \code{'asMap'= TRUE} a 'table.csv' and a 'image.png' file(s) in \code{'outDirPath'} see \code{MODISoptions()}.
 }
 
 \author{
   Matteo Mattiuzzi
 }
 
+
 \examples{
 \dontrun{
+# See "http://ivfl-info.boku.ac.at/index.php/eo-data-processing/status-of-the-local-archive" for a practical example
+
+# The following examples are expecting that you have some data stored locally!
+########################################################### 
 # generates 2 png's and 2 csv's one for TERRA one for AQUA
 arcStats(product="M.D13Q1")
 
