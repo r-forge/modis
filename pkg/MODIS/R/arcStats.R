@@ -54,8 +54,6 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
     MODIS:::getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0)
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"), stringsAsFactors=FALSE)
-
-    sr <- shapefile(system.file("external","modis_latlonWGS84_grid_world.shp", package="MODIS"))
     
     for (z in seq_along(product$PRODUCT))
     {

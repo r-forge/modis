@@ -14,7 +14,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     }
     
     old    <- FALSE # "old=T" always works, "old=F" only for MODIS system + having rgdal and rgeos installed
-    target <- NULL  # if extent is a raster* and has a different proj it is changed
+    target <- NULL  # if extent is a raster*/Spatial* and has a different proj it is changed
     isPoly <- FALSE
     system <- toupper(system) 
     
@@ -75,7 +75,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         extent <- ex 
         rm(ex)
         isPoly <- TRUE
-    # if extent is a "shapefileOBJECT"    
+    # if extent is a "shapefile"    
     }
     
     oclass <- class(extent)
@@ -252,12 +252,9 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             coordinates(xy) <- c("x","y")
             proj4string(xy) <- CRS(t_srs)
             outBB  <- spTransform(xy,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))@bbox
-            ext <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
-            #extent <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
-        }# else
-        #{
-        #    extent <- ext
-        #}
+            #ext    <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
+            extent <- extent(c(outBB["x","min"],outBB["x","max"],outBB["y","min"],outBB["y","max"]))
+        }
         target <- list(t_srs = t_srs, extent = ext, resolution = resolution) 
     }
 
@@ -314,16 +311,16 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         if (length(buffer)>1)
         {
             buffer <- buffer[1]
-            warning(paste("'buffer' on a vector object must have length==1. Used only the first element of 'buffer': ",buffer,sep=""))
+            warning(paste("'buffer' on a vector object must have length==1. Used only the first element of 'buffer': ",buffer[1],sep=""))
         }
         
         # gBuffer doesn't allow buffer on LatLon, fake CRS bypass this. Found in: 
         # http://stackoverflow.com/questions/9735466/how-to-compute-a-line-buffer-with-spatiallinesdataframe
-        win <- options()$warn 
+        win                 <- options()$warn 
         options(warn=-2)
-        inproj <- proj4string(extent)
+        inproj              <- proj4string(extent)
         proj4string(extent) <- CRS("+init=epsg:3395")
-        extent <- gBuffer(extent,width=buffer)
+        extent              <- gBuffer(extent,width=buffer)
         proj4string(extent) <- CRS(inproj)
         options(warn=win)
     }
@@ -377,10 +374,6 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
    
     } else 
     {
-        # The "modis_latlonWGS84_grid_world.shp" file is the reprojected MODIS Sinusoidal bounding grid created by
-        # Markus Neteler (software used: GRASS GIS 6.4)
-        # License: CC-BY-SA unless stated otherwise
-        sr <- shapefile(file.path(find.package("MODIS"), "external","modis_latlonWGS84_grid_world.shp"))
         if(isPoly) 
         {
             po <- list()
@@ -400,14 +393,15 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
        
         if (is.na(proj4string(spos)))
         {
-            proj4string(spos) <- proj4string(sr)
+            proj4string(spos) <- proj4string(sr) # MODIS:::sr
         }
          
-        selected <- sr[spos,]
+        selected <- sr[spos,] # == rgeos:::over() # MODIS:::sr 
+        
         tileH  <- unique(as.numeric(selected@data$h))
         tileV  <- unique(as.numeric(selected@data$v))
         result <- as.character(apply(selected@data,1,function(x) {paste("h",sprintf("%02d",x[2]),"v",sprintf("%02d",x[3]),sep="")}))
-        result <- list(tile = result, tileH = tileH, tileV = tileV,extent = extent, system = system, target = target)
+        result <- list(tile = result, tileH = tileH, tileV = tileV, extent = extent, system = system, target = target)
         class(result) <- "MODISextent"
         return(result)
     }

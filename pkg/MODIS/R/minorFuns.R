@@ -184,19 +184,13 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cat("Checking availabillity of GDAL:\n")
             }
-            if (is.null(opts$gdalPath))
-            {
-                cmd <- 'gdalinfo --version'
-            } else
-            {
-                cmd <- paste0(path.expand(opts$gdalPath),'/gdalinfo --version')            
-            }
+
+            cmd      <- paste0(opts$gdalPath,'gdalinfo --version',collapse="/")            
             gdaltext <- try(system(cmd,intern=TRUE),silent=TRUE)
- 
                          
             if (inherits(gdaltext,"try-error"))
             {
-                cat("   GDAL not found, install it or check path settings (see '?MODISoptions') in order to use related functionalities!\n")
+                cat("   GDAL not found, install 'gdal-bin' or check path settings in order to use related functionalities (see '?MODISoptions')!\n")
                 gdaltext <- "Could not determine GDAL version!"
             } else 
             {
@@ -250,11 +244,11 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                   
                     if(MODIS:::checkGdalDriver(fwt))
                     {                  
-                        cat("Found 'FWTools' verion: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
+                        cat("Found 'FWTools' version: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
                         minone <- TRUE
                     } else 
                     {
-                        cat("Found 'FWTools' verion: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, try to remove and re-install 'FWTools'!\n",sep="")
+                        cat("Found 'FWTools' version: '", fwtV,"' in '",normalizePath(fwt,"/"),"' but without HDF4 support...strange, try to remove and re-install 'FWTools'!\n",sep="")
                     }
                 }
                 if(length(osg)==1)

@@ -44,7 +44,6 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
     
     tr <- NULL
-    
     if (!is.null(extent$target$resolution[[1]]))
     {
         tr <- paste(" -tr", paste(extent$target$resolution, collapse=" "))
