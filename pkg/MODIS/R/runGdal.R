@@ -85,7 +85,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     if (!is.null(extent$target$t_srs))
     {
         opts$outProj <- extent$target$t_srs
-        cat("Output projection specified by raster* object: ")
+        cat("Output projection specified by raster*/ spatial* object: ")
     } else 
     {
         cat("outProj          = ")

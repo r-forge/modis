@@ -23,7 +23,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             path       <- MODIS:::genString(HdfName[i],...)
             MODIS:::setPath(path$localPath)
         
-            if (!file.exists(paste(path$localPath,"/",HdfName[i],sep=""))) 
+            if (!file.exists(paste0(path$localPath,"/",HdfName[i]))) 
             {
                 MODIS:::ModisFileDownloader(HdfName[i],quiet=quiet,...)
             }
@@ -32,7 +32,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             {
                 MODIS:::doCheckIntegrity(HdfName[i], quiet=quiet,...)
             }
-            dates[[i]] <- paste(path$local,"/",HdfName[i],sep="")
+            dates[[i]] <- paste0(path$local,"/",HdfName[i])
         }
         return(invisible(unlist(dates)))
     
@@ -86,7 +86,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
          
             ntiles <- length(tileID)
             path   <- MODIS:::genString("SRTM")
-            files  <- paste("srtm",tileID,".zip",sep="")
+            files  <- paste0("srtm",tileID,".zip")
             dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
             if (!file.exists(paste(path$localPath,"meta.zip",sep="/"))) 
@@ -101,7 +101,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                 {
                     stop("You need to install the 'RCurl' package: install.packages('RCurl')")
                 }
-                sizes <- getURL(paste(path$remotePath[[1]],"/",sep=""))
+                sizes <- getURL(paste0(path$remotePath[[1]],"/"))
                 sizes <- strsplit(sizes, if(.Platform$OS.type=="unix"){"\n"} else{"\r\n"})[[1]]
                 sizes <- sapply(sizes,function(x){x <- strsplit(x," ")[[1]];paste(x[length(x)],x[length(x)-5],sep=" ")})
                 names(sizes) <- NULL
@@ -117,59 +117,59 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         
             cat("Be avare, that sources for SRTM data have limited the number of requests!\nNormally it suspends the download, and after a while it continues. So may you have to be patient!\n")
         
-        for(d in seq_along(files)) 
-        {
+            for(d in seq_along(files)) 
+            {
         
-            isOK <- TRUE
-            if (file.exists(paste(path$localPath,"/",files[d],sep="")))
-            {
-                isOK <- MODIS:::checksizefun(file=paste(path$localPath,"/",files[d],sep=""),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
-            }
-            if (!file.exists(paste(path$localPath,"/",files[d],sep=""))| !isOK)
-            {
-                timeout <- options("timeout") # TEST I'm not sure if it helps (timeout is used in ?download.file)
-                options(timeout=15)
-
-                for(g in 1:sturheit) 
+                isOK <- TRUE
+                if (file.exists(paste0(path$localPath,"/",files[d])))
                 {
-                    server <- names(path$remotePath)[rep(startIND[d:(d+length(path$remotePath)-1)],length=sturheit)]
-                    cat("Getting SRTM data from:",server[g],"\n")
-                    Sys.sleep(wait)        
-                                    
-                    hdf=1
-                    try(
-                        hdf <- download.file(
-                            paste(path$remotePath[[server[g]]],"/", files[d],sep=""),
-                            destfile=paste(path$localPath,"/", files[d], sep=""),
-                            mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE),
-                        silent=TRUE
-                    )
-                    if (hdf==0) 
-                    {
-                        SizeCheck <- MODIS:::checksizefun(file=paste(path$localPath,"/", files[d], sep=""),type="SRTM",sizeInfo=sizes,flexB=50000)
-                        if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
-                    }
-                    if(hdf==0 & !quiet) 
-                    {
-                        lastused <- server[g] 
-                        if (g==1) 
-                        {
-                            cat("Downloaded by the first try!\n\n")
-                        } else 
-                        {
-                            cat("Downloaded after",g,"retries!\n\n")
-                        }
-                    }
-                    if(hdf==0) 
-                    {
-                        break
-                    }    
+                    isOK <- MODIS:::checksizefun(file=paste0(path$localPath,"/",files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
                 }
-            options(timeout=as.numeric(timeout)) # set timeout back to default
+                if (!file.exists(paste0(path$localPath,"/",files[d]))| !isOK)
+                {
+                    timeout <- options("timeout") # TEST I'm not sure if it helps (timeout is used in ?download.file)
+                    options(timeout=15)
+    
+                    for(g in 1:sturheit) 
+                    {
+                        server <- names(path$remotePath)[rep(startIND[d:(d+length(path$remotePath)-1)],length=sturheit)]
+                        cat("Getting SRTM data from:",server[g],"\n")
+                        Sys.sleep(wait)        
+                                        
+                        hdf=1
+                        try(
+                            hdf <- download.file(
+                                paste0(path$remotePath[[server[g]]],"/", files[d]),
+                                destfile=paste0(path$localPath,"/", files[d]),
+                                mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=TRUE),
+                            silent=TRUE
+                        )
+                        if (hdf==0) 
+                        {
+                            SizeCheck <- MODIS:::checksizefun(file=paste0(path$localPath,"/", files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)
+                            if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
+                        }
+                        if(hdf==0 & !quiet) 
+                        {
+                            lastused <- server[g] 
+                            if (g==1) 
+                            {
+                                cat("Downloaded by the first try!\n\n")
+                            } else 
+                            {
+                                cat("Downloaded after",g,"retries!\n\n")
+                            }
+                        }
+                        if(hdf==0) 
+                        {
+                            break
+                        }    
+                    }
+                options(timeout=as.numeric(timeout)) # set timeout back to default
+                }
             }
-        }
-        SRTM <- paste(path$localPath,"/",files,sep="")
-    return(invisible(SRTM))
+            SRTM <- paste0(path$localPath,"/",files)
+        return(invisible(SRTM))
     }
     
     dates  <- list()
@@ -186,7 +186,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         } else 
         {
 
-            todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
+            todo <- paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
         
             for (u in seq_along(todo))
             {
@@ -224,24 +224,25 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
 
                     for (i in 1:nrow(dates[[l]]))
                     { # i=1
+                        
+                        cat(dates[[l]][i,1],"\n")
+                        flush.console()
+                        
                         year <- format(as.Date(dates[[l]][i,1],format="%Y.%m.%d"), "%Y")
                         doy  <- as.integer(format(as.Date(dates[[l]][i,1],format="%Y.%m.%d"), "%j"))
                         doy  <- sprintf("%03d",doy)
-                        datu <- paste("A",year,doy,sep="")
                         mtr  <- rep(1,ntiles) # for file availability flaging
                         path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
                         
                         for(j in 1:ntiles)
-                        {
-                            dates[[l]][i,j+1] <- paste(strsplit(todo[u],"\\.")[[1]][1],".",datu,".",if (tileID[j]!="GLOBAL") {paste(tileID[j],".",sep="")},strsplit(todo[u],"\\.")[[1]][2],".*.hdf$",sep="") # create pattern
-        
+                        {  
+                            dates[[l]][i,j+1] <- paste0(strsplit(todo[u],"\\.")[[1]][1],".",paste0("A",year,doy),".",if (tileID[j]!="GLOBAL") {paste0(tileID[j],".")},strsplit(todo[u],"\\.")[[1]][2],".*.hdf$") # create pattern            
                             if (length(dir(path$localPath,pattern=dates[[l]][i,j+1]))>0)
                             { # if available locally
-        
                                 HDF <- dir(path$localPath,pattern=dates[[l]][i,j+1]) # extract HDF file
-        
+          
                                 if (length(HDF)>1)
-                                { # in very recent files sometimes there is more than 1 file/tile/date if so get the last
+                                { # in very recent files sometimes there is more than 1 file/tile/date if so get the most recent processing date
                                     select <- list()
                                     for (d in 1:length(HDF))
                                     { 
@@ -253,7 +254,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                 mtr[j] <- 0
                             }
                         }
-
+                        
                         if (sum(mtr)!=0) 
                         { # if one or more of the tiles in the given date is missing, its necessary to go online
 
@@ -271,6 +272,12 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                             { # get list of FILES in remote dir
                                 server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
                                 try(ftpfiles <- MODIS:::filesUrl(path$remotePath[[server]]),silent=TRUE)
+                                
+                                if(ftpfiles[1]==FALSE)
+                                {
+                                    stop("Problem to connect to: ",path$remotePath[[server]],"\nmaybe there is a date problem,check this path in your browser.\nIf it does not work try to solve this by running: 'MODIS:::getStruc(product=",todo[u],",wait=0,forceCheck=TRUE)'\nand restart your job (getHdf or runGdal/runMrt)")
+                                }
+                                
                                 if(exists("ftpfiles"))
                                 {
                                     break
@@ -323,16 +330,16 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         }
                         if(checkIntegrity)
                         { # after each 'i' do the sizeCheck
-                            isIn <- MODIS:::doCheckIntegrity(paste(path$localPath,"/",dates[[l]][i,-1],sep=""), wait=wait, quiet=quiet,...)
+                            isIn <- MODIS:::doCheckIntegrity(paste0(path$localPath,"/",dates[[l]][i,-1]), wait=wait, quiet=quiet,...)
                         }
-                    suboutput[[i]] <- paste(path$localPath,"/",dates[[l]][i,-1],sep="")                    
+                    suboutput[[i]] <- paste0(path$localPath,"/",dates[[l]][i,-1])                    
                     } # end i
         
                     output[[l]] <-  as.character(unlist(suboutput))
                     names(output)[l] <- todo[u]
                 } else 
                 {
-                    cat(paste("No files on ftp in date range for: ",todo[u],"\n\n",sep=""))
+                    cat(paste0("No files on ftp in date range for: ",todo[u],"\n\n"))
                 }
             } 
         }
