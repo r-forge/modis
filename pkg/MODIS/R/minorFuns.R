@@ -755,6 +755,11 @@ return(as.logical(out))
 setPath <- function(path, ask=FALSE, showWarnings=FALSE)
 {
     path <- normalizePath(path, "/", mustWork = FALSE)
+
+    ##  Strip any trailing slashes from the path as file.exists() returns
+		##    FALSE for detecting folders with a trailing slash:
+		path <- gsub("/$", "", path)
+
     if(!file.exists(path)) 
     {
         if (ask)
