@@ -27,7 +27,6 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
 
     if (method=="GDAL")
     {
-
         if (.Platform$OS=="unix")
         {
             sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
@@ -45,17 +44,17 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
             sdsRaw <- shell(cmd,intern=TRUE)
         }
         
-        SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_[0-9]{1,2}_NAME",value=T)
-    
+        SDSnames <- grep(x=sdsRaw,pattern="SUBDATASET_[0-9]{1,2}_NAME",value=TRUE)
         SDSnames <- unlist(lapply(SDSnames,function(x) strsplit(x,"=")[[1]][2]))
-    
+        SDSnames <- unlist(lapply(SDSnames,function(x) gsub(x,pattern="\\\"",replacement="")))
+        
         sds <- unlist(lapply(SDSnames,function(x) 
                 {
                     x <- strsplit(x,":")[[1]]
                     x <- x[length(x)]                    
                 }
             ))    
-    
+        
     } else if (method=="MRT")
     {
         if (.Platform$OS=="unix")
@@ -76,6 +75,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
         sds <- unlist(lapply(sds,function(x){strsplit(x,", ")[[1]][2]}))
 
     }
+    
     
     if (!is.null(SDSstring))
     {

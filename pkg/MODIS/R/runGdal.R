@@ -32,7 +32,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     {
         dataFormat <- grep(opts$gdalOutDriver$name, pattern=paste("^",dataFormat,"$",sep=""),ignore.case = TRUE,value=TRUE)
         of <- paste(" -of",dataFormat)
-        extension  <- getExtension(dataFormat)
+        extension  <- MODIS:::getExtension(dataFormat)
     } else 
     {
         stop('in argument dataFormat=\'',opts$dataFormat,'\', format not supported by GDAL type: \'options("MODIS_gdalOutDriver")\' (column \'name\') to list available inputs')
@@ -145,7 +145,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                 tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
                              )
                     files <- files[basename(files)!="NA"]
-                    
+
         			w <- options()$warn
         			options("warn"= -1)
         			SDS <- list()
@@ -154,7 +154,12 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
         			}
         			options("warn"= w)					
-    
+
+                    if (l==1)
+                    {
+                        NAS <- getNa(SDS[[1]]$SDS4gdal)
+                    }                    
+                    
                     for (i in seq_along(SDS[[1]]$SDSnames))
                     {
                         outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
@@ -162,6 +167,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                         
                         gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                         
+                        srcnodata <- paste0(" -srcnodata ",NAS[[i]])
+                        dstnodata <- paste0(" -dstnodata ",NAS[[i]])
+
                         te <- NULL
                         if ( !is.null(extent$extent) )
                         {
@@ -216,7 +224,16 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                             cp <- NULL
                         }
                         ####
-
+                        
+                        if (quiet)
+                        {
+                            q <- " -q"
+                        } else
+                        {
+                            q <- NULL
+                        }
+                        
+                        
                         if (.Platform$OS=="unix")
                         {
 
@@ -232,6 +249,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                     cp,
                                     bs,
                                     rt,
+                                    q,
+                                    srcnodata,
+                                    dstnodata,
                                     " -overwrite",
                                     " -multi",
                                     " \'", ifile,"\'",
@@ -269,6 +289,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                     cp,
                                     bs,
                                     rt,
+                                    q,
+                                    srcnodata,
+                                    dstnodata,
                                     ' -multi',
                                     ' \"', ifile,'\"',
                                     ' \"', ofile,'\"',
