@@ -330,6 +330,12 @@ return(t(out))
             {
                 stop("cluster error")
             }
+
+            ni <- nodes + i
+            if (ni <= tr$n)
+            {
+                sendCall(cl[[d$node]], fun = clFun, args = ni, tag=ni)
+            }
             
             if(doround)
             {
@@ -348,14 +354,6 @@ return(t(out))
             {
                 b[[1]]  <- writeValues(b[[1]], d$value$value, tr$row[d$value$tag])
             }
-            #####        
-    
-            ni <- nodes + i
-            if (ni <= tr$n)
-            {
-                sendCall(cl[[i]], fun = clFun, args = ni, tag=ni)
-            }
-        
         }
     }
 ###############################
