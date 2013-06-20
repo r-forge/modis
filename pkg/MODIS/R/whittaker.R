@@ -14,20 +14,21 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     # opt <- list()
         
     opt       <- combineOptions(...)
+    opt$outDirPath <- setPath(outDirPath)
     bitShift  <- opt$bitShift
     bitMask   <- opt$bitMask
     threshold <- opt$threshold
     NAflag    <- opt$NAflag
     
     dataFormat <- opt$dataFormat
-    rasterOut  <- writeFormats()
+    rasterOut  <- toupper(writeFormats())
     
-    if(dataFormat %in% rasterOut[,"name"])
+    if(toupper(dataFormat) %in% rasterOut[,"name"])
     {
         dataFormat <- raster:::.defaultExtension(dataFormat)
     } else
     {
-        stop("Argument dataFormat='",dataFormat,"' in 'smooth.spline.raster()' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")
+        stop("Argument dataFormat='",dataFormat,"' in 'whittaker.raster()' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")
     }
     
     if (is.null(opt$minDat))
