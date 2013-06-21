@@ -5,8 +5,9 @@ Set or retrieve permanent MODIS package options}
 \description{
 With this function you can get or set _persistant_ MODIS package options (per user or systemwide). Changes here will persist sessions and updates.}
 \usage{
-MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, gdalPath, 
-dlmethod, stubbornness, systemwide = FALSE, quiet = FALSE, save=TRUE, checkPackages=TRUE)
+MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, 
+gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet = FALSE, save=TRUE, 
+checkPackages=TRUE)
 }
 \arguments{
   \item{localArcPath}{

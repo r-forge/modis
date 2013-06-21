@@ -35,7 +35,8 @@ extractDate(files,pos1=10,pos2=16,asDate=FALSE,format='\%Y\%j')
 \examples{
 \dontrun{
 # example on HDF files
-files <- c("MOD13Q1.A2010209.h18v03.005.2010239071130.hdf","MOD13Q1.A2010225.h18v03.005.2010254043849.hdf")
+files <- c("MOD13Q1.A2010209.h18v03.005.2010239071130.hdf",
+"MOD13Q1.A2010225.h18v03.005.2010254043849.hdf")
 extractDate(files)
 extractDate(files,asDate=TRUE)
 

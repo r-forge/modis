@@ -9,8 +9,8 @@
 \description{
 Downloads MODIS grid data from archive (FTP or local) and processes the files.}
 
-\usage{runGdal(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, tileH=NULL, tileV=NULL, 
-buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)}
+\usage{runGdal(product, collection=NULL, begin=NULL, end=NULL, extent=NULL, tileH=NULL, 
+tileV=NULL,buffer=0,SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)}
 
 \arguments{
   \item{product}{See: \code{?getProduct}}

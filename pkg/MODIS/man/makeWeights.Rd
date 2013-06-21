@@ -85,7 +85,8 @@ res
 
 #####
 # water mask
-runGdal(product="MOD13A2",begin="2009001",end="2009001", extent=extent(c(-9,-3 ,54,58)),SDSstring="001",outDirPath="~/",job="delme") # 6.4 MB
+runGdal(product="MOD13A2",begin="2009001",end="2009001", extent=extent(c(-9,-3 ,54,58)),
+  SDSstring="001",outDirPath="~/",job="delme") # 6.4 MB
 x <- raster("~/delme/MOD13A2.A2009001.1_km_16_days_VI_Quality.tif")
 
 res1 <- maskWater(x)
@@ -95,8 +96,10 @@ res2 <- maskWater(x,keep=1) # 1 = Land (nothing else)
 x11()
 plot(res2)
 
-res3 <- maskWater(x,keep=c(1,2,3)) # Land (Nothing else but land) + Ocean coastlines and lake shorelines + shallow inland Water, the rest becomes NA
+# Land (Nothing else but land) + Ocean coastlines and lake shorelines + shallow inland Water,
+# the rest becomes NA
 x11()
+res3 <- maskWater(x,keep=c(1,2,3)) 
 plot(res3)
 
 # unlink("~/delme",recursive=TRUE)
@@ -106,29 +109,30 @@ plot(res3)
 # as on Linux you can read HDF4 directly you can also do:
 if(.Platform$OS.type=="unix")
 {
-    x <- getHdf(HdfName="MOD13A2.A2009001.h17v03.005.2009020044109.hdf", wait=0) # 6.4 MB
-    
-    detectBitInfo(x) # just info
-    getSds(x) # just info
-
-    x <- getSds(x)$SDS4gdal[3] # you need 'VI Quality'
-
-    x  <- raster(x) 
-    # plot(x)
-    # ex <- drawExtent()
-    ex <- extent(c(-580779,-200911,5974929,6529959))
-    x  <- crop(x,ex) # just for speed-up
-
-    res1 <- maskWater(x)
-    plot(res1)
-
-    res2 <- maskWater(x,keep=1) # 1 = Land (Nothing else but land), the rest becomes NA
-    x11()
-    plot(res2)
-    
-    res3 <- maskWater(x,keep=c(1,2,3)) # Land (Nothing else but land) + Ocean coastlines and lake shorelines + shallow inland Water, the rest becomes NA
-    x11()
-    plot(res3)
+  x <- getHdf(HdfName="MOD13A2.A2009001.h17v03.005.2009020044109.hdf", wait=0) # 6.4 MB
+  
+  detectBitInfo(x) # just info
+  getSds(x) # just info
+ 
+  x <- getSds(x)$SDS4gdal[3] # you need 'VI Quality'
+  x  <- raster(x) 
+  # plot(x)
+  # ex <- drawExtent()
+  ex <- extent(c(-580779,-200911,5974929,6529959))
+  x  <- crop(x,ex) # just for speed-up
+ 
+  res1 <- maskWater(x)
+  plot(res1)
+ 
+  res2 <- maskWater(x,keep=1) # 1 = Land (Nothing else but land), the rest becomes NA
+  x11()
+  plot(res2)
+  
+  # Land (Nothing else but land) + Ocean coastlines and lake shorelines + shallow inland Water,
+  # the rest becomes NA
+  res3 <- maskWater(x,keep=c(1,2,3))
+  x11()
+  plot(res3)
 }
 
 }

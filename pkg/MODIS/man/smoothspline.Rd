@@ -11,7 +11,8 @@ This function uses the \code{smooth.spline} function to filter a vegetation inde
 }
 
 \usage{
-smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),df=6,outDirPath ="./",...)
+smooth.spline.raster(x,w=NULL,t=NULL,groupYears=TRUE,timeInfo=orgTime(x),
+df=6,outDirPath ="./",...)
 }
 
 \arguments{
@@ -50,7 +51,8 @@ Currently tested on MODIS and Landsat data. Using M*D13 data it is also possible
 # The full capacity of the following functions is currently avaliable only with M*D13 data.
 # !! The function is very new, double check the result!!
 
-# You need to extract the: 'vegetation index', 'VI_Quality layer', and 'composite day of the year' layer.
+# You need to extract the: 'vegetation index', 'VI_Quality layer', 
+# and 'composite day of the year' layer.
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.7 MB): 
@@ -63,13 +65,15 @@ path <- paste(options("MODIS_outDirPath"),"/fullCapa",sep="")
 vi <- preStack(path=path, pattern="*_NDVI.tif$")
 
 # "orgTime" detects timing information of the input data and generates based on the arguments
-# the output date information. For spline functions (in general) the beginning and the end of the time series
-# is always problematic. So there is the argument "pillow" (default 75 days) that adds
+# the output date information. For spline functions (in general) the beginning and
+# the end of the time series is always problematic. 
+# So there is the argument "pillow" (default 75 days) that adds
 # (if available) some more layers on the two endings.
   
 timeInfo <- orgTime(vi,nDays=16,begin="2005001",end="2005365",pillow=40)
 
-# now re-run "preStack" with two diferences, 'files' (output of the first 'preStack' call. and the 'timeInfo'
+# now re-run "preStack" with two diferences, 'files' (output of the first 'preStack' call)
+# and the 'timeInfo'.
 # Here only the data needed for the filtering is extractet:
 vi <- preStack(files=vi,timeInfo=timeInfo)
 
@@ -80,7 +84,7 @@ system.time(smooth.spline.raster(x=vi,timeInfo=timeInfo))
 # Filter with weighting and time information:
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 w <- stack(preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo))
-w <- makeWeights(w,bitShift=2,bitMask=15,threshold=6) 
+w <- makeWeights(w,bitShift=2,bitMask=15,threshold=6)
 # you can also pass only the names
 t <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 

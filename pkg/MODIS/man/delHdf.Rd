@@ -9,8 +9,8 @@
 Delete MODIS grid files to reduce the local storage.
 }
 
-\usage{delHdf(product, collection=NULL, extent="global", tileV=NULL, tileH=NULL, begin=NULL, end=NULL,
-ask=TRUE,...)}
+\usage{delHdf(product, collection=NULL, extent="global", tileV=NULL, tileH=NULL, begin=NULL, 
+end=NULL, ask=TRUE,...)}
 
 \arguments{
 

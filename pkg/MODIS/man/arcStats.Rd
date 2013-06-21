@@ -42,8 +42,8 @@ In the same manner as \code{getHdf()}, this function quantifies the availability
 
 \examples{
 \dontrun{
-# See "http://ivfl-info.boku.ac.at/index.php/eo-data-processing/status-of-the-local-archive" for a practical example
-
+# See "http://ivfl-info.boku.ac.at/index.php/eo-data-processing/status-of-the-local-archive" (example)
+#
 # The following examples are expecting that you have some data stored locally!
 ########################################################### 
 # generates 2 png's and 2 csv's one for TERRA one for AQUA

@@ -59,9 +59,12 @@ You can obtain MRT-grid after registration from: \url{https://lpdaac.usgs.gov/to
 \examples{
 \dontrun{
 
-runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleGEOdelme", outProj="GEO")
-runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleSINdelme", outProj="SIN")
-runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101", job="ExampleUTMdelme", outProj="UTM")
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101",
+  job="ExampleGEOdelme", outProj="GEO")
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101",
+  job="ExampleSINdelme", outProj="SIN")
+runMrt( product="MOD11A1", extent="austria", begin="2010001", end="2010002", SDSstring="101",
+  job="ExampleUTMdelme", outProj="UTM")
 
 }
 }
