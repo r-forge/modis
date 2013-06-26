@@ -11,8 +11,9 @@ This function uses a modified whittaker filter function (see references) from pa
 }
 
 \usage{
-whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi), lambda = 500,
-nIter= 3, collapse=FALSE, outDirPath = "./", removeOutlier=FALSE, threshold=NULL, ...)
+whittaker.raster(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = orgTime(vi),
+lambda = 500, nIter= 3, collapse=FALSE, outDirPath = "./", removeOutlier=FALSE,
+threshold=NULL, ...)
 }
 
 \arguments{
