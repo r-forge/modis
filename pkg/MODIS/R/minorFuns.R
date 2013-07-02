@@ -784,10 +784,13 @@ setPath <- function(path, ask=FALSE, showWarnings=FALSE)
 # get NA values from getSds(x)$SDS4gdal
 getNa <- function(x)
 {
+    gdalPath <- getOption("gdalPath")[1]
+
     name <- res <- vector(mode="list",length=length(x))
+    
     for (i in seq_along(x))    
     {   
-        tmp <- system(paste0("gdalinfo '", x[i],"'"),intern=TRUE) 
+        tmp <- system(paste0(gdalPath,"gdalinfo '", x[i],"'"),intern=TRUE) 
         res[i] <- as.numeric(strsplit(grep(tmp,pattern="NoData Value=",value=TRUE),"=")[[1]][2])
         nam <- strsplit(x[i],":")[[1]] 
         name[[i]] <- nam[length(nam)]
