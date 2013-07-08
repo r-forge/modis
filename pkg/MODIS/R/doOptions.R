@@ -101,7 +101,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
     {
         return(outProj)
     }
-    # this is here because we could think in a conversion between GDAL and MRT inputs! (the available once MRT it the limiting)
+    # this is here because we could think in a conversion between GDAL and MRT inputs! (the available in MRT is the limiting factor)
     MRTprojs <- matrix(byrow=T,ncol=2,
         c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
           "IGH", "Interrupted Goode Homolosine", "HAM", "Hammer", "ISIN", "Integerized Sinusoidal", 
@@ -206,7 +206,7 @@ combineOptions <- function(...)
     opts <- options() # collects all options
     opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
     
-    if(length(opts)==0) # if nothing available look for inizial options
+    if(length(opts)==0) # if nothing available look for initial options
     {
         if(!file.exists("~/.MODIS_Opts.R"))
         {
@@ -226,6 +226,11 @@ combineOptions <- function(...)
     {
         opts <- c(Fopts, opts[(!names(opts) %in% names(Fopts))])
     }
+    if(.Platform$OS=="windows")
+    {
+        opts$gdalPath <- shortPathName(opts$gdalPath)
+    }
+    
 return(opts)
 }
 
