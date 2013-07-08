@@ -326,6 +326,11 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
     if ((renew & god) | !god)
     {
         gdalPath <- opt$gdalPath
+
+        if (.Platform$OS=="windows")
+        {
+            gdalPath <- shortPathName(gdalPath)
+        }
         
         if(!quiet)
         {
@@ -335,13 +340,13 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
         cmd <- paste0(c(gdalPath,"gdalinfo --formats"),collapse="/")
           
         # list all drivers with (rw)
-        if (.Platform$OS=="unix")
-        {
+#        if (.Platform$OS=="unix")
+#        {
             gdalOutDriver <- system(cmd,intern=TRUE)
-        } else
-        {
+#        } else
+#        {
             gdalOutDriver <- shell(cmd,intern=TRUE)
-        }
+#        }
         gdalOutDriver <- grep(gdalOutDriver,pattern="\\(rw",value=TRUE) # this regex must be preciser
         name          <- sapply(gdalOutDriver,function(x){strsplit(x,"\\(")[[1]][1]})
         name          <- gsub(as.character(name), pattern=" ", replacement="")
