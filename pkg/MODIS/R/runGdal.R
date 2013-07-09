@@ -106,7 +106,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     for (z in 1:length(product$PRODUCT))
     {
         todo <- paste(product$PRODUCT[z],".",product$CCC[[product$PRODUCT[z]]],sep="")    
-    
+        
         for(u in 1:length(todo))
         {
             MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
@@ -115,29 +115,29 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
             
             prodname <- strsplit(todo[u],"\\.")[[1]][1] 
             coll     <- strsplit(todo[u],"\\.")[[1]][2]
-    
+            
             avDates <- ftpdirs[[1]][,todo[u]]
             avDates <- avDates[!is.na(avDates)]            
             sel <- as.Date(avDates,format="%Y.%m.%d")
             us  <- sel >= tLimits$begin & sel <= tLimits$end
-    
+            
             if (sum(us,na.rm=TRUE)>0)
             {
                 avDates <- avDates[us]
-    
+                
                 if (is.null(job))
                 {
                     job <- paste(todo[u],"_",format(Sys.time(), "%Y%m%d%H%M%S"),sep="")    
-                    cat("No 'job' name specified, generated (date/time based)) output directory = ")
+                    cat("No 'job' name specified, generated (date/time based))\nOutput directory = ")
                 } else
                 {
                     cat("Output Directory = ")
                 }
-                cat(paste(opts$outDirPath,job,sep="/"),"\n\n")
+                cat(paste(normalizePath(opts$outDirPath,"/",FALSE),job,sep="/"),"\n\n")
                 
                 outDir <- file.path(opts$outDirPath,job,fsep="/")
                 dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
-    
+                
                 for (l in 1:length(avDates))
                 { 
                     files <- unlist(
@@ -145,16 +145,16 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                 tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
                              )
                     files <- files[basename(files)!="NA"]
-
-        			w <- options()$warn
-        			options("warn"= -1)
-        			SDS <- list()
-        			for (z in seq_along(files))
-        			{ # get all SDS names for one chunk
-        				SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
-        			}
-        			options("warn"= w)					
-
+              
+              w <- options()$warn
+              options("warn"= -1)
+              SDS <- list()
+              for (z in seq_along(files))
+              { # get all SDS names for one chunk
+                SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
+              }
+              options("warn"= w)
+              
                     if (l==1)
                     {
                         NAS <- getNa(SDS[[1]]$SDS4gdal)
@@ -259,9 +259,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                                     ofile,
                                     sep="")
                             cmd <- gsub(x=cmd,pattern="\"",replacement="'")
-#                           invisible(
-                                system(cmd)
-#                           )
+                            system(cmd)
                             
                         } else # windows
                         {
@@ -272,12 +270,15 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                             {
                                 cmd <- "gdalwarp"
                             }
-
+                            
                             ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
-                            ofile <- shortPathName(paste(normalizePath(outDir), '\\', outname,sep=''))
+                            ofile <- shortPathName(paste0(normalizePath(outDir), '\\', outname))
+                            
                             # GDAL < 1.8.0 doesn't support ' -overwrite' 
-                            invisible(file.remove(ofile))
-                            # 
+                            if(file.exists(ofile))
+                            {
+                              invisible(file.remove(ofile))
+                            }
                             
                             shell(
                                paste(cmd,

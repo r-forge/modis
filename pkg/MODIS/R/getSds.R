@@ -13,7 +13,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     if (!file.exists(HdfName)) 
     {
         cat("Hm, I have to search for the file! Next time provide the full path and I'll be very fast!\n")
-        HdfName <- normalizePath(list.files(path=opts$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE),winslash=fsep)
+        HdfName <- list.files(path=opts$localArcPath,pattern=paste(HdfName,"$",sep=""),recursive=TRUE,full.names = TRUE)
     }
     
     HdfName <- HdfName[1]
@@ -32,13 +32,13 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
             sdsRaw <- system(paste("gdalinfo ", HdfName,sep=""),intern=TRUE) 
         } else if (.Platform$OS=="windows")
         {
+            usar <- gsub(shortPathName(HdfName),pattern="\\\\",replacement="/")
             if (is.null(opts$gdalPath))
             {
-                cmd <- paste('gdalinfo ', shortPathName(HdfName),sep="")
+                cmd <- paste('gdalinfo ', usar,sep="")
             } else
             {
-                opts$gdalPath <- shortPathName(normalizePath(opts$gdalPath,"\\"))
-                cmd <- shQuote(paste(opts$gdalPath,'\\gdalinfo.exe ', shortPathName(HdfName),sep=""),type="cmd")            
+                cmd <- shQuote(paste0(opts$gdalPath,'gdalinfo.exe ',usar),type="cmd")            
             }
              
             sdsRaw <- shell(cmd,intern=TRUE)

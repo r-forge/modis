@@ -24,7 +24,7 @@ Target reference system where to process data using \code{runGdal} or \code{runM
   \item{resamplingType}{
 Default is \code{NN} (Neares Neightbour). In common for MRT and GDAL are \code{NN', 'CC', 'BIL}. GDAL supports also: \code{cubicspline} and \code{lanczos}, GDAL >= 1.10.0 also \code{mode} and \code{average}.}
   \item{dataFormat}{
-Default is \code{GTiff}. Or one of \code{options()$MODIS_dataFormat} (column 'name').}
+Default is \code{GTiff}. Or one of \code{getOption("MODIS_gdalOutDriver")} (column 'name').}
 
   \item{gdalPath}{
 Path to gdal _bin_ directory, relvand more for windows. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}

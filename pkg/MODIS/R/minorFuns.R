@@ -55,57 +55,57 @@ checksizefun <- function(file,sizeInfo=NULL,flexB=0)
     
     if(length(MetaSize)==0)
     {
-        res  <- list(MetaSize=NULL,FileSize=NULL,isOK=NULL)    
-        return(res)    
+        res  <- list(MetaSize=NULL,FileSize=NULL,isOK=NULL)
+        return(res)
     }
     
     FileSize <- as.numeric(file.size(file))
     if (flexB!=0)
     {
-        isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB)     
+        isOK <- (MetaSize >= FileSize-flexB & MetaSize <= FileSize+flexB)
     } else 
     {
         isOK <- (MetaSize == FileSize)
     }
-    res  <- list(MetaSize=MetaSize,FileSize=FileSize,isOK=as.logical(isOK))    
-return(res)    
+    res  <- list(MetaSize=MetaSize,FileSize=FileSize,isOK=as.logical(isOK))
+return(res)
 }
 
 
 search4map <- function(pattern="",database='worldHires',plot=FALSE)
 {
-    if (!require(mapdata))
+  if (!require(mapdata))
+  {
+    stop("This function requires 'mapdata', please install it first: install.packages('mapdata')")
+  }
+  
+  areas <- grep(x=map(database,plot=FALSE)$names,pattern=pattern,value=TRUE,ignore.case=TRUE)
+  
+  if (length(areas)==0)
+  {
+    cat("No country (region or island) found! please change your pattern!\n")
+    return(invisible(NULL))
+  } else 
+  {
+  
+  if (plot)
+  {
+    map(database,areas)
+    map.axes() 
+    box()
+    grid(36,18,col="blue",lwd=0.5)
+    
+    if(length(areas)>4) 
     {
-        stop("This function requires 'mapdata', please install it first: install.packages('mapdata')")
-    }
-
-    areas <- grep(x=map(database,plot=FALSE)$names,pattern=pattern,value=TRUE,ignore.case=TRUE)
-
-    if (length(areas)==0)
-    {
-        cat("No country (region or island) found! please change your pattern!\n")
-        return(invisible(NULL))
+      subareas <- paste(areas[1:3],collapse=", ") 
+      title(c(paste(subareas,"and",(length(areas)-3),"other")))
     } else 
     {
-
-    if (plot)
-    {
-        map(database,areas)
-        map.axes() 
-        box()
-        grid(36,18,col="blue",lwd=0.5)
-    
-        if(length(areas)>4) 
-        {
-            subareas <- paste(areas[1:3],collapse=", ") 
-            title(c(paste(subareas,"and",(length(areas)-3),"other")))
-        } else 
-        {
-            title(areas)
-        }
+      title(areas)
     }
-    return(areas=areas)
-    }
+  }
+  return(areas=areas)
+  }
 }
 
 checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
@@ -212,14 +212,9 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
-            # if GDALpath is not set manually, try if it is already in the system settings
-            if (is.null(opts$gdalPath))
-            {
-                cmd <- 'gdalinfo --version'
-            } else
-            {
-                cmd <- file.path(shortPathName(opts$gdalPath),'gdalinfo --version',fsep="\\")            
-            }
+            
+            cmd <- paste0(opts$gdalPath,'gdalinfo --version')            
+            
             gdaltext <- shell(cmd,intern=TRUE)
             
             if (length(grep(x=gdaltext,pattern="GDAL"))==0)
@@ -294,193 +289,189 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 # get gdal wtrite formats (driver name, 'long name' and extension)
 gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
 {
-    iw   <- options()$warn 
-    options(warn=-1)
-    on.exit(options(warn=iw))
-    
-    opt <- try(as.list(...),silent=TRUE)
-    
-    if(class(opt) == 'try-error'| !exists('opt')) # this is in order to use the function outside the MODISoptions process
+  iw   <- options()$warn 
+  options(warn=-1)
+  on.exit(options(warn=iw))
+  
+#  opt <- try(as.list(...),silent=TRUE)
+#  
+#  if(class(opt) == 'try-error'| !exists('opt')) # this is in order to use the function outside the MODISoptions process
+#  {
+      opt <- MODIS:::combineOptions(...)    
+#  }
+  if(!isTRUE(opt$gdalOk))
+  {
+    stop("Gdal is not properly configured or installed, see '?MODISoptions' for more informations")
+  }
+  
+  out     <- file.exists(opt$outDirPath)
+  outfile <- paste0(opt$auxPath,"/gdalOutDriver.RData")
+  god     <- file.exists(outfile)
+  
+  if (god)
+  {
+    load(outfile)
+    if (nrow(gdalOutDriver)<5)
     {
-        opt <- MODIS:::combineOptions()    
-    }    
+      renew <- TRUE
+    }
+  }
+  
+  if ((renew & god) | !god)
+  {
+    if(!quiet)
+    {
+      message("Detecting available write drivers!")
+    }
+    
+    cmd <- paste0(opt$gdalPath,"gdalinfo --formats")
+    
+    # list all drivers with (rw)
+    if (.Platform$OS=="unix")
+    {
+      gdalOutDriver <- system(cmd,intern=TRUE)
+    } else
+    {
+      gdalOutDriver <- shell(cmd,intern=TRUE)
+    }
+    gdalOutDriver <- grep(gdalOutDriver,pattern="\\(rw",value=TRUE) # this regex must be preciser
+    name          <- sapply(gdalOutDriver,function(x){strsplit(x,"\\(")[[1]][1]})
+    name          <- gsub(as.character(name), pattern=" ", replacement="")
+    
+    description <- as.character(sapply(gdalOutDriver,function(x){strsplit(x,"\\): ")[[1]][2]}))
+    
+    if(!quiet)
+    {
+      message("Found: ",length(name)," candidate drivers, detecting file extensions...")
+    }
+    
+    extension <- rep(NA,length(name))
+    for (i in seq_along(name))
+    {
+      ind <- grep(name, pattern=paste0("^",name[i],"$"), ignore.case=TRUE, value=FALSE)
+      
+      if (length(ind)!=0)
+      {
+        extension[i] <- MODIS:::getExtension(name[ind])
+      }
+    }
+    if(!quiet)
+    {
+      message(sum(!is.na(extension))," usable drivers detected!")
+    }
+    gdalOutDriver <- data.frame(name=name[!is.na(extension)], description=description[!is.na(extension)], extension=extension[!is.na(extension)], stringsAsFactors=FALSE)        
+    
+    if (!out)
+    {
+      message('The \'MODIS\' processing output location \'',normalizePath(opt$outDirPath,"/",FALSE),'\' does not exist, should it be created here? Or see in \'?MODISoptions\' to select another location')
+    } else
+    {
+      setPath(opt$auxPath,ask=FALSE)
+    }
+    
+    if(file.exists(opt$auxPath))
+    {
+      save(gdalOutDriver, file=outfile)
+    }
+  }
+  gdalOutDriver
+}
 
-    if(!isTRUE(opt$gdalOk))
-    {
-        stop("Gdal is not properly configured or installed, see '?MODISoptions' for more informations")
-    }
-        
-    out <- file.exists(opt$outDirPath)
-    outfile <- paste0(opt$auxPath,"/gdalOutDriver.RData")
-    god <- file.exists(outfile)
-    
-    if (god)
-    {
-        load(outfile)
-        if (nrow(gdalOutDriver)<5)
-        {
-            renew <- TRUE
-        }
-    }
-    
-    if ((renew & god) | !god)
-    {
-        gdalPath <- opt$gdalPath
 
-        if (.Platform$OS=="windows")
-        {
-            gdalPath <- shortPathName(gdalPath)
-        }
-        
-        if(!quiet)
-        {
-            message("Detecting available write drivers!")
-        }
-          
-        cmd <- paste0(c(gdalPath,"gdalinfo --formats"),collapse="/")
-          
-        # list all drivers with (rw)
-#        if (.Platform$OS=="unix")
-#        {
-            gdalOutDriver <- system(cmd,intern=TRUE)
-#        } else
-#        {
-            gdalOutDriver <- shell(cmd,intern=TRUE)
-#        }
-        gdalOutDriver <- grep(gdalOutDriver,pattern="\\(rw",value=TRUE) # this regex must be preciser
-        name          <- sapply(gdalOutDriver,function(x){strsplit(x,"\\(")[[1]][1]})
-        name          <- gsub(as.character(name), pattern=" ", replacement="")
-          
-        description <- as.character(sapply(gdalOutDriver,function(x){strsplit(x,"\\): ")[[1]][2]}))
-     
-        if(!quiet)
-        {
-            message("Found: ",length(name)," candidate drivers, detecting file extensions...")
-        }
-                
-        extension <- rep(NA,length(name))
-        for (i in seq_along(name))
-        {
-            ind <- grep(name, pattern=paste0("^",name[i],"$"), ignore.case=TRUE, value=FALSE)
-            
-            if (length(ind)!=0)
-            {
-                extension[i] <- MODIS:::getExtension(name[ind])
-            }
-        }
-        if(!quiet)
-        {
-            message(sum(!is.na(extension))," usable drivers detected!")
-        }
-        gdalOutDriver <- data.frame(name=name[!is.na(extension)], description=description[!is.na(extension)], extension=extension[!is.na(extension)], stringsAsFactors=FALSE)        
-           
-        if (!out)
-        {
-            message('The \'MODIS\' processing output location \'',opt$outDirPath,'\' does not exist, should it be created here? Or see in \'?MODISoptions\' to select another location')
-        }                
-        if(file.exists(opt$auxPath))
-        {
-            save(gdalOutDriver, file=outfile)
-        }
-    }
-    gdalOutDriver    
-}    
- 
-    
 getExtension <- function(dataFormat)
 {
-    if(toupper(dataFormat) %in% c("HDF-EOS","HDF4IMAGE")) # MRT + GDAL
+  if(toupper(dataFormat) %in% c("HDF-EOS","HDF4IMAGE")) # MRT + GDAL
+  {
+    return(".hdf")
+  } else if (toupper(dataFormat) %in% c("GTIFF","GEOTIFF"))  # MRT + GDAL
+  {
+    return(".tif")
+  } else if (tolower(dataFormat) =="raw binary")  # MRT + GDAL
+  {
+    return(".hdr")
+  } else if (toupper(dataFormat)=="ENVI") 
+  {
+    return("") # should generate a '.hdr' file + a file without extension
+  } else if (dataFormat=="FIT") 
+  {
+    return(NA)    
+  } else if (toupper(dataFormat)=="ILWIS")
+  {
+    return(".mpr") # is this ok?
+  } else 
+  {
+    gdalPath <- MODIS:::combineOptions()$gdalPath
+    cmd <- paste0(gdalPath,'gdalinfo --format ')
+    
+    if(.Platform$OS.type=="unix")
     {
-        return(".hdf")
-    } else if (toupper(dataFormat) %in% c("GTIFF","GEOTIFF"))  # MRT + GDAL
+      ext <- system(paste0(cmd, dataFormat),intern=TRUE)   
+    } else
     {
-        return(".tif")
-    } else if (tolower(dataFormat) =="raw binary")  # MRT + GDAL
-    {
-        return(".hdr")
-    } else if (toupper(dataFormat)=="ENVI") 
-    {
-        return("") # should generate a '.hdr' file + a file without extension
-    } else if (dataFormat=="FIT") 
-    {
-        return(NA)    
-    } else if (toupper(dataFormat)=="ILWIS")
-    {
-        return(".mpr") # is this ok?
-    } else 
-    {
-        gdalPath <- options()$MODIS_gdalPath
-        cmd <- paste0(c(gdalPath,'gdalinfo --format '),collapse="/")
-        
-        if(.Platform$OS.type=="unix")
-        {
-            ext <- system(paste0(cmd, dataFormat),intern=TRUE)   
-        } else
-        {
-            ext <- shell(paste0(cmd, dataFormat),intern=TRUE)   
-        }
-        
-        ext <- grep(ext,pattern="Extension:",value=TRUE)
-        
-        if(length(ext)==0)
-        {
-            return(NA)
-        } else
-        {
-            ext <- gsub(strsplit(ext,":")[[1]][2],pattern=" ",replacement="")
-            
-            if (ext!="")
-            {
-                ext <- paste0(".",ext)
-            }
-            return(ext)
-        }
+      ext <- shell(paste0(cmd, dataFormat),intern=TRUE)   
     }
+    
+    ext <- grep(ext,pattern="Extension:",value=TRUE)
+    
+    if(length(ext)==0)
+    {
+      return(NA)
+    } else
+    {
+      ext <- gsub(strsplit(ext,":")[[1]][2],pattern=" ",replacement="")
+      
+      if (ext!="")
+      {
+        ext <- paste0(".",ext)
+      }
+      return(ext)
+    }
+  }
 }
 
 
 isSupported <- function(x) 
 {
-    fname <- basename(x)
+  fname <- basename(x)
+  
+  iw   <- options()$warn 
+  options(warn=-1)
+  on.exit(options(warn=iw))
+  
+  res <- sapply(fname,function(y) 
+  {
+    product <- getProduct(y,quiet=TRUE)
     
-    iw   <- options()$warn 
-    options(warn=-1)
-    on.exit(options(warn=iw))
-    
-    res <- sapply(fname,function(y) 
+    if (is.null(product))
     {
-        product <- getProduct(y,quiet=TRUE)
-    
-        if (is.null(product))
+      return(FALSE)
+    } else 
+    {
+      secName <- MODIS:::defineName(product$request)
+      
+      if (product$SENSOR[1] == "MODIS") 
+      {
+        if (product$TYPE[1] == "Tile") 
         {
-            return(FALSE)
-        } else 
+          Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
+          return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+          
+        } else if (product$TYPE[1] == "CMG") 
         {
-            secName <- MODIS:::defineName(product$request)
-        
-            if (product$SENSOR[1] == "MODIS") 
-            {
-                if (product$TYPE[1] == "Tile") 
-                {
-                    Tpat    <- "h[0-3][0-9]v[0-1][0-9]" # to enhance
-                    return(all((grep(secName["TILE"],pattern=Tpat)) + (substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
-            
-                } else if (product$TYPE[1] == "CMG") 
-                {
-                    return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
-            
-                } else if (product$TYPE[1] == "Swath")  # actually no support for Swath data!
-                {
-#                  return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
+          return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==5)))
+          
+        } else if (product$TYPE[1] == "Swath")  # actually no support for Swath data!
+        {
+#             return(all((substr(secName["DATE"],1,1) == "A") + (length(secName)==6)))
 #                } else {
-                    return(FALSE)
-                }
-            } else 
-            {
-                return(FALSE)
-            }
+          return(FALSE)
         }
-    })
+      } else 
+      {
+        return(FALSE)
+      }
+    }
+  })
 return(unlist(res))
 }
 
@@ -489,25 +480,25 @@ return(unlist(res))
 
 defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
 {
-    
-    if(missing(x)) 
-    {
-        stop("Error in function 'MODIS:::defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
-    } else 
-    {
+  
+  if(missing(x)) 
+  {
+    stop("Error in function 'MODIS:::defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
+  } else 
+  {
     fname   <- basename(x)
     secName <- strsplit(fname,"\\.")[[1]] # for splitting with more signes "[._-]"
     
     if (toupper(substring(secName[1],1,4))=="CULT") 
     {
-        sensor="MERIS"
+      sensor="MERIS"
     } else if (tolower(substring(secName[1],1,4))=="srtm")
     {
-        sensor = "C-Band-RADAR"
-        secName <- strsplit(secName[1],"_")[[1]]
+      sensor = "C-Band-RADAR"
+      secName <- strsplit(secName[1],"_")[[1]]
     } else 
     {
-        sensor="MODIS"
+      sensor="MODIS"
     }
     ###################################
     # NAME definitions (is File-specific!)
@@ -515,50 +506,48 @@ defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
     # MODIS
     if (sensor=="MODIS")
     {
-        product <- getProduct(x=secName[1],quiet=TRUE)
-        if (product$TYPE=="Tile") 
-        {
-            names(secName) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
-        } else if (product$TYPE=="CMG") 
-        {
-            names(secName) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
-        } else if (product$TYPE=="Swath") 
-        { 
-            names(secName) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
-        } else 
-        {
-            stop("Not a MODIS 'Tile', 'CMG' or 'Swath'!")
-        }
+      product <- getProduct(x=secName[1],quiet=TRUE)
+      if (product$TYPE=="Tile") 
+      {
+        names(secName) <- c("PRODUCT","DATE","TILE","CCC","PROCESSINGDATE","FORMAT")
+      } else if (product$TYPE=="CMG") 
+      {
+        names(secName) <- c("PRODUCT","DATE","CCC","PROCESSINGDATE","FORMAT")
+      } else if (product$TYPE=="Swath") 
+      { 
+        names(secName) <- c("PRODUCT","DATE","TIME","CCC","PROCESSINGDATE","FORMAT")
+      } else 
+      {
+        stop("Not a MODIS 'Tile', 'CMG' or 'Swath'!")
+      }
     # MERIS
     } else if (sensor=="MERIS") 
     {
-        product  <- getProduct(x="culture-MERIS",quiet=TRUE)
-        secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-        lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-        secName  <- secName[-length(secName)]
-        secName  <- c(secName,lastpart)
-        if (length(secName)==6) 
-        {
-            names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT","COMPRESSION")
-        } else if (length(secName)==5) 
-        {
-            names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT")
-        }
-
+      product  <- getProduct(x="culture-MERIS",quiet=TRUE)
+      secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
+      lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
+      secName  <- secName[-length(secName)]
+      secName  <- c(secName,lastpart)
+      if (length(secName)==6) 
+      {
+        names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT","COMPRESSION")
+      } else if (length(secName)==5) 
+      {
+        names(secName) <- c("PRODUCT","CCC","DATE1DATE2","TILE","FORMAT")
+      }
+      
     # SRTM
     } else if (sensor=="C-Band-RADAR") 
     {
-        product  <- getProduct(x=secName[1],quiet=TRUE)
-        secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
-        lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
-        secName  <- secName[-length(secName)]
-        secName  <- c(secName,lastpart)
-        names(secName) <- c("PRODUCT","tileH","tileV","COMPRESSION") 
-
+      product  <- getProduct(x=secName[1],quiet=TRUE)
+      secName  <- strsplit(fname,MODIS_Products[MODIS_Products$PRODUCT==product$PRODUCT,]$INTERNALSEPARATOR)[[1]]
+      lastpart <- strsplit(secName[length(secName)],"\\.")[[1]]
+      secName  <- secName[-length(secName)]
+      secName  <- c(secName,lastpart)
+      names(secName) <- c("PRODUCT","tileH","tileV","COMPRESSION") 
     } # XXX else if .... add Products here
-}
-##
-return(secName)
+  }
+  return(secName)
 }
 
 #### install dependencies and suggested
@@ -573,7 +562,7 @@ checkDeps <- function()
         missingP <- !needed %in% installed.packages()[,1]
         missingP <- paste0(needed[missingP],collapse="', '")
 
-        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\n")
+        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\nXMLSchema and SSOAP are required only for *WS functions!\n")
     }
 out
 }
@@ -680,17 +669,17 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
               cat("Getting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
           }
           
-          if(.Platform$OS=="windows")
-          {
-              destfile <- paste(shortPathName(path$localPath),x[a],sep="\\")  
-          } else
-          {
-              destfile <- paste(path$localPath,x[a],sep="/")
-          }
+#          if(.Platform$OS=="windows")
+#          {
+#              destfile <- paste(shortPathName(path$localPath),x[a],sep="\\")  
+#          } else
+#          {
+              destfile <- paste0(path$localPath,x[a],sep="/")
+#          }
             
           try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
       
-          if (is.na(out[a])) {cat("File not found!\n"); unlink(paste(path$localPath,x[a],sep="/")); break} # if NA then the url name is wrong!
+          if (is.na(out[a])) {cat("File not found!\n"); unlink(destfile); break} # if NA then the url name is wrong!
           if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
           if (out[a]==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n\n")}
           if (out[a]==0 & !quiet & g==1) {cat("Downloaded by the first try!\n\n")}
@@ -759,47 +748,47 @@ return(as.logical(out))
 # setPath for localArcPath and outDirPath
 setPath <- function(path, ask=FALSE, showWarnings=FALSE)
 {
-    path <- normalizePath(path, "/", mustWork = FALSE)
-
-    ##  Strip any trailing slashes from the path as file.exists() returns
-		##    FALSE for detecting folders with a trailing slash:
-		path <- gsub("/$", "", path)
-
-    if(!file.exists(path)) 
+  path <- normalizePath(path, "/", mustWork = FALSE)
+  
+  ##  Strip any trailing slashes from the path as file.exists() returns
+  ##    FALSE for detecting folders with a trailing slash:
+  path <- gsub("/$", "", path)
+  
+  if(!file.exists(path)) 
+  {
+    if (ask)
     {
-        if (ask)
-        {
-            doit <- toupper(readline(paste0(path," does not exist, should it be created? [y/n]: ")))
-        } else 
-        {
-            doit <- 'Y'
-        }  
-        
-        if  (doit %in% c("Y","YES"))
-        {
-            stopifnot(dir.create(path, recursive = TRUE, showWarnings = showWarnings))
-        } else
-        {
-            path <- "Path not set, use ?MODISoptions to configure it"          
-        }
+      doit <- toupper(readline(paste0(path," does not exist, should it be created? [y/n]: ")))
+    } else 
+    {
+      doit <- 'Y'
+    }  
+    
+    if  (doit %in% c("Y","YES"))
+    {
+      stopifnot(dir.create(path, recursive = TRUE, showWarnings = showWarnings))
+    } else
+    {
+      path <- "Path not set, use ?MODISoptions to configure it"          
     }
-    path    
+  }
+  path    
 }
 
 # get NA values from getSds(x)$SDS4gdal
 getNa <- function(x)
 {
-    gdalPath <- getOption("MODIS_gdalPath")[1]
-    name <- res <- vector(mode="list",length=length(x))
-    
-    for (i in seq_along(x))    
-    {   
-        tmp    <- system(paste0(gdalPath,"/gdalinfo '", x[i],"'"),intern=TRUE) 
-        res[i] <- as.numeric(strsplit(grep(tmp,pattern="NoData Value=",value=TRUE),"=")[[1]][2])
-        nam    <- strsplit(x[i],":")[[1]] 
-        name[[i]] <- nam[length(nam)]
-    }
-    names(res) <- unlist(name)
-    return(res)
+  gdalPath <- getOption("MODIS_gdalPath")[1]
+  name <- res <- vector(mode="list",length=length(x))
+  
+  for (i in seq_along(x))
+  {
+    tmp    <- system(paste0(gdalPath,"gdalinfo ", x[i]),intern=TRUE)
+    res[i] <- as.numeric(strsplit(grep(tmp,pattern="NoData Value=",value=TRUE),"=")[[1]][2])
+    nam    <- strsplit(x[i],":")[[1]] 
+    name[[i]] <- nam[length(nam)]
+  }
+  names(res) <- unlist(name)
+  return(res)
 }
 
