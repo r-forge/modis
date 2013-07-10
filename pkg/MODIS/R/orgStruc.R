@@ -25,7 +25,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
     
     if(missing(pattern)) 
     {
-    	cat(paste("No 'pattern' set, moving/coping all MODIS grid data found in '", from,"'.\n",sep=""))
+    	cat(paste0("No 'pattern' set, moving/coping all MODIS grid data found in '", from,"'.\n"))
     	avFiles <- unlist(list.files(from, pattern=".hdf$", recursive=TRUE, full.names=TRUE))
     } else 
     {
@@ -58,18 +58,18 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 
 		if (move) 
 		{
-			file.rename(from=x,to=paste(path,"/",fname,sep=""))			
-			if (file.exists(paste(x,".xml",sep=""))) 
+			file.rename(from=x,to=paste0(path,fname))			
+			if (file.exists(paste0(x,".xml"))) 
 			{
-				file.rename(from=paste(x,".xml",sep=""),to=paste(path,"/",fname,".xml",sep=""))	
+				file.rename(from=paste0(x,".xml"),to=paste0(path,fname,".xml",sep=""))	
 			}
 			moved <- 1
 		} else 
 		{
-			file.copy(from=x,to=paste(path,"/",fname,sep=""),overwrite=FALSE)
-			if (file.exists(paste(x,".xml",sep=""))) 
+			file.copy(from=x,to=paste0(path,fname),overwrite=FALSE)
+			if (file.exists(paste0(x,".xml"))) 
 			{
-				file.copy(from=paste(x,".xml",sep=""),to=paste(path,"/",fname,".xml",sep=""))	
+				file.copy(from=paste0(x,".xml"),to=paste0(path,fname,".xml"))	
 			}
 			moved <- 2
 		}
@@ -77,9 +77,9 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 	} else if (file.exists(file.path(path,fname,fsep="/")) & orpath!=path) 
 	{ # if file exists in destdir & inpath!=outPath...it is duplicated in 2 different locations, so remove it
 	    unlink(x)
-		if (file.exists(paste(x,".xml",sep=""))) 
+		if (file.exists(paste0(x,".xml"))) 
 		{
-			unlink(paste(x,".xml",sep=""))	
+			unlink(paste0(x,".xml"))	
 		}
 		moved <- 3
 	} else 
@@ -92,7 +92,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 		{ # I'm looking for a windows/MAC(?) eqal to the linux "rmdir -p" command!!
 			warn <- options("warn") 
 			options(warn=-2)
-			try(xxx <- invisible(system(paste("rmdir -p --ignore-fail-on-non-empty ", orpath,sep=""),intern=TRUE)),silent=TRUE)
+			try(xxx <- invisible(system(paste0("rmdir -p --ignore-fail-on-non-empty ", orpath),intern=TRUE)),silent=TRUE)
 			options(warn=warn$warn)
 		} else 
 		{ # work arount for rmdir -p on windows/MAC(?)
@@ -101,7 +101,7 @@ orgStruc <- function(from,to,structure, pattern, move=TRUE, quiet=FALSE)
 			
 			for (o in length(secPath):1)
 			{
-				delpath <- paste(secPath[-o:-length(secPath)],sep="",collapse="/")
+				delpath <- paste0(secPath[-o:-length(secPath)],collapse="/")
 
 				if (length(list.files(delpath))==0)
 				{

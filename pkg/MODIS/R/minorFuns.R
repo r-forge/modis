@@ -674,7 +674,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
 #              destfile <- paste(shortPathName(path$localPath),x[a],sep="\\")  
 #          } else
 #          {
-              destfile <- paste0(path$localPath,x[a],sep="/")
+              destfile <- paste0(path$localPath,x[a])
 #          }
             
           try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
@@ -781,9 +781,13 @@ getNa <- function(x)
   gdalPath <- getOption("MODIS_gdalPath")[1]
   name <- res <- vector(mode="list",length=length(x))
   
+  iw   <- options()$warn 
+  options(warn=-1)
+  on.exit(options(warn=iw))
+  
   for (i in seq_along(x))
   {
-    tmp    <- system(paste0(gdalPath,"gdalinfo ", x[i]),intern=TRUE)
+    tmp    <- system(paste0(gdalPath,"gdalinfo '", MODIS:::correctPath(x[i],isFile=TRUE),"'"),intern=TRUE)
     res[i] <- as.numeric(strsplit(grep(tmp,pattern="NoData Value=",value=TRUE),"=")[[1]][2])
     nam    <- strsplit(x[i],":")[[1]] 
     name[[i]] <- nam[length(nam)]
@@ -791,4 +795,27 @@ getNa <- function(x)
   names(res) <- unlist(name)
   return(res)
 }
+
+correctPath <- function(x,isFile=FALSE)
+{
+    if(!is.null(x))
+    {
+        if (.Platform$OS.type=="windows")
+        {
+            x <- gsub(shortPathName(normalizePath(x,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
+        } else
+        {
+            x <- path.expand(x)
+        }
+        if (substr(x,nchar(x),nchar(x))!="/" & !isFile)
+        {
+            x <- paste0(x,"/") 
+        }
+    }
+return(x)
+}
+
+
+
+
 

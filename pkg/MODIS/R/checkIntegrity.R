@@ -1,77 +1,50 @@
 checkIntegrity <- function(x,...)
 {
     opts <- MODIS:::combineOptions(...)
-    
-    if (.Platform$OS.type=="windows")
-    {   
-        if (!is.null(opts$gdalPath))
-        {        
-            opts$gdalPath <- shortPathName(opts$gdalPath)
-            cmd <- paste(opts$gdalPath,"\\gdalinfo",sep="") 
-        } else
-        {
-            cmd <- "gdalinfo" 
-        }
-        testHdf <- shortPathName(system.file("external", "sdunl.hdf", package="MODIS"))
-        try(test <- system(paste(cmd,testHdf),intern=TRUE),silent=TRUE)
-                
+
+    iw   <- getOption("warn") 
+    options(warn=-1)
+    on.exit(options(warn=iw))
+
+    if(!opts$gdalOk)
+    {
+        warning("Something wrong with your GDAL installation, see '?MODISoptions' for more details")
     } else
     {
-        cmd <- paste(opts$gdalPath,"gdalinfo",collapse="/",sep="")            
-        testHdf  <- system.file("external", "sdunl.hdf", package="MODIS")
-        try(test <- system(paste(cmd,testHdf),intern=TRUE),silent=TRUE)
+        cmd <- paste0(opts$gdalPath,"gdalinfo ") 
+        out <- rep(NA,length(x))
 
-    }
-    
-    if(length(grep(test,pattern="Driver: HDF4Image/HDF4 Dataset"))==0)
-    {
-        stop("Your GDAL installation or the path to your GDAL/bin directory is not valid, please set it using '?MODISoptions'")
-    }
-
-    out <- rep(NA,length(x))
-
-    for (i in seq_along(x))
-    {
-
-        if (basename(x[i])=="NA" | is.na(basename(x[i])))
+        for (i in seq_along(x))
         {
-            out[i] <- NA
-        } else
-        {
-           if (dirname(x[i])==".")
-            {
-                x[i] <- paste(MODIS:::genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]), sep="/")        
-            }
-    
-            if (!file.exists(x[i]))
+            if (basename(x[i])=="NA" | is.na(basename(x[i])))
             {
                 out[i] <- NA
             } else
             {
-            
-                if (.Platform$OS.type=="windows")
+                if (dirname(x[i])==".")
                 {
-                    try(a <- system(paste(cmd," ",shortPathName(x[i]),sep=""),intern=TRUE),silent=TRUE)            
+                    x[i] <- paste0(MODIS:::genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]))        
+                }
+        
+                if (!file.exists(x[i]))
+                {
+                    out[i] <- NA
                 } else
                 {
-                    try(a <- system(paste(cmd," ",x[i],sep=""), intern=TRUE), silent=TRUE)
-                }
-            
-                if(length(grep(a,pattern="gdalinfo failed")==1) | length(a)==0)
-                {
-                    out[i] <- FALSE
-                } else 
-                {
-                    out[i] <- TRUE
+                    try(a <- system(paste0(cmd,correctPath(x[i],isFile=TRUE)), intern=TRUE), silent=TRUE)
+                
+                    if(length(grep(a,pattern="gdalinfo failed")==1) | length(a)==0)
+                    {
+                        out[i] <- FALSE
+                    } else 
+                    {
+                        out[i] <- TRUE
+                    }
                 }
             }
         }
+    return(out)
     }
-return(out)
 }
-    
-    
-    # Test gdal installation
-    
-        
+       
     

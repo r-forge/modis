@@ -330,9 +330,9 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         }
                         if(checkIntegrity)
                         { # after each 'i' do the sizeCheck
-                            isIn <- MODIS:::doCheckIntegrity(paste0(path$localPath,"/",dates[[l]][i,-1]), wait=wait, quiet=quiet,...)
+                            isIn <- MODIS:::doCheckIntegrity(paste0(path$localPath,dates[[l]][i,-1]), wait=wait, quiet=quiet,...)
                         }
-                    suboutput[[i]] <- paste0(path$localPath,"/",dates[[l]][i,-1])                    
+                    suboutput[[i]] <- paste0(path$localPath,dates[[l]][i,-1])                    
                     } # end i
         
                     output[[l]] <-  as.character(unlist(suboutput))

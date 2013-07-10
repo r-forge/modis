@@ -129,9 +129,9 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   
   if(.Platform$OS=="windows")# does this help?
   {
-    opt$localArcPath <- gsub(shortPathName(normalizePath(opt$localArcPath,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
-    opt$outDirPath   <- gsub(shortPathName(normalizePath(opt$outDirPath,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
-    opt$auxPath      <- gsub(shortPathName(normalizePath(opt$auxPath,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
+    opt$localArcPath <- correctPath(opt$localArcPath)
+    opt$outDirPath   <- correctPath(opt$outDirPath)
+    opt$auxPath      <- correctPath(opt$auxPath)
   }
   
   if(!missing(dlmethod))
@@ -175,24 +175,10 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
       }
     } else
     {
-      if(.Platform$OS=="windows")
-      {
-        opt$gdalPath <- normalizePath(gdalPath)
-      } else
-      {
-        opt$gdalPath <- path.expand(gdalPath)
-      }
+        opt$gdalPath <- gdalPath
     }
   }
-  if (!is.null(opt$gdalPath))
-  {
-    opt$gdalPath <- gsub(shortPathName(opt$gdalPath),pattern="\\\\",replacement="/")
-    
-    if (substr(opt$gdalPath,nchar(opt$gdalPath),nchar(opt$gdalPath))!="/")
-    {
-      opt$gdalPath <- paste0(opt$gdalPath,"/") 
-    }
-  }
+  opt$gdalPath <- correctPath(opt$gdalPath)
   
   # checks if the pointed GDAL exists and supports 'HDF4Image' driver. 
   if(checkPackages)

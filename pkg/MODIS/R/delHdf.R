@@ -21,7 +21,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
     info <-list()
     for (z in seq_along(product$PRODUCT))
     {    
-       info[[z]] <-  paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
+       info[[z]] <-  paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
     }
     cat("\nYou are about to delete\n - products:", paste(unlist(info),collapse=", "),"\n")
     rm(info)
@@ -38,7 +38,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
         ext$tile <- extent
     }
     
-    cat(" - tiles:", paste(unlist(ext$tile),collapse=", "),"\n")
+    cat(" - tiles:", paste0(unlist(ext$tile),collapse=", "),"\n")
     
     if (is.null(begin) & is.null(end))
     {
@@ -63,13 +63,13 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
         {
             for (z in seq_along(product$PRODUCT))
             {
-                todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
+                todo <- paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
         
                 for(u in seq_along(todo))
                 {
                     path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
-                    path <- paste(path[-length(path)],sep="",collapse="/")
+                    path <- paste0(path[-length(path)],collapse="/")
                     allLocal <- list.files(path,recursive=TRUE)
                     summaries <- file.size(allLocal,units="MB") + sum(summaries)
                     unlink(path,recursive=TRUE)
@@ -81,13 +81,13 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
         
             for (z in seq_along(product$PRODUCT))
             {
-                todo <- paste(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],sep="")
+                todo <- paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
             
                 for(u in seq_along(todo))
                 {
                     path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
-                    path <- paste(path[-length(path)],sep="",collapse="/")
+                    path <- paste0(path[-length(path)],collapse="/")
                     
                     allLocal <- list.files(path=path,pattern=".hdf",recursive=TRUE,full.names=TRUE)
                     if (length(allLocal)!=0)
@@ -138,7 +138,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
                                 { 
                                     warn <- options()$warn     
                                     options(warn=-2)
-                                    try(xxx <- invisible(system(paste("rmdir -p --ignore-fail-on-non-empty ", dirs[i],sep=""),intern=TRUE)),silent=TRUE)
+                                    try(xxx <- invisible(system(paste0("rmdir -p --ignore-fail-on-non-empty ", dirs[i]),intern=TRUE)),silent=TRUE)
                                     options(warn=warn)
                                 } else 
                                 { # work arount for rmdir -p on Windows
@@ -148,7 +148,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
                             
                                     for (o in length(secPath):1)
                                     {
-                                        delpath <- paste(secPath[-o:-length(secPath)],sep="",collapse="/")
+                                        delpath <- paste0(secPath[-o:-length(secPath)],collapse="/")
                                         if (length(list.files(delpath))==0)
                                         {
                                             unlink(delpath,recursive=TRUE)

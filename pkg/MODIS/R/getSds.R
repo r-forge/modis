@@ -7,7 +7,11 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
 
     method <- toupper(method) 
     fsep <- .Platform$file.sep
-    
+
+    iw   <- getOption("warn") 
+    options(warn=-1)
+    on.exit(options(warn=iw))
+
     opts <- MODIS:::combineOptions()
     
     if (!file.exists(HdfName)) 

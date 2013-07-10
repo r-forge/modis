@@ -28,6 +28,11 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         dataFormat <- "GTIFF"
     }
     
+    if(is.null(opts$gdalOutDriver))
+    {
+        opts$gdalOutDriver <-  MODIS:::gdalWriteDriver()
+    }
+    
     if(dataFormat %in% toupper(opts$gdalOutDriver$name))
     {
         dataFormat <- grep(opts$gdalOutDriver$name, pattern=paste("^",dataFormat,"$",sep=""),ignore.case = TRUE,value=TRUE)
@@ -41,7 +46,13 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     #### settings with messages
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
+    if (product$TYPE=="Tile")
+    {
+        extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
+    } else
+    {
+        extent <- NULL
+    }
     
     tr <- NULL
     if (!is.null(extent$target$resolution[[1]]))
@@ -75,7 +86,13 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     {
         if (product$SENSOR=="MODIS")
         {
-            opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"        
+            if (product$TYPE=="Tile")
+            {
+                opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
+            } else 
+            {
+                opts$outProj <- "+proj=longlat +ellps=clrk66 +no_defs"
+            }
         } else if (product$SENSOR=="SRTM")
         {
             opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
@@ -97,7 +114,13 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     
     if (product$SENSOR=="MODIS")
     {
-        s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
+        if (product$TYPE=="Tile")
+        {
+            s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
+        } else 
+        {
+            s_srs <- ' -s_srs \"+proj=longlat +ellps=clrk66 +no_defs\"'
+        }
     } else if (product$SENSOR=="SRTM")
     {
         s_srs <- ' -s_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0\"'

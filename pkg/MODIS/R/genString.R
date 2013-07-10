@@ -14,7 +14,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
     opts <- MODIS:::combineOptions(...)
     remotePath <- localPath <- NULL
     
-    opts$auxPath <- MODIS:::setPath(paste(opts$localArcPath,"/.auxiliaries",sep=""))
+    opts$auxPath <- MODIS:::setPath(opts$auxPath)
     
     product <- getProduct(x=x,quiet=TRUE)
     if(length(product$PRODUCT)>1)
@@ -198,6 +198,6 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
             }        
         }
     }        
-    return(list(localPath=localPath, remotePath=remotePath))
+    return(list(localPath=correctPath(localPath), remotePath=remotePath))
 }
 
