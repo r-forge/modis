@@ -150,47 +150,30 @@ checkGdalDriver <- function(path=NULL)
   on.exit(options(warn=inW))
   options(warn=-1)
   
+  path <- correctPath(path)
+  
+  cmd <- paste0(path,'gdalinfo --formats')
+  
   if(.Platform$OS=="windows")
   {
-    if(!is.null(path))
-    {
-      if (!file.exists(paste(path,'gdalinfo.exe',sep="")))
-      {
-        warning(paste("No gdal found in path",path))
-        return(FALSE)
-      }
-    }
-    try(driver <- shell(paste(path,'gdalinfo --formats',sep=""),intern=TRUE),silent=TRUE)
-    if(length(grep(driver,pattern="HDF4"))==0)
-    {
-      return(FALSE)
-    } else
-    {
-      return(TRUE)
-    }
+    driver <- try(shell(cmd,intern=TRUE),silent=TRUE)
   } else
-  { # on Linux with gdal-bin installed it sould always work...
-#    if (is.null(path))
-#    {
-#      test <- try(driver <- system('gdalinfo --formats',intern=TRUE),silent=TRUE)
-#    } else
-#    {
-    test <- try(driver <- system(paste(path,'gdalinfo',' --formats'),intern=TRUE), silent=TRUE)
-#    }
+  { 
+    driver <- try(system(cmd,intern=TRUE), silent=TRUE)
+  }
     
-    if (class(test) == "try-error")
-    {
-      warning("No gdal installation found please install 'gdal-bin' on your system first!")
-      return(FALSE)
-    }
+  if (class(driver) == "try-error")
+  {
+    warning("No gdal installation found please install 'gdal-bin' on your system first!")
+    return(FALSE)
+  }
     
-    if(length(grep(driver,pattern="HDF4"))==0)
-    {
-      return(FALSE)
-    } else
-    {
-      return(TRUE)
-    }
+  if(length(grep(driver,pattern="HDF4"))==0)
+  {
+    return(FALSE)
+  } else
+  {
+    return(TRUE)
   }
 }
 
