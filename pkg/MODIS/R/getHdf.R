@@ -275,12 +275,12 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                 
                                 if(ftpfiles[1]==FALSE)
                                 {
-                                    stop("Problem to connect to: ",path$remotePath[[server]],"\nmaybe there is a date problem,check this path in your browser.\nIf it does not work try to solve this by running: 'MODIS:::getStruc(product=",todo[u],",wait=0,forceCheck=TRUE)'\nand restart your job (getHdf or runGdal/runMrt)")
+                                    #stop("Problem to connect to: ",path$remotePath[[server]],"\nmaybe there is a date problem,check this path in your browser.\nIf it does not work try to solve this by running: 'MODIS:::getStruc(product=",todo[u],",wait=0,forceCheck=TRUE)'\nand restart your job (getHdf or runGdal/runMrt)")
+                                    rm(ftpfiles)
                                 }
-                                
                                 if(exists("ftpfiles"))
                                 {
-                                    break
+                                  break
                                 }
                                 Sys.sleep(wait)
                             }

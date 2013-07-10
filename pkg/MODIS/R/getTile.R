@@ -58,10 +58,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             exts <- raster:::extension(extent)
             if (exts!= ".shp")
             {
-                test <- try(ex <- raster(extent), silent=TRUE)
+                test <- try(raster(extent), silent=TRUE)
                 if (!inherits(test,"try-error"))
                 {
-                    extent <- ex 
+                    extent <- ex <- test
                     rm(ex)
                 }
             }
@@ -69,10 +69,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     }
     
     # if extent is a shapefileNAME    
-    test <- try(ex <- shapefile(extent), silent=TRUE)
+    test <- try(shapefile(extent), silent=TRUE)
     if (!inherits(test,"try-error"))
     {
-        extent <- ex 
+        extent <- ex <- test
         rm(ex)
         isPoly <- TRUE
     # if extent is a "shapefile"    
@@ -201,8 +201,8 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
             stop("For interactive TILE selection you need to install the 'mapdata' package: install.packages('mapdata')")
         }
 
-        try(test <- map("worldHires", extent, plot = FALSE),silent = TRUE)
-        if (!exists("test"))
+        try(testm <- map("worldHires", extent, plot = FALSE),silent = TRUE)
+        if (!exists("testm"))
         {
             stop(paste("Country name not valid. Check availability/spelling, i.e. try if it works with: map('worldHires,'",extent, "'), or use 'search4map('pattern')' function", sep = ""))
         }
@@ -393,10 +393,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
        
         if (is.na(proj4string(spos)))
         {
-            proj4string(spos) <- proj4string(sr) # MODIS:::sr
+            proj4string(spos) <- proj4string(MODIS:::sr) # MODIS:::sr
         }
          
-        selected <- sr[spos,] # == rgeos:::over() # MODIS:::sr 
+        selected <- MODIS:::sr[spos,] # == rgeos:::over() # MODIS:::sr 
         
         tileH  <- unique(as.numeric(selected@data$h))
         tileV  <- unique(as.numeric(selected@data$v))

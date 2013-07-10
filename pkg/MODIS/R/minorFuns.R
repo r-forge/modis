@@ -185,7 +185,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                 cat("Checking availabillity of GDAL:\n")
             }
 
-            cmd      <- paste0(opts$gdalPath,'gdalinfo --version',collapse="/")            
+            cmd      <- paste0(opts$gdalPath,'gdalinfo --version')            
             gdaltext <- try(system(cmd,intern=TRUE),silent=TRUE)
                          
             if (inherits(gdaltext,"try-error"))
@@ -254,7 +254,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                   
                     if(MODIS:::checkGdalDriver(osg))
                     {                  
-                        cat("Found 'OSgeo4W' version: '", osgV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
+                        cat("Found 'OSgeo4W' version: '", osgV,"' to enable this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
                         minone <- TRUE
                     } else 
                     {
@@ -299,13 +299,9 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
 #  {
       opt <- MODIS:::combineOptions(...)    
 #  }
-  if(!isTRUE(opt$gdalOk))
-  {
-    stop("Gdal is not properly configured or installed, see '?MODISoptions' for more informations")
-  }
   
   out     <- file.exists(opt$outDirPath)
-  outfile <- paste0(opt$auxPath,"/gdalOutDriver.RData")
+  outfile <- paste0(opt$outDirPath,".auxiliaries/gdalOutDriver.RData")
   god     <- file.exists(outfile)
   
   if (god)
@@ -352,7 +348,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
       
       if (length(ind)!=0)
       {
-        extension[i] <- MODIS:::getExtension(name[ind])
+        extension[i] <- MODIS:::getExtension(name[ind],gdalPath = opt$gdalPath)
       }
     }
     if(!quiet)
@@ -366,7 +362,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
       message('The \'MODIS\' processing output location \'',normalizePath(opt$outDirPath,"/",FALSE),'\' does not exist, should it be created here? Or see in \'?MODISoptions\' to select another location')
     } else
     {
-      setPath(opt$auxPath,ask=FALSE)
+      setPath(paste0(opt$outDirPath,".auxiliaries"),ask=FALSE)
     }
     
     if(file.exists(opt$auxPath))
@@ -378,7 +374,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
 }
 
 
-getExtension <- function(dataFormat)
+getExtension <- function(dataFormat,...)
 {
   if(toupper(dataFormat) %in% c("HDF-EOS","HDF4IMAGE")) # MRT + GDAL
   {
@@ -400,7 +396,7 @@ getExtension <- function(dataFormat)
     return(".mpr") # is this ok?
   } else 
   {
-    gdalPath <- MODIS:::combineOptions()$gdalPath
+    gdalPath <- MODIS:::combineOptions(...)$gdalPath
     cmd <- paste0(gdalPath,'gdalinfo --format ')
     
     if(.Platform$OS.type=="unix")
@@ -652,12 +648,16 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
     opts <- MODIS:::combineOptions(...)
     opts$stubbornness <- MODIS:::stubborn(opts$stubbornness)
 
+    iw   <- options()$warn 
+    options(warn=-1)
+    on.exit(options(warn=iw))
+
     out <- rep(NA,length=length(x))
     
     for (a in seq_along(x))
     {  # a=1
         path <- MODIS:::genString(x[a],...)
-        MODIS:::setPath(path$localPath) 
+        path$localPath <- correctPath(MODIS:::setPath(path$localPath)) 
         
         hv <- 1:length(path$remotePath)
         hv <- rep(hv,length=opts$stubbornness)
@@ -666,7 +666,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
         {     
           if (!quiet)
           {
-              cat("Getting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
+              cat("\nGetting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
           }
           
 #          if(.Platform$OS=="windows")
@@ -677,7 +677,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
               destfile <- paste0(path$localPath,x[a])
 #          }
             
-          try(out[a] <- download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+          out[a] <- try(download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
       
           if (is.na(out[a])) {cat("File not found!\n"); unlink(destfile); break} # if NA then the url name is wrong!
           if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
@@ -785,12 +785,24 @@ getNa <- function(x)
   options(warn=-1)
   on.exit(options(warn=iw))
   
+  gdalPath <- MODIS:::correctPath(gdalPath)
+  
+  cmd <- paste0(gdalPath,"gdalinfo ")
+  
   for (i in seq_along(x))
   {
-    tmp    <- system(paste0(gdalPath,"gdalinfo '", MODIS:::correctPath(x[i],isFile=TRUE),"'"),intern=TRUE)
-    res[i] <- as.numeric(strsplit(grep(tmp,pattern="NoData Value=",value=TRUE),"=")[[1]][2])
-    nam    <- strsplit(x[i],":")[[1]] 
-    name[[i]] <- nam[length(nam)]
+    tmp    <- system(paste0(cmd,shQuote(x[i])),intern=TRUE)
+    tmp    <- grep(tmp,pattern="NoData Value=",value=TRUE)
+    if (length(tmp)!=0)
+    {
+        res[i] <- as.numeric(strsplit(tmp,"=")[[1]][2])
+    } else
+    {
+        res[i] <- NULL
+    }
+        nam    <- strsplit(x[i],":")[[1]] 
+        name[[i]] <- nam[length(nam)]
+    
   }
   names(res) <- unlist(name)
   return(res)
@@ -798,20 +810,20 @@ getNa <- function(x)
 
 correctPath <- function(x,isFile=FALSE)
 {
-    if(!is.null(x))
+  if(!is.null(x))
+  {
+    if (.Platform$OS.type=="windows")
     {
-        if (.Platform$OS.type=="windows")
-        {
-            x <- gsub(shortPathName(normalizePath(x,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
-        } else
-        {
-            x <- path.expand(x)
-        }
-        if (substr(x,nchar(x),nchar(x))!="/" & !isFile)
-        {
-            x <- paste0(x,"/") 
-        }
+      x <- gsub(shortPathName(normalizePath(x,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
+    } else
+    {
+      x <- path.expand(x)
     }
+    if (substr(x,nchar(x),nchar(x))!="/" & !isFile)
+    {
+      x <- paste0(x,"/") 
+    }
+  }
 return(x)
 }
 

@@ -231,7 +231,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   
   if(checkPackages & opt$gdalOk)
   {
-    opt$gdalOutDriver <- gdalWriteDriver(renew = FALSE, quiet = FALSE, opt)
+    opt$gdalOutDriver <- gdalWriteDriver(renew = FALSE, quiet = FALSE, gdalPath=opt$gdalPath,outDirPath=opt$outDirPath)
   }
   
   if (save)
