@@ -46,7 +46,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     #### settings with messages
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent is a Raster object.
     
-    if (product$TYPE=="Tile")
+    if (product$TYPE[1]=="Tile")
     {
         extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
     } else
@@ -84,16 +84,16 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     
     if (opts$outProj == "asIn")
     {
-        if (product$SENSOR=="MODIS")
+        if (product$SENSOR[1]=="MODIS")
         {
-            if (product$TYPE=="Tile")
+            if (product$TYPE[1]=="Tile")
             {
                 opts$outProj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
             } else 
             {
                 opts$outProj <- "+proj=longlat +ellps=clrk66 +no_defs"
             }
-        } else if (product$SENSOR=="SRTM")
+        } else if (product$SENSOR[1]=="SRTM")
         {
             opts$outProj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
         } 
@@ -112,16 +112,16 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         
     t_srs <- paste(' -t_srs \"',opts$outProj,'\"',sep='')
     
-    if (product$SENSOR=="MODIS")
+    if (product$SENSOR[1]=="MODIS")
     {
-        if (product$TYPE=="Tile")
+        if (product$TYPE[1]=="Tile")
         {
             s_srs <- ' -s_srs \"+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs\"'
         } else 
         {
             s_srs <- ' -s_srs \"+proj=longlat +ellps=clrk66 +no_defs\"'
         }
-    } else if (product$SENSOR=="SRTM")
+    } else if (product$SENSOR[1]=="SRTM")
     {
         s_srs <- ' -s_srs \"+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0\"'
     }
