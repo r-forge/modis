@@ -5,12 +5,11 @@
  
 repDoy <- function(pixX, layerDate = NULL, bias = 0)
 {	
-
-    if (is.null(layerDate))
-    {
-        layerDate <- extractDate(colnames(pixX),asDate=TRUE)    
-    }	
-	if (layerDate$asDate)
+  if (is.null(layerDate))
+  {
+    layerDate <- extractDate(colnames(pixX),asDate=TRUE)    
+  }	
+	if (layerDate$call$asDate)
 	{
 	    layerDoy  <- format(layerDate$inputLayerDates,"%j")
         layerYear <- format(layerDate$inputLayerDates,"%Y")
@@ -31,15 +30,15 @@ repDoy <- function(pixX, layerDate = NULL, bias = 0)
 	m1 <- pixX[ pixX <= 0 ]
 	#layerDoy  <- matrix(layerDoy, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
 	mask <- pixX - as.numeric(layerDoy)
-    mask <- sign(mask)==-1
+  mask <- sign(mask)==-1
 	
 	ndays <- as.numeric(format(as.Date(paste(layerYear,"-12-31",sep="")),"%j"))
-	bias1  <- matrix(ndays, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
+	bias1 <- matrix(ndays, ncol = ncol(pixX), nrow = nrow(pixX), byrow=FALSE)
 	
 	pixX[mask] <- pixX[mask] + bias1[mask]  
 	
 	ndays <- as.numeric(format(as.Date(paste(unique(layerYear),"-12-31",sep="")),"%j"))
-    bias1  <- cumsum(ndays) - min(ndays)
+  bias1  <- cumsum(ndays) - min(ndays)
 	
 	counter <- as.numeric(table(layerYear))
 	

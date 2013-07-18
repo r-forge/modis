@@ -89,17 +89,19 @@ checkResamplingType <- function(resamplingType,tool,quiet=FALSE)
 }
 
 # checks validity of outProj and returns for tool="MRT" the short name (see mrt manual) and in case of "GDAL" the prj4 string!
-checkOutProj <- function(outProj, tool, quiet=FALSE)
+checkOutProj <- function(proj, tool, quiet=FALSE)
 {
   tool <- toupper(tool)
   if (!tool %in% c("GDAL", "MRT"))
   {
     stop("checkOptProj Error: Unknown 'tool'. Allowed are 'MRT' or 'GDAL'")
   }
-  if(outProj=="asIn") # lot of troubles because of this!
+  
+  if(proj=="asIn") # lot of troubles because of this!
   {
-    return(outProj)
+    return(proj)
   }
+  
   # this is here because we could think in a conversion between GDAL and MRT inputs! (the available in MRT is the limiting factor)
   MRTprojs <- matrix(byrow=T,ncol=2,
   c("AEA", "Albers Equal Area", "ER", "Equirectangular", "GEO", "Geographic", 
@@ -108,19 +110,47 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
   "MERCAT", "Mercator", "MOL", "Molleweide", "PS", "Polar Stereographic", 
   "SIN", "Sinusoidal", "TM", "Transverse Mercator", "UTM", "Universal Transverse Mercator"),
   dimnames=list(NULL,c("short","long")))
-  
+
   if (tool=="GDAL") # EPRS:xxxx or xxxx or "+proj=sin...." 
   { # EPSGinfo is lazy loaded (see: minorFuns.R)
-    if(!inherits(outProj,"CRS"))
+    require(rgdal)
+    
+    inW <- getOption("warn")
+    on.exit(options(warn=inW))
+    options(warn=-1)
+    
+    if(proj %in% MRTprojs)
     {
-      outProj <- CRS(gsub(outProj,pattern="^EPSG:",replacement="+init=epsg:"))@projargs
-      return(outProj)
+      if (toupper(proj) %in% c("GEO","GEOGRAPHIC"))
+      { 
+          proj <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")@projargs
+      } else if (toupper(proj) %in% c("SIN","SINUSOIDAL"))
+      {
+          proj <- CRS("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")@projargs
+      } else
+      {
+        stop("Could not convert 'outProj' argunemt",proj, "to a sp:::CRS compatible string!")
+      }
+    } else if(!is.na(as.numeric(proj)))
+    {
+      proj <- CRS(paste0("+init=epsg:",proj))@projargs
+    } else if(length(grep(proj,pattern="EPSG:",ignore.case=TRUE))==1)
+    {
+      proj <- CRS(gsub(proj,pattern="^EPSG:",replacement="+init=epsg:", ignore.case=TRUE))@projargs      
+    } else if (inherits(proj,"CRS"))
+    {
+      proj <- proj@projargs
+    } else
+    {
+      options(warn=inW) # here warning is usefull
+      proj <- CRS(proj)@projargs
     }
+    return(proj)
   }
   
   if (tool == "MRT")
   {
-    ind <- grep(MRTprojs,pattern=paste("^",outProj,"$",sep=""),ignore.case=TRUE)
+    ind <- grep(MRTprojs,pattern=paste("^",proj,"$",sep=""),ignore.case=TRUE)
     
     if(length(ind)==0)
     {
@@ -146,7 +176,7 @@ checkOutProj <- function(outProj, tool, quiet=FALSE)
 # returns 0 if a given GDAL supports HDF4 else 1 
 checkGdalDriver <- function(path=NULL)
 {
-  inW <- options()$warn
+  inW <- getOption("warn")
   on.exit(options(warn=inW))
   options(warn=-1)
   
@@ -164,7 +194,8 @@ checkGdalDriver <- function(path=NULL)
     
   if (class(driver) == "try-error")
   {
-    warning("No gdal installation found please install 'gdal-bin' on your system first!")
+    options(warn=inW)
+    warning("No gdal installation found please install 'gdal' on your system first!")
     return(FALSE)
   }
     
@@ -193,14 +224,15 @@ combineOptions <- function(...)
     opts <- opts[grep(names(opts),pattern="^MODIS_*.")] # isolate MODIS_opts
   }
   names(opts) <- gsub(names(opts),pattern="MODIS_",replacement="") # convert names to function arg style 
-  Fopts <- list(...) # collects fun args
   
-  # replace 'opts' with 'Fopts'
-  if (!is.null(Fopts))
+  Fopts <- list(...) # collects fun args
+  if (length(Fopts)==0)
   {
-    opts <- c(Fopts, opts[(!names(opts) %in% names(Fopts))])
+    Fopts <- NULL
   }
-return(opts)
+  
+  opts <- c(Fopts, opts[(!names(opts) %in% names(Fopts))])
+  return(opts)
 }
 
 

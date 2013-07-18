@@ -140,10 +140,10 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
             # mapping 
             if (isTRUE(asMap)|tolower(asMap)=="both")
             {
-                if (!(require(maptools)))
-                {
-                    stop("Please install maptools package: install.packages('maptools')")
-                }
+#                if (!(require(maptools)))
+#                {
+#                    stop("Please install maptools package: install.packages('maptools')")
+#                }
                 
                 if (!(require(mapdata)))
                 {
@@ -181,8 +181,9 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
                 proj4string(yax) <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"                               
                 
                 globe$x[!is.na(globe$x) & globe$x > 180] <- 180
-                                 
-                globe <- map2SpatialLines(globe)
+                
+                # m2SL is maptools:::map2spatialLines, see getTile.R                  
+                globe <- m2SL(globe)
 
                 #invisible(set_ll_warn(TRUE)) # shouldn't be necessary becaus of the trimming
                 #iwa <- options()$warn

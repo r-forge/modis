@@ -1,9 +1,9 @@
 Package: MODIS
-Version: 0.9-13
-Date: 10-July-2013
+Version: 0.9-14
+Date: 18-July-2013
 Title: MODIS acquisition and processing package
 Depends: R (>= 2.10), utils, raster
-Suggests: RCurl, rgeos, rgdal, bitops, mapdata, maptools, SSOAP, XML, XMLSchema, snow, ptw
+Suggests: RCurl, rgeos, rgdal, bitops, mapdata, SSOAP, XML, XMLSchema, snow, ptw
 Author: Matteo Mattiuzzi, Jan Verbesselt, Forrest Stevens, Steven Mosher, Tomislav Hengl, Anja Klisch, Bradley Evans and Agustin Lobo
 Maintainer: Matteo Mattiuzzi <matteo.mattiuzzi@boku.ac.at> 
 Description: Downloading and processing functionalities for the Moderate Resolution Imaging Spectroradiometer (MODIS). The package provides automated access to the global online data archives (LPDAAC and LAADS) an processing capabilities for this data. 

@@ -49,17 +49,17 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
     
     if(!inherits(vi,"Raster")) 
     {
-        vi <- stack(vi)
+        vi <- raster:::.quickStack(vi)
     }
     
     if(!inherits(w,"Raster") & !is.null(w)) 
     {
-        w <- stack(w)
+        w <- raster:::.quickStack(w)
     }
 
     if(!inherits(t,"Raster") & !is.null(t)) 
     {
-        t <- stack(t)
+        t <- raster:::.quickStack(t)
     }
     
     if(collapse)
@@ -202,7 +202,7 @@ clFun <- function(l)
     if (inherits(t,"Raster"))
     {
         inTu <- getValues(t, row=tr$row[l], nrows=tr$nrows[l])
-        inTu <- repDoy(inTu,timeInfo,bias=timeInfo$inSeq[1]-1)
+        inTu <- repDoy(inTu,layerDate=timeInfo,bias=timeInfo$inSeq[1]-1)
         inTu <- t(inTu)
         set0[ inTu <= 0 ] <- TRUE
         set0[is.na(inTu)] <- TRUE

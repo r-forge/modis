@@ -205,12 +205,7 @@ detectBitInfo <- function(product, what='all',warn=TRUE)
     {
         stop()
     } 
-    
-    if(exists("info"))
-    {
-        rm(info)
-    }  
-      
+          
     try(info <- eval(parse(text=paste("MODIS:::",prodinfo,"_QC",sep=""))),silent=TRUE)
     
     if(exists("info"))

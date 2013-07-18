@@ -224,7 +224,6 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
 
                     for (i in 1:nrow(dates[[l]]))
                     { # i=1
-                        
                         cat(dates[[l]][i,1],"\n")
                         flush.console()
                         
