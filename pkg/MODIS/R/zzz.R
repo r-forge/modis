@@ -14,5 +14,3 @@
 	#packageStartupMessage("MODIS_manual: http://ivfl-arc.boku.ac.at/owncloud/public.php?service=shorty_relay&id=QR5FZSxe0g")
 }
 
-
-
