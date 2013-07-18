@@ -210,7 +210,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
         {
             if (!quiet)
             {
-                cat("Checking availabillity of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
+                cat("Checking availability of 'FWTools/OSGeo4W' (GDAL with HDF4 support for Windows):\n")    
             }
             
             cmd <- paste0(opts$gdalPath,'gdalinfo --version')            
