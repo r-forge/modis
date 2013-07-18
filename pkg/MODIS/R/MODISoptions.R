@@ -76,7 +76,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   {
     localArcPath <- path.expand(localArcPath) 
   
-    if (!file.exists(opt$localArcPath))
+    if (length(list.dirs(opt$localArcPath))==0)
     {
       message("'localArcPath' does not exist, it will be created in '",localArcPath,"'")               
     } else if (opt$localArcPath != localArcPath)
@@ -87,7 +87,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$localArcPath <- localArcPath
   } else
   {
-    if (!file.exists(opt$localArcPath))
+    if (length(list.dirs(opt$localArcPath))==0)
     {
       if(!isTRUE(options()$MODIS_localArcPathWarned))
       {
@@ -104,7 +104,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   {
     outDirPath <- path.expand(outDirPath)
     
-    if (!file.exists(opt$outDirPath))
+    if (length(list.dirs(opt$outDirPath))==0)
     {
       message("'outDirPath' does not exist and will be created in '",outDirPath,"'")               
     } else if (opt$outDirPath != outDirPath)
@@ -115,7 +115,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$outDirPath <- outDirPath
   } else
   {
-    if (!file.exists(opt$outDirPath))
+    if (length(list.dirs(opt$outDirPath))==0)
     {
       if(!isTRUE(options()$MODIS_outDirPathWarned))
       {
@@ -125,7 +125,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }    
   }
   # auxPath (hard coded)
-  opt$auxPath <- path.expand(paste(opt$outDirPath,"/.auxiliaries",sep=""))
+  opt$auxPath <- path.expand(paste0(opt$outDirPath,"/.auxiliaries"))
   
   if(.Platform$OS=="windows")# does this help?
   {
@@ -164,23 +164,16 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   
   if (!missing(gdalPath))
   {
-    if(!exists("gdalPath")) # this can happen on Windows by using single backslash...I hope this solves the problem! 
+    opt$gdalPath <- correctPath(gdalPath)
+    if(length(grep(dir(opt$gdalPath),pattern="gdalinfo"))==0)
     {
-      if(.Platform$OS=="unix")
-      {
-        stop("Your 'gdalPath' is not ok. Use single forward slash!")
-      } else
-      {
-        stop("Your 'gdalPath' is not ok. Use single forward or double backward slash!")
-      }
-    } else
-    {
-        opt$gdalPath <- gdalPath
+        stop("The 'gdalPath' you have provided does not contain any gdal utilities, make sure to address the folder with GDAL executables (ie: gdalinfo)!")
     }
   }
   opt$gdalPath <- correctPath(opt$gdalPath)
+  options(MODIS_gdalPath=opt$gdalPath)# required by checkTools a few lines bellow (uses combineOptions())! Maybe not the best solution!
   
-  # checks if the pointed GDAL exists and supports 'HDF4Image' driver. 
+  # checks if the pointed GDAL exists and supports 'HDF4Image' driver.
   if(checkPackages)
   {
     # GDAL
@@ -240,7 +233,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     filename <- file(optfile, open="wt")
     
     write(paste('# This file contains ', whose,' default values for the R package \'MODIS\'.',sep=""), filename)
-    write('# version 0.8-13', filename)
+    write('# version 0.9-14', filename)
     write('# consult \'?MODISoptions\' for details and explanations', filename)
     write('  ', filename)
     write('#########################', filename)
@@ -284,7 +277,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('# consult \'?MODISoptions\' for more details', filename)        
     write('# Run: \'MODIS:::.checkTools()\' to try to autodetect.', filename)
     write('# Example (USE SINGLE FORWARD SLASH \'/\'!):', filename)
-    write('# gdalPath <- \'C:/OSGeo4W/bin\'', filename)
+    write('# gdalPath <- \'C:/OSGeo4W/bin/\'', filename)
     write('  ', filename)
     if (!is.null(opt$gdalPath))
     {
