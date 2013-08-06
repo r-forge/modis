@@ -119,7 +119,7 @@ checkOutProj <- function(proj, tool, quiet=FALSE)
     on.exit(options(warn=inW))
     options(warn=-1)
     
-    if(toupper(proj) %in% MRTprojs)
+    if(toupper(proj) %in% toupper(MRTprojs))
     {
       if (toupper(proj) %in% c("GEO","GEOGRAPHIC"))
       { 
