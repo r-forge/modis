@@ -550,7 +550,7 @@ defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
 
 checkDeps <- function()
 {
-    needed <- c('RCurl', 'rgeos', 'XMLSchema', 'rgdal', 'maps', 'mapdata', 'snow', 'ptw', 'SSOAP', 'XML')
+    needed <- c('RCurl', 'rgeos', 'rgdal', 'maps', 'mapdata', 'snow', 'ptw', 'XML')
     if (all(needed %in% installed.packages()[,1]))
     {
         out <- "All suggested packages are installed"
@@ -558,7 +558,7 @@ checkDeps <- function()
         missingP <- !needed %in% installed.packages()[,1]
         missingP <- paste0(needed[missingP],collapse="', '")
 
-        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\nXMLSchema and SSOAP are required only for *WS functions!\n")
+        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\n\n")
     }
 out
 }

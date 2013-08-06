@@ -351,7 +351,7 @@ mapSelect <- function(zoom=TRUE)
     stop("For interactive TILE selection you need to install the 'mapdata' package: install.packages('mapdata')")
   }
     
-  x11(width=9,height=7)
+  dev.new(width=9,height=7)
   map("worldHires")
   map.axes() 
   grid(36,18,col="blue",lwd=0.5)
