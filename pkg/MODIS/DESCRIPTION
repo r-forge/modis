@@ -1,5 +1,5 @@
 Package: MODIS
-Version: 0.10-0
+Version: 0.10-1
 Date: 6-August-2013
 Title: MODIS acquisition and processing package
 Depends: R (>= 2.10), utils, raster

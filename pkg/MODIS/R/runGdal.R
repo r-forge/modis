@@ -184,10 +184,10 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         if (is.null(job))
         {
           job <- paste0(todo[1],"_",format(Sys.time(), "%Y%m%d%H%M%S"))    
-          cat("Output directory = ",normalizePath(paste(opts$outDirPath,job,sep="/"),"/",mustWork=FALSE)," (no 'job' name specified, generated (date/time based))\n")
+          cat("Output directory = ",paste(normalizePath(opts$outDirPath,"/",mustWork=FALSE),job,sep="/")," (no 'job' name specified, generated (date/time based))\n")
         } else
         {
-          cat("Output Directory = ",normalizePath(paste(opts$outDirPath,job,sep="/"),"/",mustWork=FALSE),"\n")
+          cat("Output Directory = ",paste(normalizePath(opts$outDirPath,"/",mustWork=FALSE),job,sep="/"),"\n")
         }
         cat("########################\n")
         

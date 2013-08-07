@@ -70,8 +70,8 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             MODIS:::getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
             #getStruc(product=product,server="LAADS",begin=tLimits$begin,end=tLimits$end,wait=0)
             ftpdirs <- list()
-            ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
-            #ftpdirs[[2]] <- read.table(file.path(opts$auxPath,"LAADS_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            ftpdirs[[1]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
+            #ftpdirs[[2]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
 
         } else if (product$SENSOR=="C-Band-RADAR")
         {
