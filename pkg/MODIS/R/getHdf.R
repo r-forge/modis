@@ -175,8 +175,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
     dates  <- list()
     output <- list() # path info for the invisible output
     l=0
-    
-    
+       
     for(z in seq_along(product$PRODUCT))
     { # Platforms MOD/MYD
 

@@ -36,7 +36,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
     if (!file.exists(paste0(opts$auxPath,server,"_ftp.txt")))
     {
       opts$auxPath <- MODIS:::setPath(opts$auxPath)
-      invisible(file.copy(file.path(find.package('MODIS'),'external',paste(server,"_ftp.txt",sep="")),file.path(opts$auxPath,paste(server,"_ftp.txt",sep=""),fsep="/")))
+      invisible(file.copy(file.path(find.package('MODIS'),'external',paste0(server,"_ftp.txt")),paste0(opts$auxPath,server,"_ftp.txt")))
     }
     ftpdirs <- read.table(paste0(opts$auxPath,server,"_ftp.txt"),stringsAsFactors=FALSE)
     

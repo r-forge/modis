@@ -657,7 +657,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
     for (a in seq_along(x))
     {  # a=1
         path <- MODIS:::genString(x[a],...)
-        path$localPath <- correctPath(MODIS:::setPath(path$localPath)) 
+        path$localPath <- MODIS:::setPath(path$localPath)
         
         hv <- 1:length(path$remotePath)
         hv <- rep(hv,length=opts$stubbornness)
@@ -708,7 +708,7 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
         } else
         { 
             path <- MODIS:::genString(x[a],...)
-            MODIS:::setPath(path$localPath) 
+            path$localPath <- MODIS:::setPath(path$localPath) 
             
             hv <- 1:length(path$remotePath)
             hv <- rep(hv,length=opts$stubbornness)
@@ -756,23 +756,21 @@ setPath <- function(path, ask=FALSE, showWarnings=FALSE)
   
   if(!file.exists(path)) 
   {
+    doit <- 'Y'
     if (ask)
     {
       doit <- toupper(readline(paste0(path," does not exist, should it be created? [y/n]: ")))
-    } else 
-    {
-      doit <- 'Y'
-    }  
+    }
     
     if  (doit %in% c("Y","YES"))
     {
       stopifnot(dir.create(path, recursive = TRUE, showWarnings = showWarnings))
     } else
     {
-      path <- "Path not set, use ?MODISoptions to configure it"          
+      stop("Path not set, use ?MODISoptions to configure it")          
     }
   }
-  path    
+  return(MODIS:::correctPath(path))    
 }
 
 # get NA values from getSds(x)$SDS4gdal

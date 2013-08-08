@@ -68,7 +68,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                     }
                 }
             }
-        localPath <- MODIS:::setPath(path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/")))
+        localPath <- MODIS:::setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
         }
         if (remote) 
         {
@@ -149,7 +149,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
             } 
-        localPath <- MODIS:::setPath(path.expand(paste(opts$localArcPath,paste(unlist(string),sep="",collapse="/"),sep="/")))
+        localPath <- MODIS:::setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
         }
 
         if (remote) 

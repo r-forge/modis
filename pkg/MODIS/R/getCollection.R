@@ -21,7 +21,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
         stop("Unknown product")
     }
     # load aux
-    if (!file.exists(file.path(opts$auxPath,"collections.RData",fsep="/"))) # on the very first call use the delivered pre-updated version    
+    if (!file.exists(paste0(opts$auxPath,"collections.RData"))) # on the very first call use the delivered pre-updated version    
     {
         opts$auxPath <- MODIS:::setPath(opts$auxPath)
         invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(opts$auxPath,"collections.RData",fsep="/")))
