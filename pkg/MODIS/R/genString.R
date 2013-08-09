@@ -80,7 +80,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
             for (e in Hmany)
             {
        
-                stringX <- MODIS_FTPinfo[[e]]
+                stringX <- MODIS:::MODIS_FTPinfo[[e]]
                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {

@@ -268,8 +268,8 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             
                             for (g in 1:sturheit)
                             { # get list of FILES in remote dir
-                                server <- c("LAADS","LPDAAC")[g%%length(path$remotePath)+1]
-                                try(ftpfiles <- MODIS:::filesUrl(path$remotePath[[server]]),silent=TRUE)
+                                server <- names(path$remotePath)[g%%length(path$remotePath)+1]
+                                ftpfiles <- try(MODIS:::filesUrl(path$remotePath[[server]]),silent=TRUE)
                                 
                                 if(ftpfiles[1]==FALSE)
                                 {
