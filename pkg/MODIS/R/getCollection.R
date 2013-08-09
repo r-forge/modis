@@ -7,7 +7,6 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 {
 
     opts <- combineOptions()
-    opts$auxPath <- paste(opts$localArcPath,"/.auxiliaries",sep="")
 
     ####
     # checks for product
@@ -27,7 +26,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
         invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(opts$auxPath,"collections.RData",fsep="/")))
         unlink(file.path(opts$auxPath,"collections.txt",fsep="/"))
     }
-    load(file.path(opts$auxPath,"collections.RData",fsep="/"))
+    load(paste0(opts$auxPath,"collections.RData"))
     
     # clean file
     MODIS <- ftpdirs[,grep(colnames(ftpdirs),pattern="M.D")]

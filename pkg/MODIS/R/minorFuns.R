@@ -286,34 +286,37 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
 }
 
 
-# get gdal wtrite formats (driver name, 'long name' and extension)
+# get gdal write formats (driver 'name', 'long name' and 'extension')
 gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
 {
   iw   <- options()$warn 
   options(warn=-1)
   on.exit(options(warn=iw))
-  
-#  opt <- try(as.list(...),silent=TRUE)
-#  
-#  if(class(opt) == 'try-error'| !exists('opt')) # this is in order to use the function outside the MODISoptions process
-#  {
-      opt <- MODIS:::combineOptions(...)    
-#  }
-  
-  out     <- file.exists(opt$outDirPath)
+
+  opt     <- MODIS:::combineOptions(...)
+     
   outfile <- paste0(opt$outDirPath,".auxiliaries/gdalOutDriver.RData")
-  god     <- file.exists(outfile)
   
-  if (god)
+  if (!is.null(getOption("MODIS_gdalOutDriver")))
+  {
+    gdalOutDriver <- getOption("MODIS_gdalOutDriver")
+  } else if(file.exists(outfile))
   {
     load(outfile)
+  }  
+  
+  if(exists("gdalOutDriver"))
+  {
     if (nrow(gdalOutDriver)<5)
     {
       renew <- TRUE
     }
+  } else
+  {
+    renew <- TRUE
   }
-  
-  if ((renew & god) | !god)
+
+  if (renew)
   {
     if(!quiet)
     {
@@ -357,12 +360,11 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
     }
     gdalOutDriver <- data.frame(name=name[!is.na(extension)], description=description[!is.na(extension)], extension=extension[!is.na(extension)], stringsAsFactors=FALSE)        
     
-    if (!out)
+    opt$outDirPath <- setPath(opt$outDirPath,ask=TRUE)
+    
+    if(file.exists(opt$outDirPath))
     {
-      message('The \'MODIS\' processing output location \'',normalizePath(opt$outDirPath,"/",FALSE),'\' does not exist, should it be created here? Or see in \'?MODISoptions\' to select another location')
-    } else
-    {
-      setPath(paste0(opt$outDirPath,".auxiliaries"),ask=FALSE)
+      opt$auxPath <- setPath(paste0(opt$outDirPath,".auxiliaries"),ask=FALSE)
     }
     
     if(file.exists(opt$auxPath))
@@ -809,7 +811,7 @@ getNa <- function(x)
 correctPath <- function(x,isFile=FALSE)
 {
   if(!is.null(x))
-  {
+  {  
     if (.Platform$OS.type=="windows")
     {
       x <- gsub(shortPathName(normalizePath(x,winslash="/",mustWork=FALSE)),pattern="\\\\",replacement="/")
