@@ -243,38 +243,45 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                  ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension,sep="")
                 
               gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
-                 
-              srcnodata <- paste0(" -srcnodata ",NAS[[i]])
-              dstnodata <- paste0(" -dstnodata ",NAS[[i]])
+              
+              if(sum(names(NAS) %in% SDS[[1]]$SDSnames) > 0)
+              {
+                srcnodata <- paste0(" -srcnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
+                dstnodata <- paste0(" -dstnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
+              } else
+              {
+                srcnodata <- NULL
+                dstnodata <- NULL 
+              }
                 
-                 if (.Platform$OS=="unix")
-                 {
-                   ifile <- paste0(gdalSDS,collapse="' '")
-                   ofile <- paste0(outDir, '/', outname)
-                   cmd   <- paste0(opts$gdalPath,
-                         "gdalwarp",
-                             s_srs,
-                             t_srs,
-                             of,
-                             te,
-                             tr,
-                             cp,
-                             bs,
-                             rt,
-                             q,
-                             srcnodata,
-                             dstnodata,
-                             " -overwrite",
-                             " -multi",
-                             " \'", ifile,"\'",
-                             " ",
-                             ofile
-                             )
-                   cmd <- gsub(x=cmd,pattern="\"",replacement="'")
-                   system(cmd)
+              if (.Platform$OS=="unix")
+              {
+                ifile <- paste0(gdalSDS,collapse="' '")
+                ofile <- paste0(outDir, '/', outname)
+                cmd   <- paste0(opts$gdalPath,
+                      "gdalwarp",
+                          s_srs,
+                          t_srs,
+                          of,
+                          te,
+                          tr,
+                          cp,
+                          bs,
+                          rt,
+                          q,
+                          srcnodata,
+                          dstnodata,
+                          " -overwrite",
+                          " -multi",
+                          " \'", ifile,"\'",
+                          " ",
+                          ofile
+                          )
+                cmd <- gsub(x=cmd,pattern="\"",replacement="'")
+                system(cmd)
                     
-                 } else # windows
-                 {
+              } else # windows
+              {
                   cmd <- paste0(opts$gdalPath,"gdalwarp")
                
                   # ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')

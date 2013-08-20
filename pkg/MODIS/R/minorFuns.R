@@ -795,16 +795,18 @@ getNa <- function(x)
     tmp    <- grep(tmp,pattern="NoData Value=",value=TRUE)
     if (length(tmp)!=0)
     {
-        res[i] <- as.numeric(strsplit(tmp,"=")[[1]][2])
+        res[[i]] <- as.numeric(strsplit(tmp,"=")[[1]][2])
     } else
     {
-        res[i] <- NULL
+        res[[i]] <- "NO"
     }
         nam    <- strsplit(x[i],":")[[1]] 
         name[[i]] <- nam[length(nam)]
-    
+  
   }
+  
   names(res) <- unlist(name)
+  res[res=="NO"] <- NULL
   return(res)
 }
 
