@@ -2,8 +2,9 @@
 runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, tileH=NULL, tileV=NULL, buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)
 {
     opts    <- MODIS:::combineOptions(...)
-    funOpts <- list(...)
-    
+    # debug:
+    # opts    <- MODIS:::combineOptions();product="MYD09GQ";collection=NULL; begin='2007.12.03'; end='2007.12.03'; extent=siteExtent; tileH=NULL; tileV=NULL; buffer=0; SDSstring=NULL; job=NULL; checkIntegrity=TRUE; wait=0.5; quiet=FALSE
+          
     if(!opts$gdalOk)
     {
         stop("GDAL not installed or configured, read in '?MODISoptions' for help")
@@ -176,7 +177,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     }
     
     for (z in 1:length(product$PRODUCT))
-    {
+    { # z=1
       todo <- paste(product$PRODUCT[z],".",product$CCC[[product$PRODUCT[z]]],sep="")    
       
       if(z==1)
@@ -184,10 +185,10 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         if (is.null(job))
         {
           job <- paste0(todo[1],"_",format(Sys.time(), "%Y%m%d%H%M%S"))    
-          cat("Output directory = ",paste0(normalizePath(opts$outDirPath,"/",mustWork=FALSE),job)," (no 'job' name specified, generated (date/time based))\n")
+          cat("Output directory = ",paste0(normalizePath(opts$outDirPath,"/",mustWork=FALSE),"/",job)," (no 'job' name specified, generated (date/time based))\n")
         } else
         {
-          cat("Output Directory = ",paste0(normalizePath(opts$outDirPath,"/",mustWork=FALSE),job),"\n")
+          cat("Output Directory = ",paste0(normalizePath(opts$outDirPath,"/",mustWork=FALSE),"/",job),"\n")
         }
         cat("########################\n")
         
@@ -196,7 +197,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
       }
       
       for(u in 1:length(todo))
-      {
+      { # u=1
         MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
         ftpdirs      <- list()
         ftpdirs[[1]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
@@ -216,106 +217,112 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
           avDates <- avDates[us]
                       
           for (l in 1:length(avDates))
-          { 
+          { # l=1
             files <- unlist(
-               getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
+              getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
                tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
             )
-            files <- files[basename(files)!="NA"]
-          
-            w <- options()$warn
-            options("warn"= -1)
-            SDS <- list()
-            for (z in seq_along(files))
-            { # get all SDS names for one chunk
-              SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
-            }
-            options("warn"= w)
-          
-            if (l==1)
+            files <- files[basename(files)!="NA"] # is not a true NA so it need to be like that na not !is.na()
+            
+            if(length(files)>0)
             {
-              NAS <- MODIS:::getNa(SDS[[1]]$SDS4gdal)
-            }
-             
-             for (i in seq_along(SDS[[1]]$SDSnames))
-             {
-              outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
-                 ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension,sep="")
-                
-              gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
-              
-              if(sum(names(NAS) %in% SDS[[1]]$SDSnames) > 0)
-              {
-                srcnodata <- paste0(" -srcnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
-                dstnodata <- paste0(" -dstnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
-              } else
-              {
-                srcnodata <- NULL
-                dstnodata <- NULL 
+              w <- getOption("warn")
+              options("warn"= -1)
+              SDS <- list()
+              for (z in seq_along(files))
+              { # get all SDS names for one chunk
+                SDS[[z]] <- getSds(HdfName=files[z], SDSstring=SDSstring, method="GDAL")
               }
-                
-              if (.Platform$OS=="unix")
+              options("warn"= w)
+            
+              if (!exists("NAS"))
               {
-                ifile <- paste0(gdalSDS,collapse="' '")
-                ofile <- paste0(outDir, '/', outname)
-                cmd   <- paste0(opts$gdalPath,
-                      "gdalwarp",
-                          s_srs,
-                          t_srs,
-                          of,
-                          te,
-                          tr,
-                          cp,
-                          bs,
-                          rt,
-                          q,
-                          srcnodata,
-                          dstnodata,
-                          " -overwrite",
-                          " -multi",
-                          " \'", ifile,"\'",
-                          " ",
-                          ofile
-                          )
-                cmd <- gsub(x=cmd,pattern="\"",replacement="'")
-                system(cmd)
-                    
-              } else # windows
-              {
-                  cmd <- paste0(opts$gdalPath,"gdalwarp")
+                NAS <- MODIS:::getNa(SDS[[1]]$SDS4gdal)
+              }
                
-                  # ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
-                  # ofile <- shortPathName(paste0(normalizePath(outDir), '\\', outname))
-                  ofile <- paste0(outDir, '/', outname)      
-                  ifile <- paste0(gdalSDS,collapse='" "')
+              for (i in seq_along(SDS[[1]]$SDSnames))
+              { # i=1
+                outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
+                   ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension,sep="")
                   
-                  # GDAL < 1.8.0 doesn't support ' -overwrite' 
-                  if(file.exists(ofile))
-                  {
-                    invisible(file.remove(ofile))
-                  }
-                        
-                        shell(
-                           paste(cmd,
-                            s_srs,
-                                    t_srs,
-                                    of,
-                                    te,
-                                    tr,
-                                    cp,
-                                    bs,
-                                    rt,
-                                    q,
-                                    srcnodata,
-                                    dstnodata,
-                                    ' -multi',
-                                    ' \"', ifile,'\"',
-                                    ' \"', ofile,'\"',
-                                sep = '')
-                            ) 
-                        }
-                    }
+                gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
+                
+                if(names(NAS)[i] %in% SDS[[1]]$SDSnames)
+                {
+                  srcnodata <- paste0(" -srcnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
+                  dstnodata <- paste0(" -dstnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
+                } else
+                {
+                  srcnodata <- NULL
+                  dstnodata <- NULL 
                 }
+                  
+                if (.Platform$OS=="unix")
+                {
+                  ifile <- paste0(gdalSDS,collapse="' '")
+                  ofile <- paste0(outDir, '/', outname)
+                  cmd   <- paste0(opts$gdalPath,
+                        "gdalwarp",
+                            s_srs,
+                            t_srs,
+                            of,
+                            te,
+                            tr,
+                            cp,
+                            bs,
+                            rt,
+                            q,
+                            srcnodata,
+                            dstnodata,
+                            " -overwrite",
+                            " -multi",
+                            " \'", ifile,"\'",
+                            " ",
+                            ofile
+                            )
+                  cmd <- gsub(x=cmd,pattern="\"",replacement="'")
+                  system(cmd)
+                      
+                } else # windows
+                {
+                    cmd <- paste0(opts$gdalPath,"gdalwarp")
+                 
+                    # ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
+                    # ofile <- shortPathName(paste0(normalizePath(outDir), '\\', outname))
+                    ofile <- paste0(outDir, '/', outname)      
+                    ifile <- paste0(gdalSDS,collapse='" "')
+                    
+                    # GDAL < 1.8.0 doesn't support ' -overwrite' 
+                    if(file.exists(ofile))
+                    {
+                      invisible(file.remove(ofile))
+                    }
+                          
+                          shell(
+                             paste(cmd,
+                              s_srs,
+                              t_srs,
+                              of,
+                              te,
+                              tr,
+                              cp,
+                              bs,
+                              rt,
+                              q,
+                              srcnodata,
+                              dstnodata,
+                              ' -multi',
+                              ' \"', ifile,'\"',
+                              ' \"', ofile,'\"',
+                             sep = '')
+                            ) 
+                     }
+                  }
+                } else
+                {
+                  warning(paste0("No file found for date: ",avDates[l]))
+                }
+               }
             }
         }
     }
