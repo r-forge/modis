@@ -8,13 +8,13 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
 {
     if (missing(x)) 
     {
-        stop("MODIS:::genString Error: 'x' must be a HDF-file or MODIS-product name!")
+        stop("genString Error: 'x' must be a HDF-file or MODIS-product name!")
     }
 
-    opts <- MODIS:::combineOptions(...)
+    opts <- combineOptions(...)
     remotePath <- localPath <- NULL
     
-    opts$auxPath <- MODIS:::setPath(opts$auxPath)
+    opts$auxPath <- setPath(opts$auxPath)
     
     product <- getProduct(x=x,quiet=TRUE)
     if(length(product$PRODUCT)>1)
@@ -58,7 +58,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                                 }
                             } else 
                             {
-                                tmp[[u]] <- MODIS:::getPart(x=product,s[u])
+                                tmp[[u]] <- getPart(x=product,s[u])
                             }
                         }
                     if (length(tmp)>0)
@@ -68,7 +68,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                     }
                 }
             }
-        localPath <- MODIS:::setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+        localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
         }
         if (remote) 
         {
@@ -80,7 +80,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
             for (e in Hmany)
             {
        
-                stringX <- MODIS:::MODIS_FTPinfo[[e]]
+                stringX <- MODIS_FTPinfo[[e]]
                 
                 if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
                 {
@@ -113,7 +113,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                                         }
                                     } else 
                                     {
-                                        tmp[[u]] <- MODIS:::getPart(x=product,s[u])
+                                        tmp[[u]] <- getPart(x=product,s[u])
                                     }
                                 }                                
                                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")    
@@ -144,12 +144,12 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                     tmp <- list()
                     for (u in 1:length(s))
                     {
-                        tmp[[u]] <- MODIS:::getPart(x=product,s[u])
+                        tmp[[u]] <- getPart(x=product,s[u])
                     }
                 string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                 }
             } 
-        localPath <- MODIS:::setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+        localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
         }
 
         if (remote) 
@@ -186,7 +186,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
                             tmp <- list()
                             for (u in 1:length(s))
                             {
-                                tmp[[u]] <- MODIS:::getPart(x=product,s[u])
+                                tmp[[u]] <- getPart(x=product,s[u])
                             }
                             string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
                         }

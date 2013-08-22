@@ -85,7 +85,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (system == "MODIS")
     {
-      tiltab <- MODIS:::tiletable
+      tiltab <- tiletable
     }
     
     tt  <- tiltab[(tiltab$ih %in% tileH) & (tiltab$iv %in% tileV) & (tiltab$xmin>-999),]
@@ -328,10 +328,10 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
     
     if (is.na(proj4string(spos)))
     {
-      proj4string(spos) <- proj4string(MODIS:::sr) # MODIS:::sr
+      proj4string(spos) <- proj4string(sr) # sr
     }
      
-    selected <- MODIS:::sr[spos,] # == rgeos:::over() # MODIS:::sr 
+    selected <- sr[spos,] # == rgeos:::over() # sr 
     
     tileH  <- unique(as.numeric(selected@data$h))
     tileV  <- unique(as.numeric(selected@data$v))

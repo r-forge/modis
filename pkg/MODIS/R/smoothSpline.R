@@ -90,9 +90,8 @@ smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = 
         # better to be save than sorry:
         clusterEvalQ(cl,require(bitops))
         clusterEvalQ(cl,require(rgdal))
-        clusterEvalQ(cl,require(raster))
         
-        tr <- MODIS:::blockSizeCluster(x)
+        tr <- blockSizeCluster(x)
     }    
 
     cat("Data is in, start processing!\n")
@@ -117,7 +116,7 @@ clFun <- function(l)
         # is it a weight info?
         if(max(wtu) > 1)
         {
-            bits <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+            bits <- detectBitInfo(vi,"VI usefulness",warn=FALSE)
             
             if(is.null(bits))
             {

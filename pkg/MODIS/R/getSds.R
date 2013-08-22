@@ -12,7 +12,7 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     options(warn=-1)
     on.exit(options(warn=iw))
 
-    opts <- MODIS:::combineOptions()
+    opts <- combineOptions()
     
     if (!file.exists(HdfName)) 
     {
@@ -22,11 +22,11 @@ getSds <- function(HdfName,SDSstring=NULL,method="gdal")
     
     HdfName <- HdfName[1]
     
-    checkTool <- MODIS:::checkTools(tool=method,quiet=TRUE)[[method]][[method]]
+    checkTool <- checkTools(tool=method,quiet=TRUE)[[method]][[method]]
     
     if (!checkTool)
     {
-        stop("Method ",method, " does not work. Is ", method," installed properly on your system? Run: 'MODIS:::checkTools()' to check out which metods should work on your system!")
+        stop("Method ",method, " does not work. Is ", method," installed properly on your system? Run: 'checkTools()' to check out which metods should work on your system!")
     }
 
     if (method=="GDAL")

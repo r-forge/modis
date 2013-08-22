@@ -26,9 +26,9 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
         }
     }
     
-    opts <- MODIS:::combineOptions(...)
-    opts$localArcPath <- MODIS:::setPath(opts$localArcPath) 
-    opts$outDirPath   <- MODIS:::setPath(opts$outDirPath) 
+    opts <- combineOptions(...)
+    opts$localArcPath <- setPath(opts$localArcPath) 
+    opts$outDirPath   <- setPath(opts$outDirPath) 
     
     if (opts$outProj == "asIn")
     {
@@ -51,7 +51,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
         ext <- getTile(extent=extent)
     }
 
-    MODIS:::getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0)
+    getStruc(product=product, begin=tLimits$begin, end=tLimits$end, wait=0)
     ftpdirs <- list()
     ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"), stringsAsFactors=FALSE)
     
@@ -61,8 +61,8 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
 
         for(u in seq_along(todo))
         {
-            path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,...)$localPath
-            # path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
+            path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,...)$localPath
+            # path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE)$localPath
             path <- strsplit(path,"/")[[1]]
             path <- paste(path[-length(path)],sep="",collapse="/")
   
@@ -96,15 +96,15 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
                 tileinfo <- ext$tile
             } else if (extent[1]=="global") 
             {
-                tileinfo <- unique(sapply(basename(locDates),function(x){x <- getProduct(x);MODIS:::getPart(x,"TILE")}))
+                tileinfo <- unique(sapply(basename(locDates),function(x){x <- getProduct(x);getPart(x,"TILE")}))
             } else
 			{
                 tileinfo <- ext$tile
 			}
                                  
-            available <- needed <- percent <- rep(0,length(MODIS:::tileNames))
+            available <- needed <- percent <- rep(0,length(tileNames))
             MBperHDF  <- rep(NA,length(available))
-            table     <- data.frame(MODIS:::tileNames,available,needed,percent,MBperHDF)
+            table     <- data.frame(tileNames,available,needed,percent,MBperHDF)
             table[,"needed"] <- length(expected)
             colnames(table)  <- c("tile", "available", "needed", "percent", "MBperHDF")
                             
@@ -131,7 +131,7 @@ arcStats <- function(product, collection=NULL, extent="global", begin="2000.01.0
                     meanSize <- NA 
                 }
                     
-                ind <- which(MODIS:::tileNames==tileinfo[i])
+                ind <- which(tileNames==tileinfo[i])
                 table[ind,"available"] <- n
                 table[ind,"percent"]   <- round(100*(n/length(expected)),2)
                 table[ind,"MBperHDF"]  <- round(meanSize)

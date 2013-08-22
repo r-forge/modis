@@ -22,7 +22,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
     # load aux
     if (!file.exists(paste0(opts$auxPath,"collections.RData"))) # on the very first call use the delivered pre-updated version    
     {
-        opts$auxPath <- MODIS:::setPath(opts$auxPath)
+        opts$auxPath <- setPath(opts$auxPath)
         invisible(file.copy(file.path(find.package("MODIS"), "external","collections.RData"), file.path(opts$auxPath,"collections.RData",fsep="/")))
         unlink(file.path(opts$auxPath,"collections.txt",fsep="/"))
     }
@@ -41,7 +41,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 	        {
 	    	    stop("You need to install the 'RCurl' package: install.packages('RCurl')")
 	        }
-		    sturheit <- MODIS:::stubborn(level=opts$stubbornness)
+		    sturheit <- stubborn(level=opts$stubbornness)
 		    
     		for (i in 1:length(unique(productN$PF1))) 
     		{		

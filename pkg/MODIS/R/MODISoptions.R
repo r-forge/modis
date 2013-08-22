@@ -12,7 +12,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   if(checkPackages)
   {
     # check if all suggested packages are installed:
-    suggestedPackages <- MODIS:::checkDeps()
+    suggestedPackages <- checkDeps()
   } else
   {
     suggestedPackages <- "run 'MODISoptions(checkPackages=TRUE)' for further details"
@@ -172,19 +172,19 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   if(checkPackages)
   {
     # GDAL
-    isOk <- MODIS:::checkGdalDriver(path=opt$gdalPath)
+    isOk <- checkGdalDriver(path=opt$gdalPath)
     if (isOk) 
     {
       opt$gdalOk  <- TRUE
-      gdalVersion <- MODIS:::checkTools(tool="GDAL",quiet=TRUE)$GDAL$version
+      gdalVersion <- checkTools(tool="GDAL",quiet=TRUE)$GDAL$version
     } else
     {
       opt$gdalOk  <- FALSE
-      gdalVersion <- "Not available. Use 'MODIS:::checkTools('GDAL')' for more information!"
+      gdalVersion <- "Not available. Use 'checkTools('GDAL')' for more information!"
     }
     
     # MRT
-    mrt <- MODIS:::checkTools(tool="MRT",quiet=TRUE)$MRT
+    mrt <- checkTools(tool="MRT",quiet=TRUE)$MRT
     if(mrt$MRT)
     {
       opt$mrtOk  <- TRUE
@@ -192,7 +192,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     } else
     {
       opt$mrtOk  <- FALSE
-      mrtVersion <- "Not available. Use 'MODIS:::checkTools('MRT')' for more information!"
+      mrtVersion <- "Not available. Use 'checkTools('MRT')' for more information!"
     }
   } else
   {
@@ -270,7 +270,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('# More related to Windows, but also to other OS in case of a non standard location of GDAL', filename)
     write('# ON WINDOWS install \'OSGeo4W\' (recommanded) or \'FWTools\'', filename)
     write('# consult \'?MODISoptions\' for more details', filename)        
-    write('# Run: \'MODIS:::.checkTools()\' to try to autodetect.', filename)
+    write('# Run: \'.checkTools()\' to try to autodetect.', filename)
     write('# Example (USE SINGLE FORWARD SLASH \'/\'!):', filename)
     write('# gdalPath <- \'C:/OSGeo4W/bin/\'', filename)
     write('  ', filename)

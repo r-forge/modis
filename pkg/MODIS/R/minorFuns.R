@@ -176,7 +176,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
     {
         GDAL <- FALSE
         gdv  <- NA
-        opts <- MODIS:::combineOptions()
+        opts <- combineOptions()
         
         if (.Platform$OS=="unix")
         {    
@@ -237,7 +237,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                     fwtV <- shell(paste0(fwtP, " --version"),intern=TRUE)
                     fwtV <- strsplit(strsplit(fwtV,",")[[1]][1]," ")[[1]][2]
                   
-                    if(MODIS:::checkGdalDriver(fwt))
+                    if(checkGdalDriver(fwt))
                     {                  
                         cat("Found 'FWTools' version: '", fwtV,"' to enalbe this run:\n MODISoptions(gdalPath='",normalizePath(fwt,"/"),"')\n",sep="")
                         minone <- TRUE
@@ -252,7 +252,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                     osgV <- shell(paste0(osgP, " --version"),intern=TRUE)
                     osgV <- strsplit(strsplit(osgV,",")[[1]][1]," ")[[1]][2]
                   
-                    if(MODIS:::checkGdalDriver(osg))
+                    if(checkGdalDriver(osg))
                     {                  
                         cat("Found 'OSgeo4W' version: '", osgV,"' to enable this run:\n MODISoptions(gdalPath='",normalizePath(osg,"/"),"')\n",sep="")
                         minone <- TRUE
@@ -293,7 +293,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
   options(warn=-1)
   on.exit(options(warn=iw))
 
-  opt     <- MODIS:::combineOptions(...)
+  opt     <- combineOptions(...)
      
   outfile <- paste0(opt$outDirPath,".auxiliaries/gdalOutDriver.RData")
   
@@ -351,7 +351,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
       
       if (length(ind)!=0)
       {
-        extension[i] <- MODIS:::getExtension(name[ind],gdalPath = opt$gdalPath)
+        extension[i] <- getExtension(name[ind],gdalPath = opt$gdalPath)
       }
     }
     if(!quiet)
@@ -398,7 +398,7 @@ getExtension <- function(dataFormat,...)
     return(".mpr") # is this ok?
   } else 
   {
-    gdalPath <- MODIS:::combineOptions(...)$gdalPath
+    gdalPath <- combineOptions(...)$gdalPath
     cmd <- paste0(gdalPath,'gdalinfo --format ')
     
     if(.Platform$OS.type=="unix")
@@ -445,7 +445,7 @@ isSupported <- function(x)
       return(FALSE)
     } else 
     {
-      secName <- MODIS:::defineName(product$request)
+      secName <- defineName(product$request)
       
       if (product$SENSOR[1] == "MODIS") 
       {
@@ -481,7 +481,7 @@ defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
   
   if(missing(x)) 
   {
-    stop("Error in function 'MODIS:::defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
+    stop("Error in function 'defineName', x is missing, must be a MODIS, SRTM or culture-MERIS filename!")
   } else 
   {
     fname   <- basename(x)
@@ -636,19 +636,19 @@ makeRandomString <- function(n=1, length=12)
     randomString <- c(1:n) # initialize vector
     for (i in 1:n)
     {
-        randomString[i] <- paste(sample(c(0:9, letters, LETTERS),
+        randomString[i] <- paste0(sample(c(0:9, letters, LETTERS),
         length, replace=TRUE),collapse="")
     }   
     return(randomString)
 }
 
-# this function care about the download of files. Based on remotePath (result of MODIS:::genString) it alterates the effort on available sources and stops after succeded download or by reacing the stubbornness thresshold.
+# this function care about the download of files. Based on remotePath (result of genString) it alterates the effort on available sources and stops after succeded download or by reacing the stubbornness thresshold.
 ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
 {
     x <- basename(x)
 
-    opts <- MODIS:::combineOptions(...)
-    opts$stubbornness <- MODIS:::stubborn(opts$stubbornness)
+    opts <- combineOptions(...)
+    opts$stubbornness <- stubborn(opts$stubbornness)
 
     iw   <- options()$warn 
     options(warn=-1)
@@ -658,8 +658,8 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
     
     for (a in seq_along(x))
     {  # a=1
-        path <- MODIS:::genString(x[a],...)
-        path$localPath <- MODIS:::setPath(path$localPath)
+        path <- genString(x[a],...)
+        path$localPath <- setPath(path$localPath)
         
         hv <- 1:length(path$remotePath)
         hv <- rep(hv,length=opts$stubbornness)
@@ -697,8 +697,8 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
 {
     x <- basename(x)
 
-    opts <- MODIS:::combineOptions(...)
-    opts$stubbornness <- MODIS:::stubborn(opts$stubbornness)
+    opts <- combineOptions(...)
+    opts$stubbornness <- stubborn(opts$stubbornness)
 
     out <- rep(NA,length=length(x))
         
@@ -709,8 +709,8 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
             out[a] <- NA
         } else
         { 
-            path <- MODIS:::genString(x[a],...)
-            path$localPath <- MODIS:::setPath(path$localPath) 
+            path <- genString(x[a],...)
+            path$localPath <- setPath(path$localPath) 
             
             hv <- 1:length(path$remotePath)
             hv <- rep(hv,length=opts$stubbornness)
@@ -719,7 +719,7 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
             {     
                 if (g==1)
                 {
-                    out[a] <- MODIS:::checkIntegrity(x = x[a],...)
+                    out[a] <- checkIntegrity(x = x[a],...)
                 }
                 
                 if (is.na(out[a]))
@@ -733,7 +733,7 @@ doCheckIntegrity <- function(x, quiet=FALSE, wait=wait,...)
                     {
                         cat(basename(x[a]),"is corrupted, trying to re-download it!\n\n")
                     }
-                    out[a] <- MODIS:::ModisFileDownloader(x[a],quiet=quiet,...)
+                    out[a] <- ModisFileDownloader(x[a],quiet=quiet,...)
                 } else if (out[a]) 
                 {
                     break
@@ -772,7 +772,7 @@ setPath <- function(path, ask=FALSE, showWarnings=FALSE)
       stop("Path not set, use ?MODISoptions to configure it")          
     }
   }
-  return(MODIS:::correctPath(path))    
+  return(correctPath(path))    
 }
 
 # get NA values from getSds(x)$SDS4gdal
@@ -785,7 +785,7 @@ getNa <- function(x)
   on.exit(options(warn=iw))
 
   gdalPath <- getOption("MODIS_gdalPath")[1]
-  gdalPath <- MODIS:::correctPath(gdalPath)
+  gdalPath <- correctPath(gdalPath)
   cmd <- paste0(gdalPath,"gdalinfo ")
   
   for (i in seq_along(x))

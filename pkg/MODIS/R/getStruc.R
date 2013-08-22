@@ -11,9 +11,9 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
         stop("getStruc() Error! Server must be or 'LPDAAC' or 'LAADS'")
     }
     
-    opts <- MODIS:::combineOptions()
+    opts <- combineOptions()
     
-    sturheit <- MODIS:::stubborn(level=stubbornness)
+    sturheit <- stubborn(level=stubbornness)
     
     #########################
     # Check Platform and product
@@ -35,7 +35,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
     # load aux
     if (!file.exists(paste0(opts$auxPath,server,"_ftp.txt")))
     {
-      opts$auxPath <- MODIS:::setPath(opts$auxPath)
+      opts$auxPath <- setPath(opts$auxPath)
       invisible(file.copy(file.path(find.package('MODIS'),'external',paste0(server,"_ftp.txt")),paste0(opts$auxPath,server,"_ftp.txt")))
     }
     ftpdirs <- read.table(paste0(opts$auxPath,server,"_ftp.txt"),stringsAsFactors=FALSE)
@@ -49,7 +49,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
       
       for(u in seq_along(todo))
       {
-        path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
+        path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],local=FALSE)
         
         # test if the product is available on "LAADS" (default is LPDAAC!)
         if (server =="LAADS")
@@ -108,7 +108,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
               for (g in 1:sturheit)
               {
                 cat("Try:",g,"\r")
-                try(FtpDayDirs <- MODIS:::filesUrl(startPath))
+                try(FtpDayDirs <- filesUrl(startPath))
                 Sys.sleep(wait)
                 cat("             \r")
                 if(exists("FtpDayDirs"))
@@ -128,7 +128,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
             for (g in 1:sturheit)
             {
               cat("Getting Year(s) try:",g,"\r")
-              try(years <- MODIS:::filesUrl(startPath))
+              try(years <- filesUrl(startPath))
               if(g < (sturheit/2))
               {
                 Sys.sleep(wait)
@@ -154,7 +154,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
             {
               cat("                          \r")
               cat("Getting day(s) try:",g,"\r") # for",todo[u],"
-              try(p <- MODIS:::filesUrl(Ypath)) # async=T!
+              try(p <- filesUrl(Ypath)) # async=T!
               if(g < (sturheit/2))
               {
                 Sys.sleep(wait)

@@ -34,7 +34,7 @@ checkResamplingType <- function(resamplingType,tool,quiet=FALSE)
     } else
     {
       # for efficiency gdv should be stored as variable
-      gdv <- MODIS:::checkTools('GDAL',quiet=TRUE)$GDAL$vercheck
+      gdv <- checkTools('GDAL',quiet=TRUE)$GDAL$vercheck
       
       if (gdv[2] < 10 & resamplingType %in% c("average","mode"))
       {

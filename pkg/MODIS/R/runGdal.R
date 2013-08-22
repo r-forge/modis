@@ -1,9 +1,9 @@
 
 runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, tileH=NULL, tileV=NULL, buffer=0, SDSstring=NULL, job=NULL, checkIntegrity=TRUE, wait=0.5, quiet=FALSE,...)
 {
-    opts    <- MODIS:::combineOptions(...)
+    opts <- combineOptions(...)
     # debug:
-    # opts    <- MODIS:::combineOptions();product="MYD09GQ";collection=NULL; begin='2007.12.03'; end='2007.12.03'; extent=siteExtent; tileH=NULL; tileV=NULL; buffer=0; SDSstring=NULL; job=NULL; checkIntegrity=TRUE; wait=0.5; quiet=FALSE
+    # opts    <- combineOptions();product="MYD09GQ";collection=NULL; begin='2007.12.03'; end='2007.12.03'; extent=siteExtent; tileH=NULL; tileV=NULL; buffer=0; SDSstring=NULL; job=NULL; checkIntegrity=TRUE; wait=0.5; quiet=FALSE
           
     if(!opts$gdalOk)
     {
@@ -40,10 +40,10 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     {
         dataFormat <- grep(opts$gdalOutDriver$name, pattern=paste("^",dataFormat,"$",sep=""),ignore.case = TRUE,value=TRUE)
         of <- paste0(" -of ",dataFormat)
-        extension  <- MODIS:::getExtension(dataFormat)
+        extension  <- getExtension(dataFormat)
     } else 
     {
-        stop('in argument dataFormat=\'',opts$dataFormat,'\', format not supported by GDAL type: \'MODIS:::gdalWriteDriver()\' (column \'name\') to list available inputs')
+        stop('in argument dataFormat=\'',opts$dataFormat,'\', format not supported by GDAL type: \'gdalWriteDriver()\' (column \'name\') to list available inputs')
     }
     
     #### settings with messages
@@ -62,11 +62,11 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     cat("########################\n")
     if(!is.null(extent$target$outProj))
     {
-      outProj <- MODIS:::checkOutProj(extent$target$outProj,tool="GDAL")
+      outProj <- checkOutProj(extent$target$outProj,tool="GDAL")
       cat("outProj          = ",outProj ," (Specified by raster*/spatial* object)\n")
     } else
     {
-      outProj <- MODIS:::checkOutProj(opts$outProj,tool="GDAL")
+      outProj <- checkOutProj(opts$outProj,tool="GDAL")
       cat("outProj          = ",outProj,"\n")
     }
     if (outProj == "asIn")
@@ -111,7 +111,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     }
     
     #### resamplingType
-    opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType, tool="gdal")
+    opts$resamplingType <- checkResamplingType(opts$resamplingType, tool="gdal")
     cat("resamplingType   = ", opts$resamplingType,"\n")
     rt <- paste0(" -r ",opts$resamplingType)
     
@@ -198,7 +198,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
       
       for(u in 1:length(todo))
       { # u=1
-        MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
+        getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
         ftpdirs      <- list()
         ftpdirs[[1]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
         
@@ -237,7 +237,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
             
               if (!exists("NAS"))
               {
-                NAS <- MODIS:::getNa(SDS[[1]]$SDS4gdal)
+                NAS <- getNa(SDS[[1]]$SDS4gdal)
               }
                
               for (i in seq_along(SDS[[1]]$SDSnames))

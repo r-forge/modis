@@ -161,7 +161,7 @@ maskWater <- function(X, bitShift=NULL, bitMask = NULL, keep = NULL, datatype="I
         fname    <- basename(names(X)[1])        
         prodinfo <- strsplit(fname,"\\.")[[1]][1]
 
-        bits     <- MODIS:::detectBitInfo(prodinfo, what='Land/Water Flag',warn=FALSE)
+        bits     <- detectBitInfo(prodinfo, what='Land/Water Flag',warn=FALSE)
         bitShift <- bits$bitShift
         bitMask  <- bits$bitMask
         
@@ -206,7 +206,7 @@ detectBitInfo <- function(product, what='all',warn=TRUE)
         stop()
     } 
           
-    try(info <- eval(parse(text=paste("MODIS:::",prodinfo,"_QC",sep=""))),silent=TRUE)
+    try(info <- eval(parse(text=paste("",prodinfo,"_QC",sep=""))),silent=TRUE)
     
     if(exists("info"))
     {

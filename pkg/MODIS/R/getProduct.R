@@ -13,7 +13,7 @@ getProduct <- function(x=NULL,quiet=FALSE)
 
     if (is.null(x))
     { # if x isn't provided, return table of supported files.
-        products <- as.data.frame(MODIS:::MODIS_Products[c("SENSOR", "PRODUCT", "TOPIC", "PLATFORM","TYPE", "RES", "TEMP_RES")])
+        products <- as.data.frame(MODIS_Products[c("SENSOR", "PRODUCT", "TOPIC", "PLATFORM","TYPE", "RES", "TEMP_RES")])
         return(products[order(products$PRODUCT),])
     }
 
@@ -38,7 +38,7 @@ getProduct <- function(x=NULL,quiet=FALSE)
     
     product <- product[1]
     pattern <- sub(pattern="MXD", replacement="M.D", x=product, ignore.case=TRUE) # make a regEx out of "x"
-    info    <- MODIS:::listPather(MODIS:::MODIS_Products,grep(pattern=pattern,x=MODIS:::MODIS_Products$PRODUCT,ignore.case=TRUE))
+    info    <- listPather(MODIS_Products,grep(pattern=pattern,x=MODIS_Products$PRODUCT,ignore.case=TRUE))
 
     if(length(info$PRODUCT)==0)
     {

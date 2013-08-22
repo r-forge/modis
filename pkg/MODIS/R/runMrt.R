@@ -16,8 +16,8 @@ runMrt <- function(...)
     opts$product$CCC <- getCollection(opts$product,collection=opts$collection)
     tLimits          <- transDate(begin=opts$begin,end=opts$end)
     
-    opts$localArcPath <- MODIS:::setPath(opts$localArcPath)
-    opts$outDirPath   <- MODIS:::setPath(opts$outDirPath)
+    opts$localArcPath <- setPath(opts$localArcPath)
+    opts$outDirPath   <- setPath(opts$outDirPath)
     
     if(!tolower(opts$dataFormat) %in% c('raw binary', 'hdf-eos', 'hdf4image','gtiff', 'geotiff'))
     {
@@ -31,8 +31,8 @@ runMrt <- function(...)
     if (is.null(opts$mosaic))   {opts$mosaic <- TRUE} 
     if (is.null(opts$anonym))   {opts$anonym <- TRUE} 
 
-    opts$resamplingType <- MODIS:::checkResamplingType(opts$resamplingType,tool="mrt",quiet=TRUE)
-    opts$outProj        <- MODIS:::checkOutProj(opts$outProj,tool="mrt",quiet=TRUE)
+    opts$resamplingType <- checkResamplingType(opts$resamplingType,tool="mrt",quiet=TRUE)
+    opts$outProj        <- checkOutProj(opts$outProj,tool="mrt",quiet=TRUE)
     
     if (opts$outProj[1]=="asIn")
     {
@@ -110,7 +110,7 @@ runMrt <- function(...)
 
             ######################## along platform (TerraAqua)
 
-            MODIS:::getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
+            getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
     
@@ -172,7 +172,7 @@ runMrt <- function(...)
                             
                             if (mos)
                             {
-                                TmpMosNam <- paste("TmpMosaic",MODIS:::makeRandomString(),".hdf",sep="")
+                                TmpMosNam <- paste("TmpMosaic",makeRandomString(),".hdf",sep="")
                                 ### in subset
                                 paraname <- file.path(outDir,"/MRTgMosaic.prm",fsep="/") # create mosaic prm file
                                 filename = file(paraname, open="wt")

@@ -147,9 +147,8 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, groupYears=TRUE, timeInfo = org
         # better to be save than sorry:
         clusterEvalQ(cl,require(bitops))
         clusterEvalQ(cl,require(rgdal))
-        clusterEvalQ(cl,require(raster))
         clusterEvalQ(cl,require(ptw))
-        tr <- MODIS:::blockSizeCluster(vi)
+        tr <- blockSizeCluster(vi)
     }    
 
     cat("Data is in, start processing!\n")
@@ -180,7 +179,7 @@ clFun <- function(l)
             if(is.null(bitShift) | is.null(bitMask))
             {
                 # try to detect VI usefulness layer
-                bits     <- MODIS:::detectBitInfo(vi,"VI usefulness",warn=FALSE)
+                bits     <- detectBitInfo(vi,"VI usefulness",warn=FALSE)
                 bitShift <- bits$bitShift
                 bitMask  <- bits$bitMask
             }

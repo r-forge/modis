@@ -1,6 +1,6 @@
 checkIntegrity <- function(x,...)
 {
-    opts <- MODIS:::combineOptions(...)
+    opts <- combineOptions(...)
 
     iw   <- getOption("warn") 
     options(warn=-1)
@@ -23,7 +23,7 @@ checkIntegrity <- function(x,...)
             {
                 if (dirname(x[i])==".")
                 {
-                    x[i] <- paste0(MODIS:::genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]))        
+                    x[i] <- paste0(genString(x=x[i],remote=FALSE,...)$localPath, basename(x[i]))        
                 }
         
                 if (!file.exists(x[i]))

@@ -6,7 +6,7 @@ tiletable <- read.table(system.file("external", "tiletable.txt", package="MODIS"
 # save(tileNames,file="~/tileNames.RData") # in chase of changes
 load(system.file("external", "tileNames.RData", package="MODIS"))
 
-# load MODIS Tiles (MODIS:::sr)
+# load MODIS Tiles (sr)
 load(system.file("external", "MODIS_TilesPolys.RData", package="MODIS"))
 
 # save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes

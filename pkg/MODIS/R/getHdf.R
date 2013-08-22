@@ -6,9 +6,9 @@
 getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE,...) 
 {
    # product="MOD11A1"; begin="2010001"; end="2010005"; tileH=NULL; tileV=NULL; extent=NULL; collection=NULL; quiet=FALSE; wait=0.5; checkIntegrity=FALSE; z=1;u=1
-    opts <- MODIS:::combineOptions(...)
+    opts <- combineOptions(...)
     
-    sturheit <- MODIS:::stubborn(level=opts$stubbornness)
+    sturheit <- stubborn(level=opts$stubbornness)
     wait     <- as.numeric(wait)
     
     # TODO HdfName as regex
@@ -20,17 +20,17 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         for (i in seq_along(HdfName))
         {
             HdfName[i] <- basename(HdfName[i]) # separate name from path
-            path       <- MODIS:::genString(HdfName[i],...)
-            MODIS:::setPath(path$localPath)
+            path       <- genString(HdfName[i],...)
+            setPath(path$localPath)
         
             if (!file.exists(paste0(path$localPath,"/",HdfName[i]))) 
             {
-                MODIS:::ModisFileDownloader(HdfName[i],quiet=quiet,...)
+                ModisFileDownloader(HdfName[i],quiet=quiet,...)
             }
             
             if(checkIntegrity)
             {
-                MODIS:::doCheckIntegrity(HdfName[i], quiet=quiet,...)
+                doCheckIntegrity(HdfName[i], quiet=quiet,...)
             }
             dates[[i]] <- paste0(path$local,"/",HdfName[i])
         }
@@ -67,7 +67,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             tLimits <- transDate(begin=begin,end=end)
             #########
             # getStruc
-            MODIS:::getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
+            getStruc(product=product,begin=tLimits$begin,end=tLimits$end,wait=0)
             #getStruc(product=product,server="LAADS",begin=tLimits$begin,end=tLimits$end,wait=0)
             ftpdirs <- list()
             ftpdirs[[1]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
@@ -85,7 +85,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
             ntiles <- length(tileID)
          
             ntiles <- length(tileID)
-            path   <- MODIS:::genString("SRTM")
+            path   <- genString("SRTM")
             files  <- paste0("srtm",tileID,".zip")
             dir.create(path$localPath,showWarnings=FALSE,recursive=TRUE)
         
@@ -123,7 +123,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                 isOK <- TRUE
                 if (file.exists(paste0(path$localPath,"/",files[d])))
                 {
-                    isOK <- MODIS:::checksizefun(file=paste0(path$localPath,"/",files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
+                    isOK <- checksizefun(file=paste0(path$localPath,"/",files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
                 }
                 if (!file.exists(paste0(path$localPath,"/",files[d]))| !isOK)
                 {
@@ -146,7 +146,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         )
                         if (hdf==0) 
                         {
-                            SizeCheck <- MODIS:::checksizefun(file=paste0(path$localPath,"/", files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)
+                            SizeCheck <- checksizefun(file=paste0(path$localPath,"/", files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)
                             if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
                         }
                         if(hdf==0 & !quiet) 
@@ -230,7 +230,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         doy  <- as.integer(format(as.Date(dates[[l]][i,1],format="%Y.%m.%d"), "%j"))
                         doy  <- sprintf("%03d",doy)
                         mtr  <- rep(1,ntiles) # for file availability flaging
-                        path <- MODIS:::genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
+                        path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=dates[[l]][i,1])
                         
                         for(j in 1:ntiles)
                         {  
@@ -269,11 +269,11 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                             for (g in 1:sturheit)
                             { # get list of FILES in remote dir
                                 server <- names(path$remotePath)[g%%length(path$remotePath)+1]
-                                ftpfiles <- try(MODIS:::filesUrl(path$remotePath[[server]]),silent=TRUE)
+                                ftpfiles <- try(filesUrl(path$remotePath[[server]]),silent=TRUE)
                                 
                                 if(ftpfiles[1]==FALSE)
                                 {
-                                    #stop("Problem to connect to: ",path$remotePath[[server]],"\nmaybe there is a date problem,check this path in your browser.\nIf it does not work try to solve this by running: 'MODIS:::getStruc(product=",todo[u],",wait=0,forceCheck=TRUE)'\nand restart your job (getHdf or runGdal/runMrt)")
+                                    #stop("Problem to connect to: ",path$remotePath[[server]],"\nmaybe there is a date problem,check this path in your browser.\nIf it does not work try to solve this by running: 'getStruc(product=",todo[u],",wait=0,forceCheck=TRUE)'\nand restart your job (getHdf or runGdal/runMrt)")
                                     rm(ftpfiles)
                                 }
                                 if(exists("ftpfiles"))
@@ -312,7 +312,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                                             }
 
                                             dates[[l]][i,j+1] <- HDF
-                                            hdf <- MODIS:::ModisFileDownloader(HDF, wait=wait, quiet=quiet,...)
+                                            hdf <- ModisFileDownloader(HDF, wait=wait, quiet=quiet,...)
                                             mtr[j] <- hdf
 
                                         } else 
@@ -328,7 +328,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                         }
                         if(checkIntegrity)
                         { # after each 'i' do the sizeCheck
-                            isIn <- MODIS:::doCheckIntegrity(paste0(path$localPath,dates[[l]][i,-1]), wait=wait, quiet=quiet,...)
+                            isIn <- doCheckIntegrity(paste0(path$localPath,dates[[l]][i,-1]), wait=wait, quiet=quiet,...)
                         }
                     suboutput[[i]] <- paste0(path$localPath,dates[[l]][i,-1])                    
                     } # end i
