@@ -8,7 +8,7 @@ genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, 
 {
     if (missing(x)) 
     {
-        stop(".genString Error: 'x' must be a HDF-file or MODIS-product name!")
+        stop("MODIS:::genString Error: 'x' must be a HDF-file or MODIS-product name!")
     }
 
     opts <- MODIS:::combineOptions(...)

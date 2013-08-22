@@ -343,7 +343,6 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
 }
 
 
-
 mapSelect <- function(zoom=TRUE)
 {
   if (!require(mapdata)) 
@@ -398,6 +397,7 @@ mapSelect <- function(zoom=TRUE)
   return(extent)
 }
 
+# in order to avoid dependency the following functions are copied (nearly identical) from 'maptools' (v 0.8-26) package
 # function 'map2SpatialPolygons' from package 'maptools' 
 m2SP <- function (map, IDs, proj4string = CRS(as.character(NA))) 
 {
@@ -427,7 +427,7 @@ m2SP <- function (map, IDs, proj4string = CRS(as.character(NA)))
     res <- as.SpatialPolygons.PolygonsList(Srl, proj4string = proj4string)
     res
 }
-
+# function 'map2SpatialLines' from package 'maptools' 
 m2SL <- function (map, IDs = NULL, proj4string = CRS(as.character(NA))) 
 {
 #    require(maps)

@@ -778,15 +778,14 @@ setPath <- function(path, ask=FALSE, showWarnings=FALSE)
 # get NA values from getSds(x)$SDS4gdal
 getNa <- function(x)
 {
-  gdalPath <- getOption("MODIS_gdalPath")[1]
   name <- res <- vector(mode="list",length=length(x))
   
-  iw   <- options()$warn 
+  iw   <- getOption("warn") 
   options(warn=-1)
   on.exit(options(warn=iw))
-  
+
+  gdalPath <- getOption("MODIS_gdalPath")[1]
   gdalPath <- MODIS:::correctPath(gdalPath)
-  
   cmd <- paste0(gdalPath,"gdalinfo ")
   
   for (i in seq_along(x))
@@ -798,15 +797,14 @@ getNa <- function(x)
         res[[i]] <- as.numeric(strsplit(tmp,"=")[[1]][2])
     } else
     {
-        res[[i]] <- "NO"
+        res[[i]] <- NA
     }
-        nam    <- strsplit(x[i],":")[[1]] 
-        name[[i]] <- nam[length(nam)]
-  
+    nam       <- strsplit(x[i],":")[[1]] 
+    name[[i]] <- nam[length(nam)]
   }
   
   names(res) <- unlist(name)
-  res[res=="NO"] <- NULL
+  res[is.na(res)] <- NULL
   return(res)
 }
 
