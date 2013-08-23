@@ -823,6 +823,7 @@ correctPath <- function(x,isFile=FALSE)
     {
       x <- paste0(x,"/") 
     }
+    x <- gsub(x,pattern="//",replacement="/")
   }
 return(x)
 }
