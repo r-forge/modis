@@ -36,13 +36,13 @@ If "list":\cr
 \tab \code{list(xmin=mumeric, xmax=mumeric, ymax=mumeric, ymin=mumeric)}.\cr
 \cr
 If "character":\cr
-\tab the country name of a \code{map} object (see package \code{maps}), you can use \code{?search4map} to find a map.\cr
-\tab the file name of a raster or a ESRI Shapefile (shp).\cr
+\tab the country name of a \code{map} object (see package \code{maps}), you can use \code{?search4map} to find a map by regular expression.\cr
+\tab Or the file name (plus path) of a raster* or a ESRI Shapefile (shp).\cr
 \cr
 Other:\cr
-\tab \code{"extent","rasterLayer","rasterStack"} or \code{"rasterBrick"} (package raster).\cr
-\tab Using a raster object (not "extent"!), and if not specified otherwise, the "extent", "pixelsize", and the "projection" of the raster object is used as output arguments \code{"extent","pixelSize","outProj"}. (if not LatLon it requires a valid CRS string!)\cr
-\cr
+\tab If \code{"rasterLayer","rasterStack"} or \code{"rasterBrick"} (package raster).\cr
+\tab Using a raster* object as "extent", the function determines the "extent", "resolution", and the "projection" from that raster*. This will be used by "runGdal" creating perfectly matching files. If the raster file has not a valid CRS string it assumes LatLon!)\cr
+\tab Using an \code{"extent"} (package raster) object, it must be in LatLon, as the extent object has no projection information attached.\cr
 \tab If ESRI shapefile (shp) or \code{maps:::map} object, a call to \code{sp:::over} is performed to determine MODIS tile containg the "extent", this often considerably reduces the number of required tiles but can lead to NO-DATA areas if in the bounding box of 'extent' not all tiles had to be downloaded! 
 }
 }

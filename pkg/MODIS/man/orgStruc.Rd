@@ -8,7 +8,7 @@
 
 \description{This function organises the storage structure of the MODIS-archive accordingly to the settings in '~/.MODIS_opts.R'. depending on the \code{'source'} you set, you can also use this function to gatter all MODIS-grid files on you Computer and organise it like it is set in '~/.MODIS_opts.R'. The main purpose is the organisation of the archive, but it is also possible to use it for coping a subset of files to a desidered location!}
 
-\usage{orgStruc( from, to, structure, pattern, move=TRUE, quiet=FALSE)}
+\usage{orgStruc( from, to, structure, pattern, move=FALSE, quiet=FALSE)}
 
 \arguments{
   \item{from}{Character. Local path to look for MODIS files. If missing the default archive \code{options("MODIS_localArcPath")} is used. Most of the time \code{from} corresponds to \code{localArcPath} but it is not neccessary! I.e. if you want to gather all MODIS data on your Computer home use \code{'~/'}.}

@@ -297,10 +297,10 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
      
   outfile <- paste0(opt$outDirPath,".auxiliaries/gdalOutDriver.RData")
   
-  if (!is.null(getOption("MODIS_gdalOutDriver")))
+  if (!is.null(getOption("MODIS_gdalOutDriver"))) # tacke it from options()
   {
     gdalOutDriver <- getOption("MODIS_gdalOutDriver")
-  } else if(file.exists(outfile))
+  } else if(file.exists(outfile)) # or from RData
   {
     load(outfile)
   }  

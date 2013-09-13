@@ -70,18 +70,15 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   opt <- as.list(opts)	
   
   # localArcPath
-  opt$localArcPath <- path.expand(opt$localArcPath)
+  opt$localArcPath <- correctPath(opt$localArcPath)
   
   if(!missing(localArcPath))
   {
-    localArcPath <- path.expand(localArcPath) 
+    localArcPath <- correctPath(localArcPath) 
   
-    if (length(list.dirs(opt$localArcPath))==0)
+    if (opt$localArcPath != localArcPath)
     {
-      message("'localArcPath' does not exist, it will be created in '",localArcPath,"'")               
-    } else if (opt$localArcPath != localArcPath)
-    {
-      message("Changing 'localArcPath' from '",opt$localArcPath, "' to '", localArcPath,"'\nIf you already have downloaded some HDF-files, you can use '?orgStruc()' to re-arrange your HDF-data!")
+      message("Setting 'localArcPath' to '", normalizePath(localArcPath,"/",FALSE),"'\nIf you already have downloaded some HDF-files to '",normalizePath(opt$localArcPath,"/",FALSE) ,"' you can use '?orgStruc()' to re-arrange your HDF-data!")
     }
     options(MODIS_localArcPathWarned=TRUE)
     opt$localArcPath <- localArcPath
@@ -91,25 +88,25 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
       if(!isTRUE(options()$MODIS_localArcPathWarned))
       {
-        message("'localArcPath' does not exist, it will be created in '",opt$localArcPath,"'. Consult '?MODISoptions' if you want to change it!")               
+        message("'localArcPath' does not exist, and will be created in '",normalizePath(opt$localArcPath,"/",FALSE),"'. Consult '?MODISoptions' if you want to change it!")               
         options(MODIS_localArcPathWarned=TRUE)
       } 
     }
   }
   
   # outDirPath
-  opt$outDirPath <- path.expand(opt$outDirPath)
+  opt$outDirPath <- correctPath(opt$outDirPath)
   
   if(!missing(outDirPath))
   {
-    outDirPath <- path.expand(outDirPath)
+    outDirPath <- correctPath(outDirPath)
     
     if (length(list.dirs(opt$outDirPath))==0)
     {
-      message("'outDirPath' does not exist and will be created in '",outDirPath,"'")               
+      message("'outDirPath' does not exist and will be created in '",normalizePath(outDirPath,"/",FALSE),"'")               
     } else if (opt$outDirPath != outDirPath)
     {
-      message("'outDirPath' has been changed from '",opt$outDirPath,"' to '",outDirPath,"'")
+      message("'outDirPath' has been changed from '",normalizePath(opt$outDirPath,"/",FALSE),"' to '",normalizePath(outDirPath,"/",FALSE),"'")
     }
     options(MODIS_outDirPathWarned=TRUE) 
     opt$outDirPath <- outDirPath
@@ -119,14 +116,12 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     {
       if(!isTRUE(options()$MODIS_outDirPathWarned))
       {
-        message("'outDirPath' does not exist, it will be created in '",opt$outDirPath,"'. Consult '?MODISoptions' if you want to change it!")               
+        message("'outDirPath' does not exist, it will be created in '",normalizePath(opt$outDirPath,"/",FALSE),"'. Consult '?MODISoptions' if you want to change it!")               
         options(MODIS_outDirPathWarned=TRUE)
       }
     }    
   }
 
-  opt$localArcPath <- correctPath(opt$localArcPath)
-  opt$outDirPath   <- correctPath(opt$outDirPath)
   opt$auxPath      <- paste0(opt$outDirPath,".auxiliaries/")
   
   if(!missing(dlmethod))
@@ -162,11 +157,11 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$gdalPath <- correctPath(gdalPath)
     if(length(grep(dir(opt$gdalPath),pattern="gdalinfo"))==0)
     {
-        stop("The 'gdalPath' you have provided does not contain any gdal utilities, make sure to address the folder with GDAL executables (ie: gdalinfo)!")
+        stop(paste0("The 'gdalPath' you have provided '",normalizePath(opt$gdalPath,"/",FALSE) ,"' does not contain any gdal utilities, make sure to address the folder with GDAL executables (ie: gdalinfo)!"))
     }
   }
   opt$gdalPath <- correctPath(opt$gdalPath)
-  options(MODIS_gdalPath=opt$gdalPath)# required by checkTools a few lines bellow (uses combineOptions())! Maybe not the best solution!
+  options(MODIS_gdalPath=opt$gdalPath)# needs to be exportet now as it is required by checkTools a few lines bellow (uses combineOptions())! Maybe not the best solution!
   
   # checks if the pointed GDAL exists and supports 'HDF4Image' driver.
   if(checkPackages)
@@ -270,7 +265,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('# More related to Windows, but also to other OS in case of a non standard location of GDAL', filename)
     write('# ON WINDOWS install \'OSGeo4W\' (recommanded) or \'FWTools\'', filename)
     write('# consult \'?MODISoptions\' for more details', filename)        
-    write('# Run: \'.checkTools()\' to try to autodetect.', filename)
+    write('# Run: \'MODIS:::checkTools()\' to try to autodetect location.', filename)
     write('# Example (USE SINGLE FORWARD SLASH \'/\'!):', filename)
     write('# gdalPath <- \'C:/OSGeo4W/bin/\'', filename)
     write('  ', filename)

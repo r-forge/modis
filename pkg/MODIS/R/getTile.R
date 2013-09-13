@@ -179,6 +179,7 @@ getTile <- function(extent = NULL, tileH = NULL, tileV = NULL, buffer = NULL, sy
         extent <- spTransform(ext,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
       }
     }
+    
     pixelSize <- NULL    
     if(length(grep(class(extent),pattern="Raster*"))==1)
     {

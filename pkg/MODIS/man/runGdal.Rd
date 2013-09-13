@@ -24,9 +24,9 @@ quiet=FALSE,...)}
   \item{buffer}{Numeric. Buffer [in units of the 'outProj'] around the specified extent. See: \code{?getTile}}
   \item{SDSstring}{Default is extract all SDS (layers). See: \code{?getSds}.}
   \item{job}{Character name. Name of the current job for the creation of the output folder. If not specified it is created: 'PRODUCT.COLLECTION_DATETIME'.}
-  \item{checkIntegrity}{Default \code{TRUE}. Check if the file is 'healthy' (and download it again if not) before doing further processings with it.}
-  \item{wait}{Numeric. Time to wait to re-try a un-successful online connection (URL listenting or 'download.file()' process). Keep it small.}
-  \item{quiet}{Logival, Default \code{FALSE}. Some progress informations.}
+  \item{checkIntegrity}{Default \code{TRUE}. Check if the file is 'healthy' (and download it again if not) before doing further processings with it. This consumes also a littel bit of time to do the check.}
+  \item{wait}{Numeric. Time to wait to re-try a un-successful online connection (URL listenting or 'download.file()' process). Keep it small, max ~1 sec.}
+  \item{quiet}{Logical, Default \code{FALSE}. Some progress informations.}
   \item{...}{See section 'Methods'.}
 
 } 
@@ -40,7 +40,7 @@ quiet=FALSE,...)}
 \tab \code{resamplingType}\tab Character. Default is 'near', can be one of: 'bilinear', 'cubic', 'cubicspline', 'lanczos'.\cr \tab \tab See \code{?MODISoptions}.\cr
 \tab \code{blockSize}\tab integer. Default \code{NULL} that means the stripe size is set by GDAL.\cr \tab \tab Basically it is the "-co BLOCKYSIZE=" parameter. See: http://www.gdal.org/frmt_gtiff.html\cr
 \tab \code{compression}\tab logical. Default is \code{TRUE}, compress data with the lossless LZW compression with "predictor=2".\cr \tab \tab See: \url{http://www.gdal.org/frmt_gtiff.html}\cr
-\tab \code{dataFormat}\tab Data output format, see \code{options()$MODIS_gdalOutDriver} column 'name'.\cr
+\tab \code{dataFormat}\tab Data output format, see \code{getOption("MODIS_gdalOutDriver")} column 'name'.\cr
 \tab \code{localArcPath}\tab Character.  See \code{?MODISoptions}. Local path to look for and/or to download MODIS files.\cr
 \tab \code{outDirPath}\tab Character.  See \code{?MODISoptions}. Root directory where to write \code{job} folder.\cr
 }
@@ -49,7 +49,10 @@ quiet=FALSE,...)}
 
 \details{
 \code{runGdal()} uses a lot of 'MODIS'-package functions, see in section 'arguments' and 'methods' the respective '?function' for details and inputs.\cr
-If \code{extent} is a raster* object, the output has exactly the same extent, pixel size and projection as the used raster* object.
+If \code{extent} is a raster* object, the output has exactly the same extent, pixel size and projection as the used raster* object.\cr
+If \code{extent} is a spatial* object (ie polygon shapefile), the output has exactly the same extent and projection as the used spatial* object.\cr
+If \code{tileH} and \code{tileV} arguments are used (instead of \code{extent}) to define tha area of interest and \code{outProj} amd \code{pixelSize} are \code{'asIn'} the result is only converted from multilayer-HDF to \code{dataFormat}, default "GeoTiff" (\code{?MODISoptions()}).\cr
+
 }
 
 \author{

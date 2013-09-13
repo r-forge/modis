@@ -1,5 +1,5 @@
-# This file contains part of the information in the QC layers since it is a relatively boring job any addition is welcome
-# the informationcan be found under https://lpdaac.usgs.gov/products/modis_products_table -> Layers
+# This file contains part of the information in the QC layers since it is a relatively boring job any contribution is welcome!
+# the required information can be found under https://lpdaac.usgs.gov/products/modis_products_table -> Layers
 # Status: Experimental!
 
 ########### M.D09
@@ -190,11 +190,27 @@ MOD13A3_QC <- data.frame(
         bitMask=c(3,15,3,1,1,1,7,1,1)
     )
 
-#### MOD 15
+#### MCD15
 
 MCD15A2_QC <- data.frame(
   LongName=c("MODLAND_QC bits", "Sensor", "DeadDetector", "CloudState (inherited from Aggregate_QC bits {0,1} cloud state)",
              "SCF_QC (five level confidence score)"), 
   bitShift=c(0,1,2,3,5),
   bitMask=c(1,1,1,3,7)
-)
+  )
+
+#### M.D17
+
+MOD17A2_QC <- data.frame(
+  LongName=c("MODLAND_QC bits", "Sensor", "DeadDetector", "CloudState (inherited from Aggregate_QC bits {0,1} cloud state)",
+             "SCF_QC (five level confidence score)"),
+  bitShift=c(0,1,2,3,5),
+  bitMask=c(1,1,1,3,7)
+  )
+
+MYD17A2_QC <- data.frame(
+    LongName=c("MODLAND_QC bits", "Sensor", "DeadDetector", "CloudState (inherited from Aggregate_QC bits {0,1} cloud state)",
+               "SCF_QC (five level confidence score)"),
+    bitShift=c(0,1,2,3,5),
+    bitMask=c(1,1,1,3,7)
+    )
