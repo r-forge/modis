@@ -1,0 +1,97 @@
+# Author: Jan Verbesselt, Jan.Verbesselt@wur.nl
+# Date : December 2011
+
+## this is a helper function
+## for the getModisWS.R
+## not sure what the best way is here
+## to deal with helper functions
+
+createbrickWS <- function(result) 
+{  
+
+  if (! require(SSOAP) ) 
+  {
+    stop("You need to install the 'SSOAP' package: install.packages('SSOAP', repos = 'http://www.omegahat.org/R', dependencies=TRUE, type='source')
+    ")
+  }
+  
+  ## set raster
+  modisprj <- c("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
+  res   <- result@cellsize
+  nrows <- result@nrows  
+  ncols <- result@ncols  
+  nl    <- length(result@subset) # nl <- dim(summary(ddd))[1]
+  
+  dd <- strsplit(result@subset,"\n") # is the form of result@subset the only option to get the values?
+  
+  # modd by Joan Maspons
+  dd <- sapply(dd, function(x)  
+  {
+    x <- strsplit(x, ",")
+    if (length(x) > 0)
+    {
+      x <- as.numeric(x[[1]][-1:-5])
+      if (length(x) != nrows * ncols)
+      {
+        warning("Incorrect MODIS data for", lat, lon, product, band, "\n\t", x)
+        x <- rep(dMODIS$NAsMax[dMODIS$band == band], nrows * ncols)
+      }
+    } else
+    {
+      warning("The invalid server response")
+      x <- rep(NA, nrows * ncols)
+    }
+    return(x)
+  })
+
+  #dd <- sapply(dd,function(x){as.numeric(strsplit(x,",")[[1]][-1:-5])})
+  #dd <- dd * result@scale
+  
+  if (nl==1) 
+  {    
+    res <- raster(nrows=nrows, ncols=ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
+  } else 
+  {
+    res <- brick(nrows=nrows, ncols=ncols,xmn=result@xllcorner, xmx=result@xllcorner+(ncols*res),ymn=result@yllcorner, ymx=result@yllcorner+(nrows*res), crs=modisprj)
+  }
+  
+  res <- setValues(res,dd)
+  return(res) # brick or raster depends on the layers
+}
+
+
+# createbrickWS <- function(result) {  
+#   ## set raster
+#   modisprj <-c("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
+#   res <- result@cellsize
+#   nrows <- result@nrows  
+#   ncols <- result@ncols
+#   rwebs <- raster(nrows=nrows, ncols=ncols, 
+#                   xmn=result@xllcorner, xmx=result@xllcorner+(nrows*res), 
+#                   ymn=result@yllcorner, ymx=result@yllcorner+(ncols*res), crs=modisprj)
+#   ## add values
+#   ## extract the data and process
+#   dd <- strsplit(result@subset,"\n")
+#   ddd <- lapply(dd,strsplit,",")
+#   nl <- dim(summary(ddd))[1] ### number of lists i.e. dates!
+#   
+#   ## combine the layers
+#   for(i in 1:nl) {
+#     da <- unlist(ddd[[i]])
+#     oneimage <- da[6:length(da)] # the data
+#     rvalues <- as.vector(oneimage, mode="numeric")
+#     rwebs <- setValues(rwebs,rvalues*result@scale)    
+#       if (i>1) {
+#         mrwebs <- addLayer(mrwebs,rwebs)
+#       } else {
+#         mrwebs <- rwebs
+#       } 
+#     }
+#   return(brick(mrwebs)) ## return a brick
+# }
+
+
+
+
+
+
