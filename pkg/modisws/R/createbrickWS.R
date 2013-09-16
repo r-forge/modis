@@ -6,15 +6,9 @@
 ## not sure what the best way is here
 ## to deal with helper functions
 
-createbrickWS <- function(result) 
+createbrickWS <- function(result, lat, lon, product, band, dMODIS) 
 {  
 
-  if (! require(SSOAP) ) 
-  {
-    stop("You need to install the 'SSOAP' package: install.packages('SSOAP', repos = 'http://www.omegahat.org/R', dependencies=TRUE, type='source')
-    ")
-  }
-  
   ## set raster
   modisprj <- c("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
   res   <- result@cellsize

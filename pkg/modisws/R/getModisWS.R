@@ -1,8 +1,8 @@
 # Author: Jan Verbesselt, Jan.Verbesselt@wur.nl
 # Date : December 2011
 
-getModisWS <- function(lat, long, product, bandname, startdate, enddate, KmAboveBelow, KmLeftRight) {
-
+getModisWS <- function(lat, long, product, bandname, startdate, enddate, KmAboveBelow, KmLeftRight) 
+{
 	## get the SOAP service
 	ornlMODIS = processWSDL("http://daac.ornl.gov/cgi-bin/MODIS/GLBVIZ_1_Glb_subset/MODIS_webservice.wsdl")
 	## define the function set
@@ -11,13 +11,5 @@ getModisWS <- function(lat, long, product, bandname, startdate, enddate, KmAbove
 	result = ornlMODISFuncs@functions$getsubset(lat, long, product, 
 																							bandname, startdate, enddate, 
 																							KmAboveBelow, KmLeftRight)
-	return(createbrickWS(result))
+	return(createbrickWS(result, lat, lon, product, band, dMODIS))
 }
-
-
-
-
-
-
-
-
