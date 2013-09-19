@@ -24,18 +24,26 @@ createbrickWS <- function(result)
     warning("No data for these coordinates. Latitude Longitude: ", result@latitude, " ", result@longitude) ##TODO: error vs warning?
 
   }else{
+    dates<- sapply(dd, function(x){
+        dat <- strsplit(x, ",")
+        dates<- dat[[1]][3] # layer name = date
+
+        return(dates)
+      })
+
     dd <- sapply(dd, function(x){
         dat <- strsplit(x, ",")
         dat <- as.numeric(dat[[1]][-1:-5])
 
         if (length(dat) != nrows * ncols){
-          warning("Incorrect MODIS data:\n\t", x) ##TODO: error vs warning?
-          dat <- rep(NA, nrows * ncols)
+          stop("Incorrect MODIS data:\n\t", x) ##TODO: error vs warning?
+#           dat <- rep(NA, nrows * ncols)
         }
 
         return(dat)
       })
 
+    colnames(dd)<- dates
   }
   
   #dd <- sapply(dd,function(x){as.numeric(strsplit(x,",")[[1]][-1:-5])})
