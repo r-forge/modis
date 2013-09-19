@@ -8,8 +8,7 @@ getModisWS <- function(lat, long, product, bandname, startdate, enddate, KmAbove
 	## define the function set
 	ornlMODISFuncs = genSOAPClientInterface(operations=ornlMODIS@operations[[1]], def=ornlMODIS)
 	## get the data
-	result = ornlMODISFuncs@functions$getsubset(lat, long, product, 
-																							bandname, startdate, enddate, 
-																							KmAboveBelow, KmLeftRight)
-	return(createbrickWS(result, lat, lon, product, band, dMODIS))
+	result = ornlMODISFuncs@functions$getsubset(lat, long, product, bandname, startdate, enddate, KmAboveBelow, KmLeftRight)
+
+	return(createbrickWS(result))
 }
