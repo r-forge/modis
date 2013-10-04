@@ -2,6 +2,7 @@
 # Date: August 2011
 # Licence GPL v3
 
+# product="M.D13Q1"; collection=NULL; server="LPDAAC"; begin=NULL; end=NULL; forceCheck=FALSE; wait=0; stubbornness=1
 
 getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=NULL, forceCheck=FALSE, wait=1, stubbornness=10)
 {
@@ -39,10 +40,29 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
       invisible(file.copy(file.path(find.package('MODIS'),'external',paste0(server,"_ftp.txt")),paste0(opts$auxPath,server,"_ftp.txt")))
     }
     ftpdirs <- read.table(paste0(opts$auxPath,server,"_ftp.txt"),stringsAsFactors=FALSE)
-    
     good    <- sapply(colnames(ftpdirs), function(x) {length(strsplit(x,"\\.")[[1]])==2})
     ftpdirs <- ftpdirs[,good] # remove wrong cols
     
+    # clean the data.frame for "FALSE" and "NA"
+    
+    res <- vector(length=ncol(ftpdirs),mode="list")
+    for (ag in 1:ncol(ftpdirs))
+    {
+      iu <- ftpdirs[,ag]
+      iu <- iu[!is.na(iu)]
+      iu <- iu[iu!=FALSE]
+      res[[ag]] <- iu
+    }
+    
+    mtr <- matrix(NA,nrow=max(sapply(res,length)),ncol=length(res))
+    colnames(mtr) <- names(ftpdirs)    
+    
+    for(j in seq_along(ftpdirs))
+    {
+      mtr[,j] <- replace(mtr[,j], 1:length(res[[j]]),res[[j]])
+    }
+    write.table(mtr,paste0(opts$auxPath,server,"_ftp.txt"))
+   
     for (i in seq_along(product$PRODUCT))
     {
       todo <- paste(product$PRODUCT[i],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[i])]],sep="")
@@ -107,14 +127,14 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
               startPath <- strsplit(path$remotePath$LPDAAC,"DATE")[[1]][1] # cut away everything behind DATE
               for (g in 1:sturheit)
               {
-                cat("Try:",g,"\r")
-                try(FtpDayDirs <- filesUrl(startPath))
-                Sys.sleep(wait)
+                cat("Try:",g," \r")
+                FtpDayDirs <- try(filesUrl(startPath))
                 cat("             \r")
                 if(exists("FtpDayDirs"))
                 {    
                   break
                 }
+                Sys.sleep(wait)
               }
           } else if (server=="LAADS")
           {
@@ -128,7 +148,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
             for (g in 1:sturheit)
             {
               cat("Getting Year(s) try:",g,"\r")
-              try(years <- filesUrl(startPath))
+              years <- try(filesUrl(startPath))
               if(g < (sturheit/2))
               {
                 Sys.sleep(wait)
@@ -154,7 +174,7 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
             {
               cat("                          \r")
               cat("Getting day(s) try:",g,"\r") # for",todo[u],"
-              try(p <- filesUrl(Ypath)) # async=T!
+              p <- try(filesUrl(Ypath)) # async=T!
               if(g < (sturheit/2))
               {
                 Sys.sleep(wait)
@@ -187,9 +207,13 @@ getStruc <- function(product, collection=NULL, server="LPDAAC", begin=NULL, end=
           }
           if(!exists("FtpDayDirs"))
           {
-            cat("Couldn't get structure from",server,"server working with offline information!\n")
+            cat("Couldn't get structure from",server,"server using with offline information!\n")
             return(invisible(NULL))        
-          } else 
+          } else if (FtpDayDirs==FALSE)
+          {
+            cat("Couldn't get structure from",server,"server using with offline information!\n")
+            return(invisible(NULL))        
+          } else
           {
             rowdim <- max(nrow(ftpdirs),length(FtpDayDirs))
             if (todo[u] %in% colnames(ftpdirs)) 

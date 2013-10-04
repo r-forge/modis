@@ -27,6 +27,5 @@ export("extractBits")
 export("detectBitInfo")
 export("maskWater")
 
-exportPattern(".+WS$")
 
 

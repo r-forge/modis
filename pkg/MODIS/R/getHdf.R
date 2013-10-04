@@ -5,7 +5,7 @@
 
 getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent=NULL, collection=NULL, HdfName, quiet=FALSE, wait=0.5, checkIntegrity=FALSE,...) 
 {
-   # product="MOD11A1"; begin="2010001"; end="2010005"; tileH=NULL; tileV=NULL; extent=NULL; collection=NULL; quiet=FALSE; wait=0.5; checkIntegrity=FALSE; z=1;u=1
+   # product="MOD13Q1"; begin="2010001"; end="2010005"; tileH=NULL; tileV=NULL; extent=NULL; collection=NULL; quiet=FALSE; wait=0.5; checkIntegrity=FALSE; z=1;u=1
     opts <- combineOptions(...)
     
     sturheit <- stubborn(level=opts$stubbornness)
