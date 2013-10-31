@@ -6,7 +6,7 @@ Depends: R (>= 2.10), utils, raster, XML
 Suggests: rgdal
 Author: Jan Verbesselt, Joan Maspons, Matteo Mattiuzzi 
 Maintainer: Jan Verbesselt <Jan.Verbesselt@wur.nl> 
-Description: This package provides access to the web processing service for the Moderate Resolution Imaging Spectroradiometer (MODIS). 
+Description: This package provides access to the web processing service for the Moderate Resolution Imaging Spectroradiometer (MODIS). It requires SOAP and XMLSchema packages from http://www.omegahat.org
 URL: http://r-forge.r-project.org/projects/modisws/, http://daac.ornl.gov/MODIS/MODIS-menu/modis_webservice.html
 License: GPL (>=3)
 LazyLoad: yes
