@@ -98,7 +98,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
         }
         Sys.sleep(wait)
       }
-      FtpDayDirs <- as.Date(FtpDayDirs,"%Y.%m.%d")
+      FtpDayDirs <- as.Date(as.character(FtpDayDirs),"%Y.%m.%d")
     } else if (server=="LAADS")
     {
       startPath <- strsplit(path$remotePath$LAADS,"YYYY")[[1]][1] # cut away everything behind YYYY
