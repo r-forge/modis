@@ -109,10 +109,7 @@ runMrt <- function(...)
             dir.create(outDir)
 
             ######################## along platform (TerraAqua)
-
-            getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)
-            ftpdirs <- list()
-            ftpdirs[[1]] <- read.table(file.path(opts$auxPath,"LPDAAC_ftp.txt",fsep="/"),stringsAsFactors=FALSE)
+            ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)$dates)
     
             avDates <- ftpdirs[[1]][,todo[u]]
             avDates <- avDates[!is.na(avDates)]            
@@ -150,7 +147,7 @@ runMrt <- function(...)
                         {
                             v <- 1
                         } else {
-                            v <- 1:length(files)
+                            v <- seq_along(files)
                         }
             
                         for (q in v)

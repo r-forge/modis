@@ -661,14 +661,14 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
         path <- genString(x[a],...)
         path$localPath <- setPath(path$localPath)
         
-        hv <- 1:length(path$remotePath)
+        hv <- 1:length(opts$MODISserverOrder)
         hv <- rep(hv,length=opts$stubbornness)
         g=1
         while(g <= opts$stubbornness) 
         {     
           if (!quiet)
           {
-              cat("\nGetting file from:",names(path$remotePath)[hv[g]],"\n############################\n")
+              cat("\nGetting file from:",opts$MODISserverOrder[hv[g]],"\n############################\n")
           }
           
 #          if(.Platform$OS=="windows")
@@ -679,7 +679,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
               destfile <- paste0(path$localPath,x[a])
 #          }
             
-          out[a] <- try(download.file(url=paste(path$remotePath[hv[g]],x[a],sep="/"),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+          out[a] <- try(download.file(url=paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse=""),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
       
           if (is.na(out[a])) {cat("File not found!\n"); unlink(destfile); break} # if NA then the url name is wrong!
           if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 

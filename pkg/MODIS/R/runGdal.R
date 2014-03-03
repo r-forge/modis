@@ -129,7 +129,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     {
       s_srs <- paste0(' -s_srs ',shQuote("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
     }
-    #### te (target extent)
+    #### te (target @extent)
     te <- NULL # if extent comes from tileV/H
     if (!is.null(extent$target$extent)) # all extents but not tileV/H
     {
@@ -143,6 +143,16 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         rx <- extent$target$extent
       }
       te <- paste(" -te", rx@xmin, rx@ymin, rx@xmax, rx@ymax)  
+    } 
+    if (is.null(extent$target))
+    {
+      if(!is.null(extent$extent))
+      {
+        rx <- raster(extent$extent,crs="+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") 
+        rx <- projectExtent(rx,outProj)
+        rx <- extent(rx) 
+        te <- paste(" -te", rx@xmin, rx@ymin, rx@xmax, rx@ymax)  
+      }
     }
     
     #### generate non-obligatory GDAL arguments
@@ -176,7 +186,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
       q <- NULL
     }
     
-    for (z in 1:length(product$PRODUCT))
+    for (z in seq_along(product$PRODUCT))
     { # z=1
       todo <- paste(product$PRODUCT[z],".",product$CCC[[product$PRODUCT[z]]],sep="")    
       
@@ -196,32 +206,32 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
         dir.create(outDir,showWarnings=FALSE,recursive=TRUE)
       }
       
-      for(u in 1:length(todo))
+      for(u in seq_along(todo))
       { # u=1
-        getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)
         ftpdirs      <- list()
-        ftpdirs[[1]] <- read.table(paste0(opts$auxPath,"LPDAAC_ftp.txt"),stringsAsFactors=FALSE)
+        ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)$dates)
         
         prodname <- strsplit(todo[u],"\\.")[[1]][1] 
         coll     <- strsplit(todo[u],"\\.")[[1]][2]
         
-        avDates <- ftpdirs[[1]][,todo[u]]
+        avDates <- ftpdirs[[1]]
         avDates <- avDates[avDates!=FALSE]
         avDates <- avDates[!is.na(avDates)]        
         
-        sel     <- as.Date(avDates,format="%Y.%m.%d")
+        sel     <- as.Date(avDates)
         us      <- sel >= tLimits$begin & sel <= tLimits$end
         
         if (sum(us,na.rm=TRUE)>0)
         {
           avDates <- avDates[us]
                       
-          for (l in 1:length(avDates))
+          for (l in seq_along(avDates))
           { # l=1
             files <- unlist(
               getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
                tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
             )
+            
             files <- files[basename(files)!="NA"] # is not a true NA so it need to be like that na not !is.na()
             
             if(length(files)>0)

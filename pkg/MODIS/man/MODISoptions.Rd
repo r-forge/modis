@@ -5,9 +5,9 @@ Set or retrieve permanent MODIS package options}
 \description{
 With this function you can get or set _persistant_ MODIS package options (per user or systemwide). Changes here will persist sessions and updates.}
 \usage{
-MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, 
-gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet = FALSE, save=TRUE, 
-checkPackages=TRUE)
+MODISoptions(localArcPath, outDirPath, pixelSize, outProj, resamplingType, 
+dataFormat, gdalPath, MODISserverOrder, dlmethod, stubbornness,
+systemwide = FALSE, quiet = FALSE, save=TRUE, checkPackages=TRUE)
 }
 \arguments{
   \item{localArcPath}{
@@ -28,6 +28,7 @@ Default is \code{GTiff}. Or one of \code{getOption("MODIS_gdalOutDriver")} (colu
 
   \item{gdalPath}{
 Path to gdal _bin_ directory, relvand more for windows. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}
+  \item{MODISserverOrder}{Default \code{"LPDAAC","LAADS"}, you may invert, or select only one server, inhibiting all efforts to download data from the second available server.}
   \item{dlmethod}{Default \code{auto} see argument \code{method} in \code{?download.file}. On a Unixoid (also Mac?) it is suggested to use  \code{wget}.}
   \item{stubbornness}{
 The number of re-tries after that the HTTP/FTP server has refused the connection. Higher values increase the chance of getting the file but also leads to hanging functions if the server is down.}

@@ -1,4 +1,4 @@
-MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, gdalPath, dlmethod, stubbornness, systemwide = FALSE, quiet=FALSE, save=TRUE, checkPackages=TRUE)
+MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplingType, dataFormat, gdalPath, MODISserverOrder, dlmethod, stubbornness, systemwide = FALSE, quiet=FALSE, save=TRUE, checkPackages=TRUE)
 {
   # This function collects the package options from up to 3 files and creates the .MODIS_opts.R file (location depending on systemwide=T/F, see below):
   # 1. package installation directory (factory defaults); 
@@ -122,7 +122,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     }    
   }
 
-  opt$auxPath      <- paste0(opt$outDirPath,".auxiliaries/")
+  opt$auxPath <- paste0(opt$outDirPath,".auxiliaries/")
   
   if(!missing(dlmethod))
   {
@@ -157,11 +157,36 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$gdalPath <- correctPath(gdalPath)
     if(length(grep(dir(opt$gdalPath),pattern="gdalinfo"))==0)
     {
-        stop(paste0("The 'gdalPath' you have provided '",normalizePath(opt$gdalPath,"/",FALSE) ,"' does not contain any gdal utilities, make sure to address the folder with GDAL executables (ie: gdalinfo)!"))
+      stop(paste0("The 'gdalPath' you have provided '",normalizePath(opt$gdalPath,"/",FALSE) ,"' does not contain any gdal utilities, make sure to address the folder with GDAL executables (ie: gdalinfo)!"))
     }
   }
   opt$gdalPath <- correctPath(opt$gdalPath)
-  options(MODIS_gdalPath=opt$gdalPath)# needs to be exportet now as it is required by checkTools a few lines bellow (uses combineOptions())! Maybe not the best solution!
+  options(MODIS_gdalPath=opt$gdalPath) # needs to be exportet now as it is required by checkTools a few lines bellow (uses combineOptions())! Maybe not the best solution!
+  
+  if(is.null(opt$MODISserverOrder))
+  {
+    opt$MODISserverOrder <- c("LPDAAC","LAADS")
+  }
+  if (!missing(MODISserverOrder))
+  {
+    MODISserverOrder <- toupper(MODISserverOrder)
+    if(length(MODISserverOrder)==1)
+    {
+      if("LPDAAC" %in% MODISserverOrder | "LAADS" %in% MODISserverOrder)
+      {
+        opt$MODISserverOrder <- MODISserverOrder   
+      }
+    } else if(length(MODISserverOrder)==2)
+    {
+      if("LPDAAC" %in% MODISserverOrder & "LAADS" %in% MODISserverOrder)
+      {
+        opt$MODISserverOrder <- MODISserverOrder   
+      }
+    } else
+    {
+      stop("Provide valid 'MODISserverOrder' see '?MODISoptions'") 
+    }
+  }  
   
   # checks if the pointed GDAL exists and supports 'HDF4Image' driver.
   if(checkPackages)
@@ -175,7 +200,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     } else
     {
       opt$gdalOk  <- FALSE
-      gdalVersion <- "Not available. Use 'checkTools('GDAL')' for more information!"
+      gdalVersion <- "Not available. Use 'MODIS:::checkTools('GDAL')' for more information!"
     }
     
     # MRT
@@ -187,7 +212,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     } else
     {
       opt$mrtOk  <- FALSE
-      mrtVersion <- "Not available. Use 'checkTools('MRT')' for more information!"
+      mrtVersion <- "Not available. Use 'MODIS:::checkTools('MRT')' for more information!"
     }
   } else
   {
@@ -246,8 +271,16 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     write('# 2.) download defaults:', filename)
     write('# consult \'?MODISoptions\' for more details', filename)
     write('  ', filename)
-    write(paste0('dlmethod     <- \'',opt$dlmethod,'\'' ), filename)
-    write(paste0('stubbornness <- \'',opt$stubbornness,'\''), filename)
+    
+    if(length(opt$MODISserverOrder)==2)
+    {
+      write(paste0('MODISserverOrder <- c(\'',paste(opt$MODISserverOrder,collapse="', '"),'\')' ), filename)
+    } else
+    {
+      write(paste0('MODISserverOrder <- \'',opt$MODISserverOrder,'\'' ), filename)
+    }
+    write(paste0('dlmethod         <- \'',opt$dlmethod,'\'' ), filename)
+    write(paste0('stubbornness     <- \'',opt$stubbornness,'\''), filename)
     write('  ', filename)
     
     write('#########################', filename)
@@ -289,22 +322,23 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   {
     cat('\nSTORAGE:\n')
     cat('_______________\n')
-    cat('localArcPath  :', normalizePath(opt$localArcPath,"/",FALSE), '\n' )
-    cat('outDirPath    :', normalizePath(opt$outDirPath,"/",FALSE), '\n\n\n')
+    cat('localArcPath :', normalizePath(opt$localArcPath,"/",FALSE), '\n' )
+    cat('outDirPath   :', normalizePath(opt$outDirPath,"/",FALSE), '\n\n\n')
     
     cat('DOWNLOAD:\n')
     cat('_______________\n')
-    cat('dlmethod      :', opt$dlmethod,'\n')
-    cat('stubbornness  :', opt$stubbornness,'\n\n\n')
+    cat('MODISserverOrder :', paste(opt$MODISserverOrder,collapse=", "),'\n')
+    cat('dlmethod         :', opt$dlmethod,'\n')
+    cat('stubbornness     :', opt$stubbornness,'\n\n\n')
     
     cat('PROCESSING:\n')
     cat('_______________\n')
-    cat('GDAL          :', gdalVersion, '\n')
-    cat('MRT           :', mrtVersion, '\n')
-    cat('pixelSize     :', opt$pixelSize, '\n')
-    cat('outProj       :', opt$outProj, '\n')
-    cat('resamplingType:', opt$resamplingType, '\n')
-    cat('dataFormat    :', opt$dataFormat, '\n\n\n')
+    cat('GDAL           :', gdalVersion, '\n')
+    cat('MRT            :', mrtVersion, '\n')
+    cat('pixelSize      :', opt$pixelSize, '\n')
+    cat('outProj        :', opt$outProj, '\n')
+    cat('resamplingType :', opt$resamplingType, '\n')
+    cat('dataFormat     :', opt$dataFormat, '\n\n\n')
     
     cat('DEPENDENCIES:\n')
     cat('_______________\n')
@@ -324,7 +358,13 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   {
     if (is.character(opt[[i]]))
     {
-      eval(parse(text=paste0("options(MODIS_",names(opt[i]),"='",opt[[i]],"')")))
+#      if(length(opt[[i]])==1)
+#      {
+#        eval(parse(text=paste0("options(MODIS_",names(opt[i]),"='",opt[[i]],"')")))
+#      } else
+#      {
+        eval(parse(text=paste0("options(MODIS_",names(opt[i]),"= c('",paste0(opt[[i]],collapse="', '"),"'))")))
+#      }
     } else if (is.data.frame(opt[[i]]) | is.matrix(opt[[i]]))
     {
       eval(parse(text=paste0("options(MODIS_",names(opt[i]),"=opt$",names(opt[i]),")")))
