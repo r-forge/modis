@@ -1,3 +1,6 @@
+import(raster)
+#importFrom("raster",raster:::.defaultExtension,raster:::.doCluster)
+
 export("getHdf")
 export("getTile")
 export("getProduct")

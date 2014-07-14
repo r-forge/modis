@@ -38,7 +38,6 @@ checksizefun <- function(file,sizeInfo=NULL,flexB=0)
     # determine reference size
     if (is.null(sizeInfo))
     {
-
         if (!require(XML)) 
         {
             stop("You need to install the 'XML' package: install.packages('XML')")
@@ -47,7 +46,6 @@ checksizefun <- function(file,sizeInfo=NULL,flexB=0)
         xmlfile  <- xmlParse(xmlfile)
         MetaSize <- getNodeSet(xmlfile, "/GranuleMetaDataFile/GranuleURMetaData/DataFiles/DataFileContainer/FileSize" )
         MetaSize <- as.numeric(xmlValue(MetaSize[[1]])) # expected filesize
-
     } else 
     {
         MetaSize <- as.numeric(sizeInfo[which(sizeInfo[,1]==basename(file)),2])
@@ -555,14 +553,13 @@ checkDeps <- function()
     needed <- c('RCurl', 'rgeos', 'rgdal', 'maps', 'mapdata', 'snow', 'ptw', 'XML')
     if (all(needed %in% installed.packages()[,1]))
     {
-        out <- "All suggested packages are installed"
+        cat("All suggested packages are installed\n")
     } else {
         missingP <- !needed %in% installed.packages()[,1]
         missingP <- paste0(needed[missingP],collapse="', '")
 
-        out <- paste0("To install all required and suggested packages run:\nsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \ninstall.packages(c('",missingP,"'),dependencies=TRUE)\n\n")
+        cat("To install all required and suggested packages run:\n\tsetRepositories() # activate CRAN, R-forge, and Omegahat and then: \n\tinstall.packages(c('",missingP,"'),dependencies=TRUE)\n\n")
     }
-out
 }
 
 
@@ -661,7 +658,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
         path <- genString(x[a],...)
         path$localPath <- setPath(path$localPath)
         
-        hv <- 1:length(opts$MODISserverOrder)
+        hv <- seq_along(opts$MODISserverOrder)
         hv <- rep(hv,length=opts$stubbornness)
         g=1
         while(g <= opts$stubbornness) 
@@ -670,17 +667,15 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
           {
               cat("\nGetting file from:",opts$MODISserverOrder[hv[g]],"\n############################\n")
           }
+          destfile <- paste0(path$localPath,x[a])
           
-#          if(.Platform$OS=="windows")
-#          {
-#              destfile <- paste(shortPathName(path$localPath),x[a],sep="\\")  
-#          } else
-#          {
-              destfile <- paste0(path$localPath,x[a])
-#          }
-            
-          out[a] <- try(download.file(url=paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse=""),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
-      
+          if(!.Platform$OS=="windows" & opts$dlmethod=="aria2")
+          {
+            out[a] <- system(paste0("aria2 -x 3 ",paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse="")," -d ", destfile))
+          } else
+          {
+            out[a] <- try(download.file(url=paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse=""),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
+          }
           if (is.na(out[a])) {cat("File not found!\n"); unlink(destfile); break} # if NA then the url name is wrong!
           if (out[a]!=0 & !quiet) {cat("Remote connection failed! Re-try:",g,"\r")} 
           if (out[a]==0 & !quiet & g>1) {cat("Downloaded after:",g,"re-tries\n\n")}

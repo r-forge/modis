@@ -7,7 +7,7 @@
 \title{List MODIS QA (Quality) SDS information: bitShift and bitMask}
 
 \description{
-This function gets MODIS QA infromation. Is gets the information from a local database and not all products are available.   
+This function returns MODIS QA information for a specific product. It gets the information from a internal database and not all products are available.   
 }
 
 \usage{

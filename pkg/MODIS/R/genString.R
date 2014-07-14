@@ -2,202 +2,196 @@
 # Date : February 2012
 # Licence GPL v3
 
-# 'date' is an EXISTING date! result from getStruc() and passed as single date! For format see ?transDate
+# 'date' is the date of an existing file! result from getStruc() and passed as single date! For format see ?transDate
 
-genString <- function(x, date=NULL, collection=NULL, what="images", local=TRUE, remote=TRUE, ...)
+genString <- function(x, collection=NULL, date=NULL, what="images", local=TRUE, remote=TRUE, ...)
 {
-    if (missing(x)) 
-    {
-        stop("genString Error: 'x' must be a HDF-file or MODIS-product name!")
-    }
+  product <- getProduct(x=x,quiet=TRUE)
 
-    opts <- combineOptions(...)
-    remotePath <- localPath <- NULL
+  if(length(product$PRODUCT)>1)
+  {
+    warning("genString() does not support multiple products! Generating 'path' for the first product:", product$PRODUCT[1], "\n")
+    product <- lapply(product,function(x){x[1]}) # take only the first argument
+  }
+
+  if(length(product$CCC)==0)
+  {
+    product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
+  }
+     
+  if (!is.null(date)) 
+  {
+    product$DATE <- list(paste0("A",transDate(date)$beginDOY)) # generates MODIS file date format "AYYYYDDD"
+  }
+
+  opts         <- combineOptions(...)
+  opts$auxPath <- setPath(opts$auxPath)
+  remotePath   <- localPath <- NULL    
     
-    opts$auxPath <- setPath(opts$auxPath)
-    
-    product <- getProduct(x=x,quiet=TRUE)
-    if(length(product$PRODUCT)>1)
+  if (is.null(product$DATE)) # if x is a PRODUCT and date is not provided 
+  { 
+    if (local) 
     {
-        warning(".genString() does not support multiple products! Generating 'path' only for the first:", product$PRODUCT[1], "\n")
-        product <- lapply(product,function(x){x[1]}) # take only the first argument
-    }
+      tempString <- strsplit(opts$arcStructure,"/")[[1]]
+      
+      string <- list()
+      l=0
+      for (i in 1:length(tempString))
+      {
+        s <- strsplit(tempString[i],"\\.")[[1]]
     
-    if(length(product$CCC)==0)
-    {
-        product$CCC <- getCollection(product=product$PRODUCT,collection=collection)[[1]]
-    }
-    
-    if (!is.null(date)) 
-    { # date can be supplied as argument! 
-        product$DATE <- list(paste("A",transDate(begin=date)$beginDOY,sep="")) # generates MODIS file date format "AYYYYDDD"
-    }
-    
-    if (is.null(product$DATE)) # if x is a PRODUCT and date is not provided 
-    { 
-        if (local) 
+        if (length(s)>0) 
         {
-            tempString <- strsplit(opts$arcStructure,"/")[[1]]
-            
+          tmp <- list()
+          for (u in 1:length(s))
+          {
+            if (s[u] %in% c("DATE","YYYY","DDD")) 
+            {
+              if (product$PRODUCT!="SRTM")
+              {
+                tmp[[u]] <- s[u]
+              }
+            } else 
+            {
+              tmp[[u]] <- getPart(x=product,s[u])
+            }
+          }
+          if (length(tmp)>0)
+          {
+            l=l+1
+            string[[l]] <- paste0(unlist(tmp),collapse=".")
+          }
+        }
+      }
+    localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+    }
+        
+    if (remote) 
+    {
+      namesFTP <- names(MODIS_FTPinfo)
+      Hmany <- grep(namesFTP,pattern="^ftpstring*.")
+      
+      remotePath <- list()
+      n = 0
+      for (e in Hmany)
+      {
+        stringX <- MODIS_FTPinfo[[e]]
+        
+        if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
+        {
+          n=n+1                    
+          if(is.null(stringX$variablepath))
+          {
+            remotePath[[n]] <- stringX$basepath
+          } else 
+          {
+            struc      <- stringX$variablepath    
+            tempString <- strsplit(struc,"/")[[1]]
+    
             string <- list()
             l=0
             for (i in 1:length(tempString))
             {
-                s <- strsplit(tempString[i],"\\.")[[1]]
-            
-                if (length(s)>0) 
+              s <- strsplit(tempString[i],"\\.")[[1]]
+      
+              if (length(s)> 0) 
+              {
+                l=l+1    
+                tmp <- list()
+                for (u in 1:length(s))
                 {
-                    tmp <- list()
-                        for (u in 1:length(s))
-                        {
-                            if (s[u] %in% c("DATE","YYYY","DDD")) 
-                            {
-                                if (product$PRODUCT!="SRTM")
-                                {
-                                    tmp[[u]] <- s[u]
-                                }
-                            } else 
-                            {
-                                tmp[[u]] <- getPart(x=product,s[u])
-                            }
-                        }
-                    if (length(tmp)>0)
+                  if (s[u] %in% c("DATE","YYYY","DDD")) 
+                  {
+                    if (product$PRODUCT!="SRTM")
                     {
-                        l=l+1
-                        string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
+                      tmp[[u]] <- s[u]
                     }
-                }
+                  } else 
+                  {
+                    tmp[[u]] <- getPart(x=product,s[u])
+                  }
+                }                                
+                string[[l]] <- paste0(unlist(tmp),collapse=".")    
+              }
             }
-        localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+          remotePath[[n]] <- path.expand(paste(stringX$basepath,paste0(unlist(string),collapse="/"),sep="/"))
+          }
+          names(remotePath)[n] <- stringX$name
         }
-        if (remote) 
-        {
-            namesFTP <- names(MODIS_FTPinfo)
-            Hmany <- grep(namesFTP,pattern="^ftpstring*.")
-            
-            remotePath <- list()
-            n = 0
-            for (e in Hmany)
-            {
-       
-                stringX <- MODIS_FTPinfo[[e]]
-                
-                if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
-                {
-                    n=n+1                    
-                    if(is.null(stringX$variablepath))
-                    {
-                        remotePath[[n]] <- stringX$basepath
-                    } else 
-                    {
-                        struc      <- stringX$variablepath    
-                        tempString <- strsplit(struc,"/")[[1]]
-                
-                        string <- list()
-                        l=0
-                        for (i in 1:length(tempString))
-                        {
-                            s <- strsplit(tempString[i],"\\.")[[1]]
-                    
-                            if (length(s)> 0) 
-                            {
-                                l=l+1    
-                                tmp <- list()
-                                for (u in 1:length(s))
-                                {
-                                    if (s[u] %in% c("DATE","YYYY","DDD")) 
-                                    {
-                                        if (product$PRODUCT!="SRTM")
-                                        {
-                                            tmp[[u]] <- s[u]
-                                        }
-                                    } else 
-                                    {
-                                        tmp[[u]] <- getPart(x=product,s[u])
-                                    }
-                                }                                
-                                string[[l]] <- paste(unlist(tmp),sep="",collapse=".")    
-                            }
-                        }
-                    remotePath[[n]] <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
-                    }
-                    names(remotePath)[n] <- stringX$name
-                }
-            }
-        }
-    } else 
-    { # if x is a file name
-            
-        if (local) 
-        {
-            tempString <- strsplit(opts$arcStructure,"/")[[1]]
+      }
+    }
+  } else 
+  { # if x is a file name
+          
+    if (local) 
+    {
+      tempString <- strsplit(opts$arcStructure,"/")[[1]]
+  
+      string <- list()
+      l=0
+      for (i in 1:length(tempString))
+      {
+        s <- strsplit(tempString[i],"\\.")[[1]]
         
-            string <- list()
-            l=0
-            for (i in 1:length(tempString))
-            {
-                s <- strsplit(tempString[i],"\\.")[[1]]
-                
-                if (length(s)>0)
-                {
-                    l=l+1
-                    tmp <- list()
-                    for (u in 1:length(s))
-                    {
-                        tmp[[u]] <- getPart(x=product,s[u])
-                    }
-                string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
-                }
-            } 
-        localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+        if (length(s)>0)
+        {
+          l=l+1
+          tmp <- list()
+          for (u in seq_along(s))
+          {
+            tmp[[u]] <- getPart(x=product,s[u])
+          }
+        string[[l]] <- paste0(unlist(tmp),collapse=".")
         }
+      } 
+    localPath <- setPath(path.expand(paste0(opts$localArcPath,paste0(unlist(string),collapse="/"))))
+    }
 
-        if (remote) 
-        {
-            if (!what %in% c("images","metadata")) 
-            {
-                stop("Parameter 'what' must be 'images' or 'metadata'")
-            }
-                     
-            namesFTP <- names(MODIS_FTPinfo)
-            Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
+    if (remote) 
+    {
+      if (!what %in% c("images","metadata")) 
+      {
+        stop("Parameter 'what' must be 'images' or 'metadata'")
+      }
+               
+      namesFTP <- names(MODIS_FTPinfo)
+      Hmany <- grep(namesFTP,pattern="^ftpstring*.") # get ftpstrings in ./MODIS_opts.R
+  
+      remotePath <- list()
+      n = 0
+      for (e in Hmany)
+      {
+        stringX <- MODIS_FTPinfo[[e]]
         
-            remotePath <- list()
-            n = 0
-            for (e in Hmany)
+        if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
+        {
+          struc <- stringX$variablepath    
+          tempString <- strsplit(struc,"/")[[1]]
+      
+          string <- list()
+          l=0        
+          for (i in 1:length(tempString))
+          {
+            s <- strsplit(tempString[i],"\\.")[[1]]
+    
+            if (length(s)>0)
             {
-                stringX <- MODIS_FTPinfo[[e]]
-                
-                # if (stringX$name %in% eval(parse(text=product$SOURCE)) & what %in% stringX$content)                 
-                if(length(grep(product$SOURCE,pattern=stringX$name))>0 & what %in% stringX$content)
-                {
-                    struc <- stringX$variablepath    
-                    tempString <- strsplit(struc,"/")[[1]]
-                
-                    string <- list()
-                    l=0        
-                    for (i in 1:length(tempString))
-                    {
-                        s <- strsplit(tempString[i],"\\.")[[1]]
-                
-                        if (length(s)>0)
-                        {
-                            l=l+1
-                            tmp <- list()
-                            for (u in 1:length(s))
-                            {
-                                tmp[[u]] <- getPart(x=product,s[u])
-                            }
-                            string[[l]] <- paste(unlist(tmp),sep="",collapse=".")
-                        }
-                    }
-                    n=n+1
-                    remotePath[[n]]      <- path.expand(paste(stringX$basepath,paste(unlist(string),sep="",collapse="/"),sep="/"))
-                    names(remotePath)[n] <- stringX$name
-                }
-            }        
+              l=l+1
+              tmp <- list()
+              for (u in seq_along(s))
+              {
+                tmp[[u]] <- getPart(x=product,s[u])
+              }
+              string[[l]] <- paste0(unlist(tmp),collapse=".")
+            }
+          }
+          n=n+1
+          remotePath[[n]]      <- path.expand(paste(stringX$basepath,paste0(unlist(string),collapse="/"),sep="/"))
+          names(remotePath)[n] <- stringX$name
         }
-    }        
-    return(list(localPath=correctPath(localPath), remotePath=remotePath))
+      }        
+    }
+  }        
+  return(list(localPath=correctPath(localPath), remotePath=remotePath))
 }
 

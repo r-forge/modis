@@ -56,12 +56,12 @@ Currently tested on MODIS and Landsat data. Using M*D13 data it is also possible
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.7 MB): 
-# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=shorty_relay&id=QR5FZSxe0g
+# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=files&t=c4481aebe031c26fbbc62722ace11da4
 # Afterward extract it to: 
 options("MODIS_outDirPath")
 
 # the only obligatory dataset is "x" (vegetatino index), get the 'vi' data on the source directory: 
-path <- paste(options("MODIS_outDirPath"),"/fullCapa",sep="")
+path <- paste0(options("MODIS_outDirPath"),"/fullCapa")
 vi <- preStack(path=path, pattern="*_NDVI.tif$")
 
 # "orgTime" detects timing information of the input data and generates based on the arguments

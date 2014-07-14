@@ -18,7 +18,7 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
     product     <- getProduct(x=product,quiet=TRUE)
     product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
     
-    info <-list()
+    info <- list()
     for (z in seq_along(product$PRODUCT))
     {    
        info[[z]] <-  paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
@@ -56,8 +56,8 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
     {
         return("Ok deleting abborted!")
         
-    } else if (doit %in% c("Y","YES")) {
-    
+    } else if (doit %in% c("Y","YES")) 
+    {
         # bypass checks if a complete product has to be deleted! 
         if (is.null(begin) & is.null(end) & ext$tile[1]=="global")
         {
@@ -67,25 +67,25 @@ delHdf <- function(product, collection=NULL, extent="global", tileV=NULL, tileH=
         
                 for(u in seq_along(todo))
                 {
-                    path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
-                    path <- strsplit(path,"/")[[1]]
-                    path <- paste0(path[-length(path)],collapse="/")
-                    allLocal <- list.files(path,recursive=TRUE)
+                    path      <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=NULL,remote=FALSE,opts)$localPath
+                    path      <- strsplit(path,"/")[[1]]
+                    path      <- paste0(path[-length(path)],collapse="/")
+                    allLocal  <- list.files(path,recursive=TRUE)
                     summaries <- file.size(allLocal,units="MB") + sum(summaries)
                     unlink(path,recursive=TRUE)
                 }
             }
             cat("Deleted:", todo[u],"\n")
             
-        } else { 
-        
+        } else 
+        { 
             for (z in seq_along(product$PRODUCT))
             {
                 todo <- paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
             
                 for(u in seq_along(todo))
                 {
-                    path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],remote=FALSE,opts)$localPath
+                    path <- genString(x=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],date=NULL,remote=FALSE,opts)$localPath
                     path <- strsplit(path,"/")[[1]]
                     path <- paste0(path[-length(path)],collapse="/")
                     

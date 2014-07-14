@@ -114,7 +114,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
       isOK <- TRUE
       if (file.exists(paste0(path$localPath,"/",files[d])))
       {
-       isOK <- checksizefun(file=paste0(path$localPath,"/",files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)$isOK # flexB!
+       isOK <- checksizefun(file=paste0(path$localPath,"/",files[d]),sizeInfo=sizes,flexB=50000)$isOK # flexB!
       }
       if (!file.exists(paste0(path$localPath,"/",files[d]))| !isOK)
       {
@@ -137,7 +137,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
           )
           if (hdf==0) 
           {
-            SizeCheck <- checksizefun(file=paste0(path$localPath,"/", files[d]),type="SRTM",sizeInfo=sizes,flexB=50000)
+            SizeCheck <- checksizefun(file=paste0(path$localPath,"/", files[d]),sizeInfo=sizes,flexB=50000)
             if(!SizeCheck$isOK) {hdf=1} # if size check fails, re-try!
           }
           if(hdf==0 & !quiet) 

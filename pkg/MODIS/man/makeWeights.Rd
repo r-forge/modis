@@ -39,6 +39,9 @@ maskWater(X, bitShift=NULL, bitMask = NULL, keep = NULL, datatype="INT1U",...)
 \value{
    A rasterLayer if input is a rasterLayer, a rasterBrick if input is a rasterBrick or rasterStack.
 }
+\seealso{
+\code{detectBitInfo}
+}
 
 \author{
   Matteo Mattiuzzi

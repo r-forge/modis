@@ -84,7 +84,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$localArcPath <- localArcPath
   } else
   {
-    if (length(list.dirs(opt$localArcPath))==0)
+    if (length(list.dirs(opt$localArcPath,recursive=FALSE))==0)
     {
       if(!isTRUE(options()$MODIS_localArcPathWarned))
       {
@@ -101,7 +101,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   {
     outDirPath <- correctPath(outDirPath)
     
-    if (length(list.dirs(opt$outDirPath))==0)
+    if (length(list.dirs(opt$outDirPath,recursive=FALSE))==0)
     {
       message("'outDirPath' does not exist and will be created in '",normalizePath(outDirPath,"/",FALSE),"'")               
     } else if (opt$outDirPath != outDirPath)
@@ -112,7 +112,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
     opt$outDirPath <- outDirPath
   } else
   {
-    if (length(list.dirs(opt$outDirPath))==0)
+    if (length(list.dirs(opt$outDirPath,recursive=FALSE))==0)
     {
       if(!isTRUE(options()$MODIS_outDirPathWarned))
       {

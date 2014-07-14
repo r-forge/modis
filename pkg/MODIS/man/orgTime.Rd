@@ -4,10 +4,10 @@
 
 \alias{orgTime}
 
-\title{Creat. an output date information based on the input date information.}
+\title{Handles the in/output date used in the filerting}
 
 \description{
-This function checks the date information in an input file (ie. from MODIS filenames) and generates an output date information used for the creation of a regular intervalled result.
+With this function you define the period to be filtered (begin:end), the output temporal resolution (nDays), and it selected from 'files' the required data.
 }
 
 \usage{
@@ -15,18 +15,18 @@ This function checks the date information in an input file (ie. from MODIS filen
 }
 
 \arguments{
-  \item{files}{MODIS filenames, output or \code{runGdal} od \code{runMrt}.}
-  \item{nDays}{Integer. Time interval for the output layers. Default is "asIn" that includes the exact input dates within the period selected using \code{begin} and \code{end}. Can also be nDays="1 month" or "1 week" see: \url{http://statistics.berkeley.edu/classes/s133/dates.html} example of seq(from,to,by) at the bottom.}
-  \item{begin}{Default is from earliest input dataset. Here you can supply the begin date of the output files} 
-  \item{end}{Default to the end of the input dataset. Here you can specify the end date of the output file (note, the exact value depends also in "nDays" argument.} 
-  \item{pillow}{Number of days added on the beginning and on the en of a time serie} 
+  \item{files}{MODIS filenames, eg output of \code{runGdal} or \code{runMrt}.}
+  \item{nDays}{Integer. Time interval for the output layers. Default is "asIn" that includes the exact input dates within the period selected using \code{begin} and \code{end}. Can also be nDays="1 month" or "1 week" see: \url{https://www.stat.berkeley.edu/classes/s133/dates.html} example of seq(from,to,by) at the bottom.}
+  \item{begin}{Default is from earliest input dataset. Here you can supply the begin date of the output} 
+  \item{end}{Default to the end of the input dataset. Here you can specify the end date of the output (note, the exact \code{end}-date depends on \code{start} and \code{nDays} argument.} 
+  \item{pillow}{Number of days added on the beginning and on the end of a time serie.} 
   \item{pos1}{Start position of date in the filename. You have to count, sorry!} 
   \item{pos2}{End position of date in the filename. You have to count, sorry!} 
-  \item{format}{Default is all dates, if set the function subsets by date the files in path and pattern} 
+  \item{format}{How is the date formatted in the \code{file}, default expects: 'YYYYDDD' (\code{"\%Y\%j"}). Read \code{?as.Date} for for more information.} 
 } 
 
 \value{
-  Character vector of filenames sorted and subsetted by date. The result should in: \link{preStack}
+  List
 }
 
 \author{
