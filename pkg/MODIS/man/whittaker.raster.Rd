@@ -67,7 +67,8 @@ Currently tested on MODIS and Landsat data. Using M*D13 it is also possible to u
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.6 MB): 
-# download.file("http://ivfl-arc.boku.ac.at/owncloud/public.php?service=files&t=ebd4d3f8f3f643020e14798048853138&download",destfile=paste0(options("MODIS_outDirPath"),"fullCapa.zip"))
+# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=files&t=ebd4d3f8f3f643020e14798048853138&download
+# copy it to: options("MODIS_outDirPath")
 # Extract: 
 # unzip(paste0(options("MODIS_outDirPath"),"fullCapa.zip"),exdir=options("MODIS_outDirPath"))
 # delete the zip file:
