@@ -70,7 +70,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       readonly <- TRUE
     } else
     {
-      write.table("n",paste0(opts$auxPath, basnam,".lock"))
+      write.table(Sys.time(),paste0(opts$auxPath, basnam,".lock"))
       readonly <- FALSE
       on.exit(unlink(paste0(opts$auxPath, basnam,".lock")))
     }
@@ -112,6 +112,8 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       {
         cat("Downloading structure from 'LAADS'-server! Try:",g,"\r")
         years <- try(filesUrl(startPath))
+        years <- as.character(na.omit(as.numeric(years))) # removes folders/files probably not containing data
+        
         if(g < (sturheit/2))
         {
           Sys.sleep(wait)
