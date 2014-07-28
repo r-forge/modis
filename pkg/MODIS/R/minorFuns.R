@@ -671,7 +671,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
           
           if(!.Platform$OS=="windows" & opts$dlmethod=="aria2")
           {
-            out[a] <- system(paste0("aria2 -x 3 ",paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse="")," -d ", destfile))
+            out[a] <- system(paste0("aria2c -x 3 --file-allocation=none ",paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse="")," -d ", dirname(destfile)))
           } else
           {
             out[a] <- try(download.file(url=paste(path$remotePath[which(names(path$remotePath)==opts$MODISserverOrder[hv[g]])],x[a],sep="/",collapse=""),destfile=destfile,mode='wb', method=opts$dlmethod, quiet=quiet, cacheOK=FALSE),silent=TRUE)
