@@ -48,8 +48,8 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
     
     #### settings with messages
     # output pixel size in output proj units (default is "asIn", but there are 2 chances of changing this argument: pixelSize, and if extent comes from a Raster* object.
-    
-    if (product$TYPE[1]=="Tile")
+     
+    if (product$TYPE[1]=="Tile" | (all(!is.null(extent) | !is.null(tileH) & !is.null(tileV)) & product$TYPE[1]=="CMG"))
     {
         extent <- getTile(extent=extent, tileH=tileH, tileV=tileV, buffer=buffer)
     } else
@@ -252,21 +252,48 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                
               for (i in seq_along(SDS[[1]]$SDSnames))
               { # i=1
-                outname <- paste(paste(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
-                   ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension,sep="")
+                outname <- paste0(paste0(strsplit(basename(files[1]),"\\.")[[1]][1:2],collapse="."),
+                   ".", gsub(SDS[[1]]$SDSnames[i],pattern=" ",replacement="_"), extension)
                   
                 gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                 
-                if(names(NAS)[i] %in% SDS[[1]]$SDSnames)
+                naID <- which(SDS[[1]]$SDSnames == names(NAS)[i])
+                if(length(naID)>0)
                 {
-                  srcnodata <- paste0(" -srcnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
-                  dstnodata <- paste0(" -dstnodata ",NAS[[SDS[[1]]$SDSnames[i]]])
+                  srcnodata <- paste0(" -srcnodata ",NAS[[naID]])
+                  dstnodata <- paste0(" -dstnodata ",NAS[[naID]])
                 } else
                 {
                   srcnodata <- NULL
                   dstnodata <- NULL 
                 }
-                  
+ 
+                if(length(grep(todo,pattern="M.D13C2\\.005"))>0)
+                {
+                  if(i==1)
+                  {
+                    cat("\n###############\nM.D13C2.005 is likely to have a problem in metadata extent information, it it corrected on the fly\n###############\n") 
+                  }
+                  randomName <- paste0(outDir,"/",makeRandomString(),"_",1:length(gdalSDS),".tif") 
+                  on.exit(unlink(randomName,recursive=TRUE))
+                  for(ix in seq_along(gdalSDS))
+                  {
+                    cmd1 <- paste0(opts$gdalPath,"gdal_translate -a_nodata ",NAS[[naID]]," '",gdalSDS[ix],"' '",randomName[ix],"'")   
+                    cmd2 <- paste0(opts$gdalPath,"gdal_edit.py -a_ullr -180 90 180 -90 '",randomName[ix],"'")
+                    
+                    if (.Platform$OS=="unix")
+                    {
+                      system(cmd1,intern=TRUE)
+                      system(cmd2,intern=TRUE)
+                    } else
+                    {
+                      shell(cmd1,intern=TRUE)
+                      shell(cmd2,intern=TRUE)
+                    }
+
+                  }
+                  gdalSDS <- randomName
+                } 
                 if (.Platform$OS=="unix")
                 {
                   ifile <- paste0(gdalSDS,collapse="' '")
@@ -292,7 +319,8 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                             )
                   cmd <- gsub(x=cmd,pattern="\"",replacement="'")
                   system(cmd)
-                      
+                  unlink(randomName,recursive=TRUE)  
+                    
                 } else # windows
                 {
                     cmd <- paste0(opts$gdalPath,"gdalwarp")
