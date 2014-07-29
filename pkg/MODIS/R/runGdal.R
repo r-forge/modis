@@ -247,7 +247,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
             
               if (!exists("NAS"))
               {
-                NAS <- getNa(SDS[[1]]$SDS4gdal)
+                NAS <- MODIS:::getNa(SDS[[1]]$SDS4gdal)
               }
                
               for (i in seq_along(SDS[[1]]$SDSnames))
@@ -272,9 +272,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                 {
                   if(i==1)
                   {
-                    cat("\n###############\nM.D13C2.005 is likely to have a problem in metadata extent information, it it corrected on the fly\n###############\n") 
+                    cat("\n###############\nM.D13C2.005 is likely to have a problem in metadata extent information, it is corrected on the fly\n###############\n") 
                   }
-                  randomName <- paste0(outDir,"/",makeRandomString(),"_",1:length(gdalSDS),".tif") 
+                  randomName <- paste0(outDir,"/",MODIS:::makeRandomString(),"_",1:length(gdalSDS),".tif") 
                   on.exit(unlink(randomName,recursive=TRUE))
                   for(ix in seq_along(gdalSDS))
                   {
@@ -293,6 +293,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
 
                   }
                   gdalSDS <- randomName
+
                 } 
                 if (.Platform$OS=="unix")
                 {
@@ -319,42 +320,43 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                             )
                   cmd <- gsub(x=cmd,pattern="\"",replacement="'")
                   system(cmd)
-                  unlink(randomName,recursive=TRUE)  
-                    
                 } else # windows
                 {
-                    cmd <- paste0(opts$gdalPath,"gdalwarp")
-                 
-                    # ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
-                    # ofile <- shortPathName(paste0(normalizePath(outDir), '\\', outname))
-                    ofile <- paste0(outDir, '/', outname)      
-                    ifile <- paste0(gdalSDS,collapse='" "')
-                    
-                    # GDAL < 1.8.0 doesn't support ' -overwrite' 
-                    if(file.exists(ofile))
+                  cmd <- paste0(opts$gdalPath,"gdalwarp")
+               
+                  # ifile <- paste(shortPathName(gdalSDS),collapse='\" \"',sep=' ')
+                  # ofile <- shortPathName(paste0(normalizePath(outDir), '\\', outname))
+                  ofile <- paste0(outDir, '/', outname)      
+                  ifile <- paste0(gdalSDS,collapse='" "')
+                  
+                  # GDAL < 1.8.0 doesn't support ' -overwrite' 
+                  if(file.exists(ofile))
+                  {
+                    invisible(file.remove(ofile))
+                  }
+                    shell(
+                       paste(cmd,
+                        s_srs,
+                        t_srs,
+                        of,
+                        te,
+                        tr,
+                        cp,
+                        bs,
+                        rt,
+                        q,
+                        srcnodata,
+                        dstnodata,
+                        ' -multi',
+                        ' \"', ifile,'\"',
+                        ' \"', ofile,'\"',
+                       sep = '')
+                      ) 
+                   }
+                    if(length(grep(todo,pattern="M.D13C2\\.005"))>0)
                     {
-                      invisible(file.remove(ofile))
+                      unlink(randomName,recursive=TRUE)
                     }
-                          
-                          shell(
-                             paste(cmd,
-                              s_srs,
-                              t_srs,
-                              of,
-                              te,
-                              tr,
-                              cp,
-                              bs,
-                              rt,
-                              q,
-                              srcnodata,
-                              dstnodata,
-                              ' -multi',
-                              ' \"', ifile,'\"',
-                              ' \"', ofile,'\"',
-                             sep = '')
-                            ) 
-                     }
                   }
                 } else
                 {
