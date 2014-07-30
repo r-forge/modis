@@ -274,8 +274,9 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                   {
                     cat("\n###############\nM.D13C2.005 is likely to have a problem in metadata extent information, it is corrected on the fly\n###############\n") 
                   }
-                  randomName <- paste0(outDir,"/",MODIS:::makeRandomString(),"_",1:length(gdalSDS),".tif") 
-                  on.exit(unlink(randomName,recursive=TRUE))
+                  ranpat     <- MODIS:::makeRandomString(length=21)
+                  randomName <- paste0(outDir,"/deleteMe_",ranpat,".tif") 
+                  on.exit(unlink(list.files(path=outDir,pattern=ranpat,full.names=TRUE),recursive=TRUE))
                   for(ix in seq_along(gdalSDS))
                   {
                     cmd1 <- paste0(opts$gdalPath,"gdal_translate -a_nodata ",NAS[[naID]]," '",gdalSDS[ix],"' '",randomName[ix],"'")   
@@ -355,7 +356,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                    }
                     if(length(grep(todo,pattern="M.D13C2\\.005"))>0)
                     {
-                      unlink(randomName,recursive=TRUE)
+                      unlink(list.files(path=outDir,pattern=ranpat,full.names=TRUE),recursive=TRUE)
                     }
                   }
                 } else
