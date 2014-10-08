@@ -19,7 +19,7 @@ getProduct <- function(x=NULL,quiet=FALSE)
 
     if (is.list(x) && names(x) %in% c("request", "PRODUCT", "TOPIC", "DATE", "TILE", "TILEV", "TILEH", "CCC", "PROCESSINGDATE", "FORMAT", "SENSOR", "PLATFORM", "PF1", "PF2", "TOPIC", "TYPE", "RES", "TEMP_RES", "INTERNALSEPARATOR")) 
     {
-        # if TRUE than it is a result from a getProduct() call. a good idea would be to have a CLASS for it!
+        # if TRUE than it is a result from a getProduct() call. A good idea would be to have a CLASS for it!
         return(x)
     }
     
@@ -33,7 +33,7 @@ getProduct <- function(x=NULL,quiet=FALSE)
     } else 
     {
         isFile <- FALSE
-        product  <- inbase
+        product <- inbase
     }
     
     product <- product[1]
@@ -111,17 +111,17 @@ getProduct <- function(x=NULL,quiet=FALSE)
 
             return(invisible(result))  
           
-    } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR")) 
-    {
-        return(
-            invisible(
-                list(request = as.character(info$PRODUCT), PF1 = NULL, 
-                PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM),
-                TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
-                SENSOR = as.character(info$SENSOR), SOURCE=info$SOURCE)
-            )
-        )
-    }         
+      } else if (info$SENSOR[1] %in% c("MERIS","C-Band-RADAR")) 
+      {
+          return(
+              invisible(
+                  list(request = as.character(info$PRODUCT), PF1 = NULL, 
+                  PF2 = NULL, PD = NULL, PLATFORM = as.character(info$PLATFORM),
+                  TYPE = as.character(info$TYPE), PRODUCT = as.character(info$PRODUCT),
+                  SENSOR = as.character(info$SENSOR), SOURCE=info$SOURCE)
+              )
+          )
+      }         
     } else  # if not a file
     {
         if (!quiet) 
