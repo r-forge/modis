@@ -47,8 +47,14 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
     #######
     # check product
     product <- getProduct(x=product,quiet=TRUE)
-    # check collection
-    product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)
+    # check if missing collection, else bilieve it
+    if(is.null(collection)) 
+    {
+      product$CCC <- getCollection(product=product,collection=collection,quiet=TRUE)[[1]]
+    } else
+    {
+      product$CCC <- sprintf("%03d",as.numeric(unlist(collection)[1]))
+    }
     #########
 
     if (product$SENSOR[1]=="MODIS")
@@ -175,7 +181,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
         cat("'Swath'-products not yet supported, jumping to the next.\n")
     } else 
     {
-      todo <- paste0(product$PRODUCT[z],".",product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]])
+      todo <- paste0(product$PRODUCT[z],".",product$CCC)
       for (u in seq_along(todo))
       {
         # tileID
@@ -196,13 +202,13 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
           ntiles <- length(tileID)
         }
         
-        onlineInfo <- getStruc(product=product$PRODUCT[z],collection=product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],server=opts$MODISserverOrder[1],begin=tLimits$begin,end=tLimits$end,wait=0)
+        onlineInfo <- getStruc(product=product$PRODUCT[z],collection=product$CCC,server=opts$MODISserverOrder[1],begin=tLimits$begin,end=tLimits$end,wait=0)
         if(!is.na(onlineInfo$online))
         {
           if (!onlineInfo$online & length(opts$MODISserverOrder)==2)
           {
             cat(opts$MODISserverOrder[1]," seams not online, trying on '",opts$MODISserverOrder[2],"':\n",sep="")
-            onlineInfo <- getStruc(product=product$PRODUCT[z],collection=product$CCC[[which(names(product$CCC)==product$PRODUCT[z])]],begin=tLimits$begin,end=tLimits$end,wait=0,server=opts$MODISserverOrder[2])
+            onlineInfo <- getStruc(product=product$PRODUCT[z],collection=product$CCC,begin=tLimits$begin,end=tLimits$end,wait=0,server=opts$MODISserverOrder[2])
           }
           if(is.null(onlineInfo$dates))
           {
@@ -321,7 +327,7 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
                       }
 
                       dates[[l]][i,j+1] <- HDF
-                      hdf <- ModisFileDownloader(HDF, wait=wait, quiet=quiet,...)
+                      hdf <- ModisFileDownloader(HDF, wait=wait, quiet=quiet)
                       mtr[j] <- hdf
 
                     } else 

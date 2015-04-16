@@ -6,12 +6,12 @@
 
 getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserverOrder")[1], begin=NULL, end=NULL, forceCheck=FALSE, wait=1, stubbornness=10)
 {
-  server <- toupper(server)
+  server <- toupper(server)[1]
   if(!server %in% c("LPDAAC","LAADS"))
   {
     stop("getStruc() Error! Server must be or 'LPDAAC' or 'LAADS'")
   }
-  opts <- combineOptions()
+  opts     <- combineOptions()
   sturheit <- stubborn(level=stubbornness)
 
   #########################
@@ -32,9 +32,9 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
   ########################
 
   # load aux
-  col       <- product$CCC[[1]]
-  basnam    <- paste0(product$PRODUCT[1],".",col,".",server)
-  info      <- list.files(path=opts$auxPath,pattern=paste0(basnam,".*.txt"),full.names=TRUE)[1]
+  col    <- product$CCC[[1]]
+  basnam <- paste0(product$PRODUCT[1],".",product$CCC[[1]],".",server)
+  info   <- list.files(path=opts$auxPath,pattern=paste0(basnam,".*.txt"),full.names=TRUE)[1]
 
   output <- list(dates=NULL,source=server,online=NA)
   class(output) <- "MODISonlineFolderInfo" 
@@ -45,7 +45,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
   } else
   {
     lastcheck    <- as.Date(strsplit(basename(info),"\\.")[[1]][4],"%Y%j")
-    output$dates <- as.Date(read.table(info,stringsAsFactors=FALSE)[,1])
+    output$dates <- na.omit(as.Date(read.table(info,stringsAsFactors=FALSE)[,1]))
     if (max(output$dates,na.rm=TRUE) > dates$end)
     { 
       getIT <- FALSE
@@ -57,6 +57,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       getIT <- FALSE
     }
   }
+  
   if (getIT | forceCheck)
   {
     if (!require(RCurl))
@@ -64,15 +65,25 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       stop("You need to install the 'RCurl' package: install.packages('RCurl')")
     }
 
-    if(file.exists(paste0(opts$auxPath, basnam,".lock")))
+    lockfile <- paste0(opts$auxPath, basnam,".lock")[[1]]
+    if(file.exists(lockfile))
     {
-      file.info(paste0(opts$auxPath, basnam,".lock"))
+      if(as.numeric(Sys.time() - file.info(lockfile)$mtime) > 10)
+      {
+        unlink(lockfile)
+      }
+    }
+    if(file.exists(lockfile))
+    {
       readonly <- TRUE
     } else
     {
-      write.table(Sys.time(),paste0(opts$auxPath, basnam,".lock"))
+      zz <- file(description=lockfile, open="wt")  # open an output file connection
+      write('deleteme',zz)
+      close(zz)
+ 
       readonly <- FALSE
-      on.exit(unlink(paste0(opts$auxPath, basnam,".lock")))
+      on.exit(unlink(lockfile))
     }
     
     path <- genString(x=product$PRODUCT[1],collection=col,local=FALSE)
@@ -105,8 +116,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       opt <- options("warn")
       options("warn"=-1)
       rm(years)
-      options("warn"=opt$warn)
-      
+    
       once <- TRUE
       for (g in 1:sturheit)
       {
@@ -129,10 +139,8 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
         }
         cat("                                                      \r") 
       }
-      
-      #years <- unlist(strsplit(years[[1]], if(.Platform$OS.type=="unix"){"\n"}else{"\r\n"}))
-      #years <- years[substr(years, 1, 1)=='d'] 
-      #years <- unlist(lapply(strsplit(years, " "), function(x){x[length(x)]}))
+      options("warn"=opt$warn)
+
       Ypath <- paste0(startPath,years,"/")
       
       ouou <- vector(length=length(years),mode="list")
@@ -147,26 +155,25 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
 
     if(!exists("FtpDayDirs"))
     {
-      cat("Couldn't get structure from",server,"server using offline information!\n")
+      cat("Couldn't get structure from",server,"server. Using offline information!\n")
       output$online <- FALSE
     } else if (FtpDayDirs[1]==FALSE)
     {
-      cat("Couldn't get structure from",server,"server using offline information!\n")
+      cat("Couldn't get structure from",server,"server. Using offline information!\n")
       output$online <- FALSE
     } else
     {
       output$dates  <- FtpDayDirs
       output$online <- TRUE
     }
-  }
-  if(getIT | forceCheck)
-  {
+    
     if(!readonly)
     {
       unlink(list.files(path=opts$auxPath, pattern=paste0(basnam,".*.txt"), full.names=TRUE))
+      unlink(lockfile)
       write.table(output$dates, paste0(opts$auxPath,basnam,".",todoy,".txt"), row.names=FALSE, col.names=FALSE)  
     }
-  }
+  }  
   return(output)
 }
 

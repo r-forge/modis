@@ -4,6 +4,18 @@
 
 ########### M.D09
 
+MOD09A1_QC <- data.frame(
+        LongName=c("MODLAND_QA", "band 1 data quality four bit range", "band 2 data quality four bit range", "band 3 data quality four bit range", "band 4 data quality four bit range", "band 5 data quality four bit range", "band 6 data quality four bit range", "band 7 data quality four bit range", "atmospheric correction performed", "adjacency correction performed"), 
+        bitShift=c(0,2,6,10,14,18,22,26,30,31),
+        bitMask=c(3,15,15,15,15,15,15,15,1,1)
+    )
+    
+MYD09A1_QC <- data.frame(
+        LongName=c("MODLAND_QA", "band 1 data quality four bit range", "band 2 data quality four bit range", "band 3 data quality four bit range", "band 4 data quality four bit range", "band 5 data quality four bit range", "band 6 data quality four bit range", "band 7 data quality four bit range", "atmospheric correction performed", "adjacency correction performed"), 
+        bitShift=c(0,2,6,10,14,18,22,26,30,31),
+        bitMask=c(3,15,15,15,15,15,15,15,1,1)
+    )
+
 MOD09GQ_QC <- data.frame(
         LongName=c("MODLAND_QA", "cloud state", "band 1 data quality four bit range", "band 2 data quality four bit range",
         "atmospheric correction performed", "adjacency correction performed", "spare (unused)"), 

@@ -44,22 +44,24 @@ orgTime <- function(files,nDays="asIn",begin=NULL,end=NULL,pillow=75,pos1=10,pos
     
     inputLayerDates <- allDates[allDates >= minHAVE & allDates <= maxHAVE]
     inDoys <- as.numeric(format(as.Date(inputLayerDates),"%j"))
-        
-    if (minIN < minHAVE)
-    {
-      if (as.numeric(minHAVE - minIN) <= pillow)
+    
+    if(FALSE) # currently removed
+    {   
+      if (minIN < minHAVE)
       {
-        warning("'begin'-date - 'pillow' is earlier by, ",as.numeric(minHAVE - minIN) ," days, than the available input dates!\nPillow at the start of the time serie is reduced to ",pillow - as.numeric(minHAVE - minIN)," days!")
-      } else if (minOUT == minHAVE)
-      {      
-        warning("Is is not possible to use the pillow at the begin of the time series since there is no data available before 'begin'-date!")
+        if (as.numeric(minHAVE - minIN) <= pillow)
+        {
+          warning("'begin'-date - 'pillow' is earlier by, ",as.numeric(minHAVE - minIN) ," days, than the available input dates!\nPillow at the start of the time serie is reduced to ",pillow - as.numeric(minHAVE - minIN)," days!")
+        } else if (minOUT == minHAVE)
+        {      
+          warning("Is is not possible to use the pillow at the begin of the time series since there is no data available before 'begin'-date!")
+        }
+      }
+      if (maxIN > maxHAVE)
+      {
+        warning("'end'-date + 'pillow' is later by, ",as.numeric(maxIN - max(inputLayerDates)) ," days, than the available input dates!")
       }
     }
-    if (maxIN > maxHAVE)
-    {
-      warning("'end'-date + 'pillow' is later by, ",as.numeric(maxIN - max(inputLayerDates)) ," days, than the available input dates!")
-    }
-
     if (nDays=="asIn")
     {
       outputLayerDates <- inputLayerDates[datLim$begin <= inputLayerDates & datLim$end > inputLayerDates]

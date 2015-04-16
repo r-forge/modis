@@ -209,7 +209,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
       for(u in seq_along(todo))
       { # u=1
         ftpdirs      <- list()
-        ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end)$dates)
+        ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end,server=opts$MODISserverOrder[1])$dates)
         
         prodname <- strsplit(todo[u],"\\.")[[1]][1] 
         coll     <- strsplit(todo[u],"\\.")[[1]][2]
@@ -229,7 +229,8 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
           { # l=1
             files <- unlist(
               getHdf(product=prodname, collection=coll, begin=avDates[l], end=avDates[l],
-               tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, stubbornness=opts$stubbornness)
+               tileH=extent$tileH, tileV=extent$tileV, checkIntegrity=checkIntegrity, 
+               stubbornness=opts$stubbornness, MODISserverOrder=opts$MODISserverOrder)
             )
             
             files <- files[basename(files)!="NA"] # is not a true NA so it need to be like that na not !is.na()

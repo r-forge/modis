@@ -25,7 +25,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   eval(parse(file.path(find.package("MODIS"), "external", "MODIS_Opts.R")),envir=opts) 
   
   # 2. system wide
-  sysopts <- paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')
+  sysopts <- paste(R.home(component="etc"), '/', '.MODIS_Opts.R', sep='')
   so      <- FALSE
   
   if (file.exists(sysopts))
@@ -127,7 +127,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
   if(!missing(dlmethod))
   {
     dlmethod <- tolower(dlmethod)
-    stopifnot(dlmethod %in% c("auto","internal","wget","curl","lynx"))
+    stopifnot(dlmethod %in% c("auto","internal","wget","curl","lynx","aria2"))
     opt$dlmethod <- dlmethod
   }
   
@@ -373,7 +373,7 @@ MODISoptions <- function(localArcPath, outDirPath, pixelSize, outProj, resamplin
       eval(parse(text=paste0("options(MODIS_",names(opt[i]),"=",opt[[i]],")")))        
     }
   }
-  # this is fix
+  # this is fixed
   options(MODIS_arcStructure='/SENSOR/PRODUCT.CCC/DATE')
   invisible(return())
 }

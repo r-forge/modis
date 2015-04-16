@@ -12,6 +12,8 @@ load(system.file("external", "MODIS_TilesPolys.RData", package="MODIS"))
 # save(MODIS_Products,file="~/MODIS_Products.RData") # in chase of changes
 load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 
+load(system.file("external", "collections.RData", package="MODIS"))
+
 ## pitty that this does not work like that!
 ## lazy load gdal EPSG
 #if (require(rgdal))
@@ -19,7 +21,7 @@ load(system.file("external", "MODIS_Products.RData", package="MODIS"))
 #    EPSGinfo <- make_EPSG() # if rgdal, make it new!
 #} else
 #{
-    # save(EPSGinfo,file="~/EPSGinfo.RData") # periodically safed manually by Admin (last up: May2013)
+    # save(EPSGinfo,file="~/EPSGinfo.RData") # periodically safed manually by Admin (last up: October2014)
     load(system.file("external", "EPSGinfo.RData", package="MODIS"))
 #}
 ###

@@ -182,7 +182,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             {
                 cat("Checking availabillity of GDAL:\n")
             }
-
+            
             cmd      <- paste0(opts$gdalPath,'gdalinfo --version')            
             gdaltext <- try(system(cmd,intern=TRUE),silent=TRUE)
                          
@@ -215,7 +215,7 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
             
             gdaltext <- shell(cmd,intern=TRUE)
             
-            if (length(grep(x=gdaltext,pattern="GDAL"))==0)
+            if (length(grep(x=gdaltext,pattern="GDAL",ignore.case = TRUE))==0)
             {
                 cat("'FWTools/OSGeo4W' installation not found or path not set.\nIf you don't have installed one of them you can get it from 'http://fwtools.maptools.org/' or 'http://trac.osgeo.org/osgeo4w/' (recommanded)\nTrying to autodetect path to 'FWTools/OSGeo4W' (this may takes some time, you can interupt this process and set it manually, see 'gdalPath' argument in '?MODISoptions':\n\n")
                 
@@ -226,8 +226,8 @@ checkTools <- function(tool=c("MRT","GDAL"), quiet=FALSE)
                     stop("No 'FWTools/OSGeo4W' installation(s) found! In order to use related function please solve this problem first.\n")
                 }
 
-                fwt <- a[grep(a,pattern="FWTools")]
-                osg <- a[grep(a,pattern="OSGeo4W")]
+                fwt <- a[grep(a,pattern="FWTools",ignore.case = TRUE)]
+                osg <- a[grep(a,pattern="OSGeo4W",ignore.case = TRUE)]
                 minone <- FALSE
                 if(length(fwt)==1)
                 {
