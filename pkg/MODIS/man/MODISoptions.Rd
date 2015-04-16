@@ -29,7 +29,7 @@ Default is \code{GTiff}. Or one of \code{getOption("MODIS_gdalOutDriver")} (colu
   \item{gdalPath}{
 Path to gdal _bin_ directory, relvand more for windows. Use \code{MODIS:::checkTools("GDAL")} to detect it automaticly}
   \item{MODISserverOrder}{Default \code{"LPDAAC","LAADS"}, you may invert, or select only one server, inhibiting all efforts to download data from the second available server.}
-  \item{dlmethod}{Default \code{auto} see argument \code{method} in \code{?download.file}. On a Unixoid (also Mac?) it is suggested to use  \code{wget}.}
+  \item{dlmethod}{Default \code{auto} see argument \code{method} in \code{?download.file}. On a Unixoid (also Mac?) it is suggested to use \code{wget} or if installed \code{aria2}.}
   \item{stubbornness}{
 The number of re-tries after that the HTTP/FTP server has refused the connection. Higher values increase the chance of getting the file but also leads to hanging functions if the server is down.}
   \item{systemwide}{Default \code{FALSE}. 'User' wide settings saved to \code{path.expand("~/.MODIS_Opts.R")}, if \code{TRUE} write settings to 'systemwide', presumed you have write access to \code{paste(R.home(component="etc"), '/', '.MODIS_opts.R', sep='')}}

@@ -11,25 +11,24 @@ This function uses a modified whittaker filter function (see references) from pa
 }
 
 \usage{
-whittaker.raster(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), groupYears=TRUE,
-lambda = 5000, nIter= 3, collapse=FALSE, outDirPath = "./", removeOutlier=FALSE,
-threshold=NULL, mergeDoyFun="max", ...)
+whittaker.raster((vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda = 5000, nIter= 3, outputAs=c("single","yearly","one"), collapse=FALSE, prefixSuffix=c("MCD","ndvi"), outDirPath=getwd(), outlierThreshold=NULL, mergeDoyFun="max", ...)
 }
 
 \arguments{
   \item{vi}{Sorted 'Vegetation index' raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
   \item{w}{In case of MODIS composite the 'VI_Quality'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.}
-  \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input.} 
+  \item{t}{In case of MODIS composite the 'composite_day_of_the_year'  raster-Brick, Stack or filenames. Use \code{preStack} functionality to ensure the right input. If missing the date is determined using \code{timeInfo}} 
   \item{timeInfo}{output of \code{?orgTime}.} 
-  \item{groupYears}{Default \code{TRUE}, rasterBrick files separated by years as result. If \code{FALSE} a single rasterBrick file for the entire period.} 
   \item{lambda}{_Yearly_ lambda value passed to \code{?ptw:::wit2}.  If set as character (i.e. lambda="600"), it is not adapted to the time serie length but used as a fixed value (see details). High values = stiff/rigid spline} 
-  \item{collapse}{logical, if \code{TRUE} the input data is treated as _1_single_Year_ collapsing the data using the Julian date information without the year.}   
-  \item{nIter}{Number of iteration for the upper envelope fitting.}   
-  \item{outDirPath}{Output path default is the current directory.}   
+  \item{nIter}{Numeric. Number of iteration for the upper envelope fitting.}
+  \item{outputAs}{Character. Organisation of output files: \code{single} each date one \code{RasterLayer}, \code{yearly} a \code{RasterBrick} for each year, \code{one} one \code{RasterBrick} for the entire time-serie.}
+  \item{collapse}{Logical. Collapse input data of multiple years into on single year before filtering.}
+  \item{prefixSuffix}{Filennaming. Naming is composed as dottseparated: \code{paste0(prefixSuffix[1],"YYYDDD",lambda,refixSuffix[2],".defaultFileExtension")}}
+  \item{outDirPath}{Output path default is the current directory.}
   \item{removeOutlier}{Logical. See details}  
-  \item{threshold}{numerical in the same unit as \code{vi}, used for outliers removal. See details}      
+  \item{outlierThreshold}{numerical in the same unit as \code{vi}, used for outliers removal. See details}
   \item{mergeDoyFun}{Especially when using argument \code{collapse=TRUE}, multiple measurements for one day can be present, here you can choose how those values are merged to one single value: \code{"max"} use the highest value, \code{"mean"} or \code{"weighted.mean"} use the \code{mean} if no weighting \code{"w"} is available and \code{weighted.mean} if it is.}    
-  \item{...}{Arguments passed to ?writeRaster (except filename is automatic), NAflag, datatype, overwrite,...}   
+  \item{...}{Arguments passed to ?writeRaster (except filename is automatic), NAflag, datatype, overwrite,...}
 } 
 
 \details{
@@ -67,7 +66,7 @@ Currently tested on MODIS and Landsat data. Using M*D13 it is also possible to u
 # runGdal(product="MOD13A2",begin="2004340",extent="sicily",end="2006070",
 # job="fullCapa",SDSstring="101000000010")
 # You can download this dataset from (2.6 MB): 
-# http://ivfl-arc.boku.ac.at/owncloud/public.php?service=files&t=ebd4d3f8f3f643020e14798048853138&download
+# https://ivfl-rio.boku.ac.at/owncloud/public.php?service=files&t=2fdac3598dba8f5bd865b9dadd715e22&download
 # copy it to: options("MODIS_outDirPath")
 # Extract: 
 # unzip(paste0(options("MODIS_outDirPath"),"fullCapa.zip"),exdir=options("MODIS_outDirPath"))
@@ -99,7 +98,7 @@ system.time(whittaker.raster(vi,timeInfo=timeInfo,lambda=5000))
 # if the files are M*D13 you can use also Quality layers and the composite day of the year:
 wt <- preStack(path=path, pattern="*_VI_Quality.tif$", timeInfo=timeInfo)
 # can also be already stacked:
-inT <- stack(preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)) 
+inT <- preStack(path=path, pattern="*_composite_day_of_the_year.tif$", timeInfo=timeInfo)
 
 # beginCluster(type="SOCK",exclude="MODIS") # See: ?beginCluster # CURRENTLY NOT WORKING!
 system.time(whittaker.raster(vi=vi, wt=wt, inT=inT, timeInfo=timeInfo, lambda=5000, overwrite=TRUE))
