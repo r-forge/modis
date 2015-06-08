@@ -33,7 +33,7 @@ whittaker.raster((vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda = 5000, nIt
 
 \details{
 The argument 'lambda' is passed to the \code{MODIS:::miwhitatzb1} function. You can set it as a yearly 'lambda', this means that it doesn't matter how long the _input_ time serie is because 'lambda' is adapted to it with: \code{lambda*('length of _input_ timeserie in days'/365)}. The input length can differ from the output because of the \code{pillow} argument in \code{orgTime}! But you can also set it as a character value (i.e. lambda="1000") in this case the adaption to the time serie length is not performed.\cr
-If 'removeOutliers=TRUE', a whittaker spline (with the user specified 'lambda') is applied befor the iterative  filtering process. If the difference between spline and raw value is bigger than \code{threshold} the raw value is removed. 
+If 'removeOutliers=TRUE', a whittaker spline (with the user specified 'lambda') is applied befor the iterative filtering process. If the difference between spline and raw value is bigger than \code{threshold} the raw value is removed. 
 }
 
 \value{
