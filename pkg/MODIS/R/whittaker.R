@@ -178,7 +178,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
   
   if (is.null(opts$overwrite))
   {
-    opts$overwrite <- raster:::.overwrite()
+    opts$overwrite <- FALSE
   }
  
   outputAs <- tolower(outputAs)
