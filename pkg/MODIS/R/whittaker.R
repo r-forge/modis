@@ -74,7 +74,7 @@ doCollapse <- function(tx,pillow)
   list(order=c(tS,ord,tE),sequence=c(s0,s1,s2)+1)
 }
     
-whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda = 5000, nIter= 3, outputAs=c("single","yearly","one"), collapse=FALSE, prefixSuffix=c("MCD","ndvi"), outDirPath=getwd(), outlierThreshold=NULL, mergeDoyFun="max", ...)
+whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda = 5000, nIter= 3, outputAs="single", collapse=FALSE, prefixSuffix=c("MCD","ndvi"), outDirPath=".", outlierThreshold=NULL, mergeDoyFun="max", ...)
 {
   if(!require(ptw))
   {
@@ -236,8 +236,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
   
   tr <- blockSize(vi)
   
-  cluster <- raster:::.doCluster()
-  if (cluster)
+  if (isTRUE(getOption("rasterCluster")))
   {
     # beginCluster()
     cl <- getCluster()
@@ -248,8 +247,8 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
     clF <- function(i){require(MODIS)}
     for (i in 1:nodes) 
     {
-      sendCall(cl[[i]], clF, i, tag=i)
-      recvOneData(cl)
+      parallel:::sendCall(cl[[i]], clF, i, tag=i)
+      parallel:::recvOneData(cl)
     }
     
     # better to be save than sorry:
