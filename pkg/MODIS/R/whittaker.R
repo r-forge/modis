@@ -235,8 +235,9 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
   } 
   
   tr <- blockSize(vi)
+  cluster <- isTRUE(getOption("rasterCluster"))
   
-  if (isTRUE(getOption("rasterCluster")))
+  if (cluster)
   {
     # beginCluster()
     cl <- getCluster()
@@ -252,9 +253,9 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
     }
     
     # better to be save than sorry:
-    clusterEvalQ(cl,require(bitops))
-    clusterEvalQ(cl,require(rgdal))
-    clusterEvalQ(cl,require(ptw))
+    parallel:::clusterEvalQ(cl,require(bitops))
+    parallel:::clusterEvalQ(cl,require(rgdal))
+    parallel:::clusterEvalQ(cl,require(ptw))
     tr <- blockSizeCluster(vi)
   }    
 
@@ -417,12 +418,12 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
   {
     for (i in 1:nodes) 
     {
-        sendCall(cl[[i]], fun = clFun, args = i, tag=i)
+        parallel:::sendCall(cl[[i]], fun = clFun, args = i, tag=i)
     }
 
     for (i in 1:tr$n)
     {
-      d <- recvOneData(cl)
+      d <- parallel:::recvOneData(cl)
 
       if (!d$value$success)
       {
@@ -432,7 +433,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
       ni <- nodes + i
       if (ni <= tr$n)
       {
-        sendCall(cl[[d$node]], fun = clFun, args = ni, tag=ni)
+        parallel:::sendCall(cl[[d$node]], fun = clFun, args = ni, tag=ni)
       }
       
       if(doround)
