@@ -248,7 +248,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
             
               if (!exists("NAS"))
               {
-                NAS <- MODIS:::getNa(SDS[[1]]$SDS4gdal)
+                NAS <- getNa(SDS[[1]]$SDS4gdal)
               }
                
               for (i in seq_along(SDS[[1]]$SDSnames))
@@ -275,7 +275,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                   {
                     cat("\n###############\nM.D13C2.005 is likely to have a problem in metadata extent information, it is corrected on the fly\n###############\n") 
                   }
-                  ranpat     <- MODIS:::makeRandomString(length=21)
+                  ranpat     <- makeRandomString(length=21)
                   randomName <- paste0(outDir,"/deleteMe_",ranpat,".tif") 
                   on.exit(unlink(list.files(path=outDir,pattern=ranpat,full.names=TRUE),recursive=TRUE))
                   for(ix in seq_along(gdalSDS))

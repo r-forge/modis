@@ -331,6 +331,7 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
     {
       gdalOutDriver <- shell(cmd,intern=TRUE)
     }
+    
     gdalOutDriver <- grep(gdalOutDriver,pattern="\\(rw",value=TRUE) # this regex must be preciser
     name          <- sapply(gdalOutDriver,function(x){strsplit(x,"\\(")[[1]][1]})
     name          <- gsub(as.character(name), pattern=" ", replacement="")
@@ -550,7 +551,7 @@ defineName <- function(x) # "x" is a MODIS,SRTM or culture-MERIS filename
 
 checkDeps <- function()
 {
-    needed <- c('RCurl', 'rgeos', 'rgdal', 'maps', 'mapdata', 'snow', 'ptw', 'XML')
+    needed <- c('RCurl', 'rgeos', 'rgdal', 'maps', 'mapdata', 'parallel', 'ptw', 'XML')
     if (all(needed %in% installed.packages()[,1]))
     {
         cat("All suggested packages are installed\n")

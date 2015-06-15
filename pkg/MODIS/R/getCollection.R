@@ -5,7 +5,7 @@
 
 getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,as="character",quiet=TRUE)
 {
-    opts <- MODIS:::combineOptions()
+    opts <- combineOptions()
 
     ####
     # checks for product
@@ -58,7 +58,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
     			}
     			for (g in 1:sturheit)
     			{
-    			  try(dirs <- MODIS:::filesUrl(ftp))
+    			  try(dirs <- filesUrl(ftp))
     				if(exists("dirs"))
     				{
     				  if(dirs != FALSE)

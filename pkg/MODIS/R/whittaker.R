@@ -101,7 +101,7 @@ whittaker.raster <- function(vi, w=NULL, t=NULL, timeInfo = orgTime(vi), lambda 
     
   if(toupper(dataFormat) %in% rasterOut[,"name"])
   {
-    dataFormat <- raster:::.defaultExtension(dataFormat)
+    dataFormat <- getExtension(dataFormat)
   } else
   {
     stop("Argument dataFormat='",dataFormat,"' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")

@@ -10,12 +10,18 @@ smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = 
     dir.create(opt$outDirPath,showWarnings=FALSE)
     outDirPath <- normalizePath(opt$outDirPath, winslash = "/", mustWork = TRUE)
 
-    dataFormat <- opt$dataFormat
-    rasterOut  <- writeFormats()
+    outDirPath <- setPath(outDirPath)
+    bitShift   <- opts$bitShift
+    bitMask    <- opts$bitMask
+    threshold  <- opts$threshold
+
+    dataFormat <- opts$dataFormat
+    rasterOut  <- toupper(writeFormats())
+
     
     if(dataFormat %in% rasterOut[,"name"])
     {
-        dataFormat <- raster:::.defaultExtension(dataFormat)
+        dataFormat <- getExtension(dataFormat)
     } else
     {
         stop("Argument dataFormat='",dataFormat,"' in 'smooth.spline.raster()' is unknown/not supported. Please run 'writeFormats()' (column 'name') so list available dataFormat's")
@@ -23,17 +29,17 @@ smooth.spline.raster <- function(x, w=NULL, t=NULL, groupYears=TRUE, timeInfo = 
     
     if(!inherits(x,"Raster")) 
     {
-        x <- stack(x)
+        x <- stack(x, quick=TRUE)
     }
     
     if(!inherits(w,"Raster") & !is.null(w)) 
     {
-        w <- stack(w)
+        w <- stack(w, quick=TRUE)
     }
 
     if(!inherits(t,"Raster") & !is.null(t)) 
     {
-        t <- stack(t)
+        t <- stack(t, quick=TRUE)
     }
    
     tsLength <- as.numeric(max(timeInfo$inputLayerDates) - (min(timeInfo$inputLayerDates)-1)) 
