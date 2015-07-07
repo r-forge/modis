@@ -144,9 +144,9 @@ miwhitatzb1 <- function(orgTS,w=NULL, l=10, f=2, minval=-3000, maxval=10000, min
   # prepare weights
   if (is.null(w))
   {
-    w <-  orgTS * 0 + 1
+    w <- orgTS * 0 + 1
   } 
-  nas <- is.na(orgTS)
+  nas        <- is.na(orgTS)
   w[nas]     <- 0 
   orgTS[nas] <- 0 # whit1() does not accept NAs !!! but value will be ignored because of miw
   

@@ -13,7 +13,8 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
   }
   opts     <- combineOptions()
   sturheit <- stubborn(level=stubbornness)
-
+	
+	setPath(opts$auxPath, ask=FALSE)
   #########################
   # Check Platform and product
   product <- getProduct(x=product,quiet=TRUE)
@@ -71,11 +72,10 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       if(as.numeric(Sys.time() - file.info(lockfile)$mtime) > 10)
       {
         unlink(lockfile)
+      } else
+      {
+        readonly <- TRUE
       }
-    }
-    if(file.exists(lockfile))
-    {
-      readonly <- TRUE
     } else
     {
       zz <- file(description=lockfile, open="wt")  # open an output file connection
@@ -86,7 +86,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       on.exit(unlink(lockfile))
     }
     
-    path <- genString(x=product$PRODUCT[1],collection=col,local=FALSE)
+    path <- genString(x=product$PRODUCT[1], collection=col, local=FALSE)
     
     cat("Downloading structure on '",server,"' for: ",product$PRODUCT[1],".",col,"\n",sep="")
 
@@ -101,7 +101,7 @@ getStruc <- function(product, collection=NULL, server=getOption("MODIS_MODISserv
       for (g in 1:sturheit)
       {
         cat("Try:",g," \r")
-        FtpDayDirs <- try(filesUrl(startPath))
+        FtpDayDirs <- try(MODIS:::filesUrl(startPath))
         cat("             \r")
         if(exists("FtpDayDirs"))
         {    

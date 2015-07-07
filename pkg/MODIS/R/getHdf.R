@@ -19,8 +19,8 @@ getHdf <- function(product, begin=NULL, end=NULL, tileH=NULL, tileV=NULL, extent
     
     for (i in seq_along(HdfName))
     {
-      HdfName[i] <- basename(HdfName[i]) # separate name from path
-      path       <- genString(HdfName[i],...)
+      HdfName[i]     <- basename(HdfName[i]) # separate name from path
+      path           <- genString(HdfName[i],...)
       path$localPath <- setPath(path$localPath)
 
       if (!file.exists(paste0(path$localPath,"/",HdfName[i]))) 

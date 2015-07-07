@@ -291,11 +291,11 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
   options(warn=-1)
   on.exit(options(warn=iw))
 
-  opt     <- combineOptions(...)
+  opt <- combineOptions(...)
      
   outfile <- paste0(opt$outDirPath,".auxiliaries/gdalOutDriver.RData")
   
-  if (!is.null(getOption("MODIS_gdalOutDriver"))) # tacke it from options()
+  if (!is.null(getOption("MODIS_gdalOutDriver"))) # take it from options()
   {
     gdalOutDriver <- getOption("MODIS_gdalOutDriver")
   } else if(file.exists(outfile)) # or from RData
@@ -359,11 +359,10 @@ gdalWriteDriver <- function(renew = FALSE, quiet = TRUE,...)
     }
     gdalOutDriver <- data.frame(name=name[!is.na(extension)], description=description[!is.na(extension)], extension=extension[!is.na(extension)], stringsAsFactors=FALSE)        
     
-    opt$outDirPath <- setPath(opt$outDirPath,ask=TRUE)
-    
-    if(file.exists(opt$outDirPath))
+    if(!file.exists(opt$outDirPath))
     {
-      opt$auxPath <- setPath(paste0(opt$outDirPath,".auxiliaries"),ask=FALSE)
+	    opt$outDirPath <- setPath(opt$outDirPath,ask = TRUE)
+      opt$auxPath    <- setPath(paste0(opt$outDirPath,".auxiliaries"),ask=FALSE)
     }
     
     if(file.exists(opt$auxPath))
@@ -600,7 +599,7 @@ filesUrl <- function(url)
     {
         if(!require(XML))
         {
-            stop("You need to install the 'XML' package from 'Omegahat' repository")
+            stop("Missing dependency, please install the 'XML' package.")
         }
              
         co     <- htmlTreeParse(co)
@@ -656,7 +655,7 @@ ModisFileDownloader <- function(x, quiet=FALSE, wait=wait,...)
     
     for (a in seq_along(x))
     {  # a=1
-        path <- genString(x[a],...)
+        path           <- genString(x[a],...)
         path$localPath <- setPath(path$localPath)
         
         hv <- seq_along(opts$MODISserverOrder)
