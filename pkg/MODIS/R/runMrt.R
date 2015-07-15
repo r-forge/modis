@@ -109,6 +109,7 @@ runMrt <- function(...)
             dir.create(outDir)
 
             ######################## along platform (TerraAqua)
+            ftpdirs <- list()		##	FRS: Fix provided by Ahmadou Dicko
             ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)$dates)
     
             avDates <- ftpdirs[[1]][,todo[u]]
