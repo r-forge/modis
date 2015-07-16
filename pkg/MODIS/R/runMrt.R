@@ -109,14 +109,19 @@ runMrt <- function(...)
             dir.create(outDir)
 
             ######################## along platform (TerraAqua)
-            ftpdirs <- list()		##	FRS: Fix provided by Ahmadou Dicko
-            ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=opts$begin,end=opts$end)$dates)
-    
-            avDates <- ftpdirs[[1]][,todo[u]]
-            avDates <- avDates[!is.na(avDates)]            
-            sel <- as.Date(avDates,format="%Y.%m.%d")
-            us  <- sel >= tLimits$begin & sel <= tLimits$end
-    
+            ftpdirs <- list()    ##  FRS: Fix provided by Ahmadou Dicko
+            ftpdirs[[1]] <- as.Date(getStruc(product=strsplit(todo[u],"\\.")[[1]][1],collection=strsplit(todo[u],"\\.")[[1]][2],begin=tLimits$begin,end=tLimits$end,server=opts$MODISserverOrder[1])$dates)
+            
+            prodname <- strsplit(todo[u],"\\.")[[1]][1] 
+            coll     <- strsplit(todo[u],"\\.")[[1]][2]
+            
+            avDates <- ftpdirs[[1]]
+            avDates <- avDates[avDates!=FALSE]
+            avDates <- avDates[!is.na(avDates)]        
+            
+            sel     <- as.Date(avDates)
+            us      <- sel >= tLimits$begin & sel <= tLimits$end
+            
             if (sum(us,na.rm=TRUE)>0)
             {
                 avDates <- avDates[us]
