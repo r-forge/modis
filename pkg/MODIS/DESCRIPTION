@@ -1,7 +1,7 @@
 Package: MODIS
 Type: Package
 Title: MODIS Acquisition and Processing
-Version: 0.10-30
+Version: 0.10-31
 Date: 2015-07-15
 Depends: R (>= 2.10), utils, raster
 Suggests: RCurl, rgeos, rgdal, bitops, mapdata, XML, parallel, ptw
