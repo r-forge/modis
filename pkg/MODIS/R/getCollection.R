@@ -139,7 +139,7 @@ getCollection <- function(product,collection=NULL,newest=TRUE,forceCheck=FALSE,a
 	
 	    if (sum(isOk==FALSE)==length(isOk)) 
 	    {
-		    cat("Product(s) not awailable in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
+		    cat("Product(s) not available in collection '",collection,"'. Try 'getCollection('",productN$request,"',newest=FALSE,forceCheck=TRUE)'\n",sep="")
 	        return(invisible(isOk))
 	    } else if (sum(isOk==FALSE)>0 & sum(isOk==FALSE)<length(isOk))
 	    {
