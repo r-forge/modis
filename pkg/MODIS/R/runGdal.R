@@ -258,7 +258,7 @@ runGdal <- function(product, collection=NULL, begin=NULL,end=NULL, extent=NULL, 
                   
                 gdalSDS <- sapply(SDS,function(x){x$SDS4gdal[i]}) # get names of layer 'o' of all files (SDS)
                 
-                naID <- which(SDS[[1]]$SDSnames == names(NAS)[i])
+                naID <- which(SDS[[1]]$SDSnames[i] == names(NAS))
                 if(length(naID)>0)
                 {
                   srcnodata <- paste0(" -srcnodata ",NAS[[naID]])
